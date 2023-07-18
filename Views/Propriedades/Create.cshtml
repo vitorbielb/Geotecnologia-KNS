@@ -1,0 +1,229 @@
+﻿@model GeotecnologiaKNS.Models.Propriedade
+
+<head>
+    <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
+</head>
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Cadastrar propriedade</h1>
+
+<hr />
+
+<div class="form-group">
+    <div class="row">
+        <form asp-action="Create" method="post" class="col-md-12">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="NomePropriedade"></label>
+                        <input asp-for="NomePropriedade" class="form-control" />
+                        @Html.ValidationMessageFor(model => model.NomePropriedade, "", new { @class = "error-message" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="TipoPropriedade" class="control-label">Tipo de propriedade</label>
+                        <div class="custom-select">
+                            <select asp-for="TipoPropriedade" class="form-control">
+                                <option value="">Selecione...</option>
+                                <option value="Propriedade Rural">Propriedade Rural</option>
+                                <option value="Confinamento">Confinamento</option>
+                            </select>
+                            @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="CicloProducao" class="control-label">Ciclo de produção</label>
+                        <div class="custom-select">
+                            <select asp-for="CicloProducao" class="form-control">
+                                <option value="">Selecione...</option>
+                                <option value="CRIA">CRIA</option>
+                                <option value="RECRIA">RECRIA</option>
+                                <option value="ENGORDA">ENGORDA</option>
+                                <option value="CRIA RECRIA">CRIA RECRIA</option>
+                                <option value="RECRIA ENGORDA">RECRIA ENGORDA</option>
+                                <option value="CICLO COMPLETO">CICLO COMPLETO</option>
+                                <option value="NÃO INFORMADO">NÃO INFORMADO</option>
+                            </select>
+                            @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="Area"></label>
+                        <input asp-for="Area" class="form-control" />
+                        @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="AreaUtil"></label>
+                        <input asp-for="AreaUtil" class="form-control" />
+                        @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="Latitude"></label>
+                        <input asp-for="Latitude" class="form-control" />
+                        @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="Longitude"></label>
+                        <input asp-for="Longitude" class="form-control" />
+                        @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="OrigemCoordenadas"></label>
+                        <input asp-for="OrigemCoordenadas" class="form-control" />
+                        @Html.ValidationMessageFor(model => model.OrigemCoordenadas, "", new { @class = "error-message" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="Bioma" class="control-label">Bioma</label>
+                        <div class="custom-select">
+                        <select asp-for="Bioma" class="form-control">
+                            <option value="">Selecione...</option>
+                            <option value="Amazônia">Amazônia</option>
+                            <option value="Cerrado">Cerrado</option>
+                            <option value="Mata Atlântica">Mata Atlântica</option>
+                            <option value="Caatinga">Caatinga</option>
+                            <option value="Pantanal">Pantanal</option>
+                            <option value="Pampa">Pampa</option>
+                            <option value="NÃO INFORMADO">NÃO INFORMADO</option>
+                        </select>
+                            @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="UnidadeFederativa"></label>
+                        <div class="custom-select">
+                        <select asp-for="UnidadeFederativa" class="form-control">
+                            @foreach (var estado in Enum.GetValues(typeof(Estado)))
+                            {
+                                <option value="@estado">@estado</option>
+                            }
+                        </select>
+                            @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="Municipio"></label>
+                        <div class="custom-select">
+                        <select asp-for="Municipio" class="form-control">
+                            <option value="">Selecione...</option>
+                        </select>
+                            @Html.ValidationMessageFor(model => model.Municipio, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="Industria"></label>
+                        <input asp-for="Industria" class="form-control" />
+                        @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="TipoCadastroRural" class="control-label">Tipo de Cadastro Rural</label>
+                        <div class="custom-select">
+                        <select asp-for="TipoCadastroRural" class="form-control">
+                            <option value="">Selecione...</option>
+                            <option value="Sicar - Recibo">Sicar - Recibo</option>
+                            <option value="Sicar - Protocolo">Sicar - Protocolo</option>
+                            <option value="Car Estadual">Car Estadual</option>
+                            <option value="Código Senacsa">Código Senacsa</option>
+                            <option value="RSPP">RSPP</option>
+                            <option value="RENSPA">RENSPA</option>
+                            <option value="DICOSE">DICOSE</option>
+                        </select>
+                            @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
+                    </div>
+                </div>
+
+                <div>
+                    <div>
+                        <label asp-for="CadastroAmbientalRural"></label>
+                        <input asp-for="CadastroAmbientalRural" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="form-group" style="margin-top: 40px;">
+                <a type="submit" href="/Propriedades/Index" class="btn btn-secondary">Voltar</a>
+                <input type="submit" value="Cadastrar" class="btn btn-primary gradient-button" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            // Carregar os municípios com base no estado selecionado
+            $('#UnidadeFederativa').change(function () {
+                var estado = $(this).val();
+                if (estado !== '') {
+                    $.ajax({
+                        url: '/Propriedades/CarregarMunicipios',
+                        type: 'GET',
+                        data: { estado: estado },
+                        success: function (result) {
+                            var municipioSelect = $('#Municipio');
+                            municipioSelect.empty();
+                            if (result.length > 0) {
+                                $.each(result, function (index, item) {
+                                    municipioSelect.append($('<option></option>').val(item).text(item));
+                                });
+                            } else {
+                                municipioSelect.append($('<option></option>').text('Nenhum município encontrado'));
+                            }
+                        },
+                        error: function () {
+                            alert('Ocorreu um erro ao carregar os municípios.');
+                        }
+                    });
+                } else {
+                    $('#Municipio').empty();
+                    $('#Municipio').append($('<option></option>').text('Selecione...'));
+                }
+            });
+        });
+    </script>
+}

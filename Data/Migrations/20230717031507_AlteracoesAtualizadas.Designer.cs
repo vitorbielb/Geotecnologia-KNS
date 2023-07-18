@@ -4,6 +4,7 @@ using GeotecnologiaKNS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeotecnologiaKNS.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230717031507_AlteracoesAtualizadas")]
+    partial class AlteracoesAtualizadas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -75,6 +78,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Ccir")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CicloProducao")
@@ -82,6 +86,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Incra")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Industria")
@@ -93,6 +98,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LicencaAmbiental")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Longitude")
@@ -100,6 +106,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Matricula")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Municipio")
@@ -112,9 +119,11 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("OrigemCoordenadas")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Outros")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipoCadastroRural")

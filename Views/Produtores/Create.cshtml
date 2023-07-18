@@ -1,0 +1,42 @@
+﻿@model Produtor
+<head>
+    <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
+</head>
+<body>
+    <h1>Cadastrar produtor</h1>
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <div class="row">
+                <div class="col-md-6" style="margin-top: 40px;">
+                    @Html.LabelFor(model => model.Nome)
+                    @Html.TextBoxFor(model => model.Nome, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Nome, "", new { @class = "error-message" })
+                </div>
+
+                <div class="col-md-6" style="margin-top: 40px;">
+                    @Html.LabelFor(model => model.Cpf)
+                    @Html.TextBoxFor(model => model.Cpf, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Cpf, "", new { @class = "error-message" })
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+            @Html.LabelFor(model => model.Industria)
+            @Html.TextBoxFor(model => model.Industria, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+        </div>
+
+        <div class="form-group" style="margin-top: 40px;">
+            <a type="submit" href="/Produtores/Index" class="btn btn-secondary">Voltar</a>
+            <input type="submit" value="Cadastrar" class="btn btn-primary gradient-button" />
+        </div>
+    }
+</body>
+
+
+

@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Produtor>
+<head>
+    <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
+</head>
+<body>
+<h2 style="font-size: 50px;">Produtores</h2>
+
+<table class="table">
+        <div style="text-align: right;">
+        <button type="submit" class="btn btn-primary gradient-button" onclick="location.href='@Url.Action("Create")'">Novo cadastro</button>
+    </div>
+        <tr style="background-color: #FFF; color: #258cfb;">
+            <th>ID</th>
+            <th>Nome</th>
+            <th>CPF/CNPJ</th>
+            <th>Indústria</th>
+        </tr>
+        @foreach (var produtor in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(x => produtor.Id)</td>
+                <td>@Html.DisplayFor(x => produtor.Nome)</td>
+                <td>@Html.DisplayFor(x => produtor.Cpf)</td>
+                <td>@Html.DisplayFor(x => produtor.Industria)</td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = produtor.Id })" class="btn btn-primary gradient-button">Editar</a>
+
+                </td>
+            </tr>
+        }
+</table>
+</body>

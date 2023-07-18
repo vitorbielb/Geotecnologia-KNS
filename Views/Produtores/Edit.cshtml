@@ -1,0 +1,55 @@
+﻿@model Produtor
+
+<h1 style="font-size: 50px;">Editar produtor</h1>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Nome)
+                @Html.TextBoxFor(model => model.Nome, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Nome, "", new { @class = "error-message" })
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Cpf)
+                @Html.TextBoxFor(model => model.Cpf, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Cpf, "", new { @class = "error-message" })
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Industria)
+                @Html.TextBoxFor(model => model.Industria, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                @Html.LabelFor(model => model.Id)
+                @Html.TextBoxFor(model => model.Id, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Id, "", new { @class = "error-message" })
+            </div>
+        </div>
+       
+    </div>
+    <div style="margin-top: 20px">
+        <a type="submit" class="btn btn-secondary" href="@Url.Action("Index", "Produtores")">Voltar</a>
+
+        <div style="float: right;">
+            <input type="submit" style="text-align: right; margin-left: 10px;" value="Salvar" class="btn btn-primary gradient-button" />
+            <a href="@Url.Action("Delete", "Produtores", new { id = Model.Id })" class="btn btn-danger">Excluir</a>
+        </div>
+    </div>
+}
+
+
+
+

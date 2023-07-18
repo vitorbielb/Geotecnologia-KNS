@@ -1,0 +1,43 @@
+﻿@model List<GeotecnologiaKNS.Models.Propriedade>
+<head>
+    <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
+</head>
+
+<body>
+<h1 style ="font-size: 50px;">Propriedades</h1>
+
+    <div style="text-align: right;">
+        <button type="submit" class="btn btn-primary gradient-button" onclick="location.href='@Url.Action("Create")'">Novo cadastro</button>
+    </div>
+
+<table class="table">
+    <thead>
+            <tr style="background-color: #FFF; color: #258cfb;">
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Município</th>
+            <th>UF</th>
+            <th>Cadastro Rural</th>
+            <th>Indústria</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var propriedade in Model)
+        {
+            <tr>
+                <td>@propriedade.Id</td>
+                <td>@propriedade.NomePropriedade</td>
+                <td>@propriedade.Municipio</td>
+                <td>@propriedade.UnidadeFederativa</td>
+                <td>@propriedade.CadastroAmbientalRural</td>
+                <td>@propriedade.Industria</td>
+                    <td>
+                        <a href="@Url.Action("Edit", new { id = propriedade.Id })" class="btn btn-primary gradient-button">Editar</a>
+
+                    </td>
+                
+            </tr>
+        }
+    </tbody>
+</table>
+</body>
