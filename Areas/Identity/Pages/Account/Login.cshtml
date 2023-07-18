@@ -1,0 +1,75 @@
+﻿@page
+@model LoginModel
+<html>
+    <head>
+    <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
+</head>
+    <body class="hide-navbar">
+    <section class="form-container">
+        <div class="container">
+    <div class="login">
+<h1>LOGIN</h1>
+               
+
+            <form id="account" method="post">
+                
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control" aria-required="true" placeholder="email" />
+                            <label asp-for="Input.Email" class="form-label">Email</label>
+                    
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Password" class="form-control" aria-required="true" placeholder="password" />
+                    <label asp-for="Input.Password" class="form-label">Senha</label>
+                    
+                </div>
+                <div class="checkbox mb-3">
+                    <label asp-for="Input.RememberMe" class="form-label">
+                        <input class="form-check-input" asp-for="Input.RememberMe" />
+                        @Html.DisplayNameFor(m => m.Input.RememberMe)
+                    </label>
+                </div>
+                        <div class="button-container">
+                    <button id="login-submit" type="submit" class="w-50 btn btn-lg btn-primary">Entrar</button>
+                </div>
+             
+            </form>
+        </div>
+        </div>
+        </section>
+    
+   
+        <section>
+            <h3></h3>
+   
+            @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                   
+                }
+                else
+                {
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div>
+                            <p>
+                                @foreach (var provider in Model.ExternalLogins!)
+                                {
+                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                }
+                            </p>
+                        </div>
+                    </form>
+                }
+            }
+        </section>
+   
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+
+</body>
+</html>
