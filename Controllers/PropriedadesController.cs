@@ -1,79 +1,133 @@
-﻿using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using GeotecnologiaKNS.Models;
-using GeotecnologiaKNS.Repositories.Interfaces;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using GeotecnologiaKNS.Data;
-using GeotecnologiaKNS.Repositories;
+using GeotecnologiaKNS.Models;
 
-namespace GeotecnologiaKNS.Controllers
+namespace KNS.Controllers
 {
     public class PropriedadesController : Controller
     {
-        private readonly IPropriedadeRepository _propriedadeRepository;
+        private readonly ApplicationDbContext _context;
 
-        public PropriedadesController(ApplicationDbContext context, IPropriedadeRepository propriedadeRepository)
+        public PropriedadesController(ApplicationDbContext context)
         {
-            _propriedadeRepository = propriedadeRepository;
+            _context = context;
         }
 
         // GET: Propriedades
-        public ActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var propriedades = _propriedadeRepository.ObterTodasPropriedades();
-            return View(propriedades);
+            return _context.Propriedade != null ?
+                        View(await _context.Propriedade.ToListAsync()) :
+                        Problem("Entity set 'ApplicationDbContext.Propriedade'  is null.");
         }
 
         // GET: Propriedades/Details/5
-        public ActionResult Details(int id)
+        public async Task<IActionResult> Details(int? id)
         {
-            var propriedade = _propriedadeRepository.ObterPropriedadePorId(id);
+            if (id == null || _context.Propriedade == null)
+            {
+                return NotFound();
+            }
 
+            var propriedade = await _context.Propriedade
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (propriedade == null)
             {
                 return NotFound();
             }
 
             return View(propriedade);
-        }
-
-        [HttpGet]
-        public JsonResult CarregarMunicipios(string estado)
-        {
-            var municipiosPorEstado = MunicipiosPorEstado.Municipio;
-            var municipios = municipiosPorEstado.FirstOrDefault(x => x.Key.ToString() == estado).Value;
-
-            return Json(municipios);
         }
 
         // GET: Propriedades/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
-            var propriedade = new Propriedade();
-
-            return View(propriedade);
+            return View();
         }
 
+        // POST: Propriedades/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(Propriedade propriedade)
+        public async Task<IActionResult> Create([Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,Outros")] Propriedade propriedade)
         {
             if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                _context.Add(propriedade);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            return View(propriedade);
+        }
+
+        // GET: Propriedades/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null || _context.Propriedade == null)
+            {
+                return NotFound();
+            }
+
+            var propriedade = await _context.Propriedade.FindAsync(id);
+            if (propriedade == null)
+            {
+                return NotFound();
+            }
+            return View(propriedade);
+        }
+
+        // POST: Propriedades/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,Outros")] Propriedade propriedade)
+        {
+            if (id != propriedade.Id)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
                 {
-                    _propriedadeRepository.CadastrarPropriedade(propriedade);
-
-                    return RedirectToAction("Index");
+                    _context.Update(propriedade);
+                    await _context.SaveChangesAsync();
                 }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!PropriedadeExists(propriedade.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
             }
             return View(propriedade);
         }
 
-        public ActionResult Edit(int id)
+        // GET: Propriedades/Delete/5
+        public async Task<IActionResult> Delete(int? id)
         {
-            var propriedade = _propriedadeRepository.ObterPropriedadePorId(id);
+            if (id == null || _context.Propriedade == null)
+            {
+                return NotFound();
+            }
 
+            var propriedade = await _context.Propriedade
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (propriedade == null)
             {
                 return NotFound();
@@ -82,47 +136,33 @@ namespace GeotecnologiaKNS.Controllers
             return View(propriedade);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(Propriedade propriedade)
-        {
-            if (ModelState.IsValid)
-            {
-                _propriedadeRepository.AtualizarPropriedade(propriedade);
-                return RedirectToAction("Index");
-            }
-
-            return View(propriedade);
-        }
-
-        public ActionResult Delete(int id)
-        {
-            var propriedade = _propriedadeRepository.ObterPropriedadePorId(id);
-
-            if (propriedade == null)
-            {
-                return NotFound();
-            }
-
-            return View(propriedade);
-        }
-
+        // POST: Propriedades/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var propriedade = _propriedadeRepository.ObterPropriedadePorId(id);
-
+            if (_context.Propriedade == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.Propriedade'  is null.");
+            }
+            var propriedade = await _context.Propriedade.FindAsync(id);
             if (propriedade != null)
             {
-                _propriedadeRepository.RemoverPropriedade(propriedade);
+                _context.Propriedade.Remove(propriedade);
             }
 
-            return RedirectToAction("Index");
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
-      
+        public ActionResult GetCitiesByUF(Estado uf)
+        {
+            return Json(UnidadesFederativasExtension.GetCities(uf));
+        }
 
-        
+        private bool PropriedadeExists(int id)
+        {
+            return (_context.Propriedade?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
     }
 }
