@@ -1,43 +1,15 @@
 ﻿@model IEnumerable<GeotecnologiaKNS.Models.Propriedade>
 
-@{
-    ViewData["Title"] = "Index";
-}
+<h1 style="font-size: 50px;">Propriedades</h1>
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<div style="text-align: right;">
+    <button type="submit" class="btn btn-primary gradient-button" onclick="location.href='@Url.Action("Create")'">Novo cadastro</button>
+</div>
 <table class="table">
     <thead>
-        <tr>
+        <tr style="background-color: #FFF; color: #258cfb;">
             <th>
                 @Html.DisplayNameFor(model => model.NomePropriedade)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TipoPropriedade)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CicloProducao)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Area)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AreaUtil)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Latitude)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Longitude)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.OrigemCoordenadas)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Bioma)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.UnidadeFederativa)
@@ -49,84 +21,35 @@
                 @Html.DisplayNameFor(model => model.Industria)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.TipoCadastroRural)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Matricula)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LicencaAmbiental)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Ccir)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Incra)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Outros)
-            </th>
+
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.NomePropriedade)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TipoPropriedade)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CicloProducao)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Area)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AreaUtil)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Latitude)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Longitude)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrigemCoordenadas)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Bioma)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UnidadeFederativa)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Municipio)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Industria)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TipoCadastroRural)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Matricula)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CadastroAmbientalRural)
-            </td>
-            
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NomePropriedade)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UnidadeFederativa)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Municipio)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Industria)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CadastroAmbientalRural)
+                </td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = item.Id })" class="btn btn-primary gradient-button">Editar</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

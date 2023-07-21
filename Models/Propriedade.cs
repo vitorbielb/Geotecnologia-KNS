@@ -44,7 +44,7 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Indústria")]
         public string Industria { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Tipo de propriedade")]
+        [Display(Name = "Tipo de cadastro rural")]
         public string TipoCadastroRural { get; set; }
         [Display(Name = "Matrícula")]
         public string? Matricula { get; set; }

@@ -15,7 +15,7 @@ namespace GeotecnologiaKNS.Data
         {
         }
 
-        public DbSet<GeotecnologiaKNS.Models.Propriedade> Propriedade { get; set; } = default!;
+        public DbSet<Propriedade> Propriedades { get; set; } = default!;
         public DbSet<Produtor> Produtores { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
