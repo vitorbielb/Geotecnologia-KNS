@@ -1,4 +1,5 @@
 ﻿@model GeotecnologiaKNS.Models.Propriedade
+
 <head>
     <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
 </head>
@@ -64,10 +65,12 @@
                     <option value="Pampas">Pampas</option>
                 </select>
                 @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
+
             </div>
             <div class="form-group">
                 <label asp-for="Industria" class="control-label"></label>
                 <input asp-for="Industria" class="form-control" />
+
                 @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
             </div>
         </div>
@@ -82,10 +85,12 @@
                 <label asp-for="Latitude" class="control-label"></label>
                 <input asp-for="Latitude" class="form-control" />
                 @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
+
             </div>
             <div class="form-group">
                 <label asp-for="CadastroAmbientalRural" class="control-label"></label>
                 <input asp-for="CadastroAmbientalRural" class="form-control" />
+
                 @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
             </div>
         </div>
@@ -168,3 +173,4 @@
         </script>
     </div>
 </body>
+

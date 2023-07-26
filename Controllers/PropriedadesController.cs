@@ -22,20 +22,25 @@ namespace KNS.Controllers
         // GET: Propriedades
         public async Task<IActionResult> Index()
         {
+
             return _context.Propriedades != null ?
                         View(await _context.Propriedades.ToListAsync()) :
+
                         Problem("Entity set 'ApplicationDbContext.Propriedade'  is null.");
         }
 
         // GET: Propriedades/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+
             if (id == null || _context.Propriedades == null)
+
             {
                 return NotFound();
             }
 
             var propriedade = await _context.Propriedades
+
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (propriedade == null)
             {
@@ -70,12 +75,16 @@ namespace KNS.Controllers
         // GET: Propriedades/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+
             if (id == null || _context.Propriedades == null)
+
             {
                 return NotFound();
             }
 
+
             var propriedade = await _context.Propriedades.FindAsync(id);
+
             if (propriedade == null)
             {
                 return NotFound();
@@ -121,12 +130,16 @@ namespace KNS.Controllers
         // GET: Propriedades/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
+
             if (id == null || _context.Propriedades == null)
+
             {
                 return NotFound();
             }
 
+
             var propriedade = await _context.Propriedades
+
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (propriedade == null)
             {
@@ -141,6 +154,7 @@ namespace KNS.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+
             if (_context.Propriedades == null)
             {
                 return Problem("Entity set 'ApplicationDbContext.Propriedade'  is null.");
@@ -149,6 +163,7 @@ namespace KNS.Controllers
             if (propriedade != null)
             {
                 _context.Propriedades.Remove(propriedade);
+
             }
 
             await _context.SaveChangesAsync();
@@ -162,7 +177,9 @@ namespace KNS.Controllers
 
         private bool PropriedadeExists(int id)
         {
+
             return (_context.Propriedades?.Any(e => e.Id == id)).GetValueOrDefault();
+
         }
     }
 }

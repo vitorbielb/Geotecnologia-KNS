@@ -17,36 +17,36 @@ namespace GeotecnologiaKNS.Repositories
 
         public IEnumerable<Propriedade> ObterTodasPropriedades()
         {
-            return _context.Propriedades.ToList();
+            return _context.Propriedade.ToList();
         }
 
         public Propriedade ObterPropriedadePorId(int id)
         {
-            return _context.Propriedades.FirstOrDefault(p => p.Id == id);
+            return _context.Propriedade.FirstOrDefault(p => p.Id == id);
         }
 
         public void CadastrarPropriedade(Propriedade propriedade)
         {
-            _context.Propriedades.Add(propriedade);
+            _context.Propriedade.Add(propriedade);
             _context.SaveChanges();
         }
 
         public void AtualizarPropriedade(Propriedade propriedade)
         {
-            _context.Propriedades.Update(propriedade);
+            _context.Propriedade.Update(propriedade);
             _context.SaveChanges();
         }
 
         public void RemoverPropriedade(Propriedade propriedade)
         {
-            _context.Propriedades.Remove(propriedade);
+            _context.Propriedade.Remove(propriedade);
             _context.SaveChanges();
         }
         public void Save(Propriedade propriedade)
         {
             if (propriedade != null)
             {
-                _context.Propriedades.Add(propriedade);
+                _context.Propriedade.Add(propriedade);
                 _context.SaveChanges();
             }
         }

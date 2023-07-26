@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<GeotecnologiaKNS.Models.Propriedade>
 
+
 <h1 style="font-size: 50px;">Propriedades</h1>
 
 <div style="text-align: right;">
@@ -8,10 +9,12 @@
 <table class="table">
     <thead>
         <tr style="background-color: #FFF; color: #258cfb;">
+
             <th>
                 @Html.DisplayNameFor(model => model.NomePropriedade)
             </th>
             <th>
+
                 @Html.DisplayNameFor(model => model.UnidadeFederativa)
             </th>
             <th>
@@ -21,13 +24,16 @@
                 @Html.DisplayNameFor(model => model.Industria)
             </th>
             <th>
+
                 @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
             </th>
+
 
             <th></th>
         </tr>
     </thead>
     <tbody>
+
         @foreach (var item in Model)
         {
             <tr>
@@ -51,5 +57,6 @@
                 </td>
             </tr>
         }
+
     </tbody>
 </table>

@@ -130,7 +130,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Propriedades");
+                    b.ToTable("Propriedade");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
