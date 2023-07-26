@@ -1,8 +1,10 @@
 ﻿@model GeotecnologiaKNS.Models.Propriedade
+<head>
+    <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
+</head>
+<h1 style="font-size: 50px;">Propriedade</h1>
 
-<h1 style="font-size: 50px;">Editar</h1>
-
-<h4>Propriedade</h4>
+<h4>Editar</h4>
 <hr />
 <form asp-action="Edit">
     <div class="row">
@@ -118,11 +120,51 @@
 
     <div class="form-group" style="margin-top: 40px;">
         <a asp-action="Index" class="btn btn-secondary">Voltar</a>
-        <input type="submit" value="Salvar" class="btn btn-primary gradient-button" />
+    </div>
+    <div style="float: right;">
+        <input type="submit" style="text-align: right; margin-left: 10px;" value="Salvar" class="btn btn-primary gradient-button" />
+        <a href="@Url.Action("Delete", "Propriedades", new { id = Model.Id })" class="btn btn-danger">Excluir</a>
     </div>
 </form>
 
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+<body>
+    <div class="conteudo-superior">
+        <div class="tabs">
+            <div class="tabs__sidebar">
+                <button class="tabs__button active" data-for-tab="1" onclick="selecionarGuia(this)">Vínculos</button>
+                <button class="tabs__button" data-for-tab="2" onclick="selecionarGuia(this)">Solicitação</button>
+            </div>
+            <div class="tabs__content" data-tab="1">
+                <h2>Vínculo</h2>
+                <p>Propriedade</p>
+            </div>
+            <div class="tabs__content" data-tab="2">
+                <h2>Solicitação</h2>
+                <p>Situação</p>
+            </div>
+        </div>
+        <script>
+            function selecionarGuia(botao) {
+                const tabsContainer = document.querySelector('.tabs');
+                const tabNumber = botao.dataset.forTab;
+                const tabToActivate = tabsContainer.querySelector('.tabs__content[data-tab="' + tabNumber + '"]');
 
+                const allButtons = tabsContainer.querySelectorAll('.tabs__button');
+                allButtons.forEach((button) => {
+                    button.classList.remove('active');
+                });
+
+                const allTabs = tabsContainer.querySelectorAll('.tabs__content');
+                allTabs.forEach((tab) => {
+                    tab.classList.remove('active');
+                });
+
+                botao.classList.add('active');
+                tabToActivate.classList.add('active');
+            }
+        </script>
+    </div>
+</body>
