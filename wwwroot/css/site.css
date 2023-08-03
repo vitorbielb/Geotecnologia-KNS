@@ -198,3 +198,94 @@ body {
     .tabs__content.active {
         display: block; /* Exibe o conteúdo da guia selecionada */
     }
+
+.select-wrapper {
+    position: relative;
+}
+
+    .select-wrapper select {
+        padding-right: 30px;
+    }
+
+    .select-wrapper .arrow-down {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+.select-with-icon .arrow-down {
+    color: #000; /* Cor da seta, ajuste conforme desejado */
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* Cor para as linhas pares */
+}
+
+/* Estilo para as linhas ímpares */
+tr:nth-child(odd) {
+    background-color: #ffffff; /* Cor para as linhas ímpares */
+}
+.dark-row {
+    background-color: #f2f2f2; /* Cor escura desejada */
+    color: white; /* Cor do texto para melhor contraste */
+}
+
+/* Estilo para o efeito hover */
+tr:hover {
+    background-color: #f2f2f2; /* Mesma cor escura para o fundo */
+    color: black; /* Cor do texto para melhor contraste */
+    cursor: pointer; /* O cursor se torna uma mão para indicar que é clicável */
+}
+
+/* Estilo para alternar entre as linhas claras e escuras */
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* Cor clara desejada */
+}
+
+/* Para garantir que as linhas escuras não sejam afetadas pelo estilo da alternância */
+tr.dark-row:nth-child(even) {
+    background-color: #f2f2f2; /* Cor escura */
+}
+/* Classe para estilizar o botão com o ícone */
+.btn-with-icon {
+    position: relative;
+    padding-left: 24px; /* Espaço para o ícone */
+}
+
+    /* Estilo do ícone */
+    .btn-with-icon:before {
+        content: "";
+        background-image: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0iY3VycmVudENvbG9yIiAvPjxwYXRoIGQ9Ik0xMSAxdjFoMy41YS41LjUgMCAwIDAtLjUgMHoiIGZpbGw9Im5vbmUiLz48L3N2Zz4=");
+        background-repeat: no-repeat;
+        background-size: 16px 16px;
+        position: absolute;
+        top: 50%;
+        left: 4px; /* Espaço entre o ícone e a borda do botão */
+        transform: translateY(-50%);
+    }
+/* Estilos para o footer */
+footer {
+    border-top: 1px solid #ccc; /* Linha superior com cor cinza */
+    background-color: #f9f9f9; /* Cor de fundo do footer */
+    padding: 5px 0; /* Espaçamento interno (10px na parte superior e inferior, 0 nos lados) */
+    text-align: center; /* Centralizar o texto no footer */
+    color: #888; /* Cor do texto (cinza claro) */
+    height: 10px; /* Altura da barra */
+}
+
+    /* Estilos para o link no footer */
+    footer a {
+        color: #888; /* Cor do link (cinza claro) */
+        text-decoration: none; /* Remover sublinhado do link */
+    }
+
+        footer a:hover {
+            text-decoration: underline; /* Adicionar sublinhado no link ao passar o mouse */
+        }
+
+
+
+
+
+
+

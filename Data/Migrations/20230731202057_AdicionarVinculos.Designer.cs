@@ -4,6 +4,7 @@ using GeotecnologiaKNS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeotecnologiaKNS.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230731202057_AdicionarVinculos")]
+    partial class AdicionarVinculos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,8 +35,8 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.Property<string>("Cpf")
                         .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasMaxLength(18)
+                        .HasColumnType("nvarchar(18)");
 
                     b.Property<string>("Industria")
                         .IsRequired()
@@ -74,8 +77,19 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Ccir")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CicloProducao")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Cnpj")
+                        .IsRequired()
+                        .HasMaxLength(18)
+                        .HasColumnType("nvarchar(18)");
+
+                    b.Property<string>("Incra")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Industria")
@@ -86,8 +100,14 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("LicencaAmbiental")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Longitude")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Matricula")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Municipio")
@@ -100,6 +120,9 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("OrigemCoordenadas")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Outros")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipoCadastroRural")
@@ -116,6 +139,48 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Propriedades");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.VinculoProdutor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CadastroRural")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Identificacao")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Municipio")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProdutorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Propriedade")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Responsavel")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProdutorId");
+
+                    b.ToTable("Vinculos");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -320,6 +385,13 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("GeotecnologiaKNS.Models.VinculoProdutor", b =>
+                {
+                    b.HasOne("GeotecnologiaKNS.Models.Produtor", null)
+                        .WithMany("Vinculos")
+                        .HasForeignKey("ProdutorId");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -369,6 +441,11 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
+                {
+                    b.Navigation("Vinculos");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,6 +1,8 @@
 ﻿@model Produtor
 <head>
     <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
 </head>
 <h1 style="font-size: 50px;">Produtor</h1>
 
@@ -42,55 +44,72 @@
                 @Html.ValidationMessageFor(model => model.Id, "", new { @class = "error-message" })
             </div>
         </div>
-
     </div>
+
     <div style="margin-top: 20px">
         <a type="submit" class="btn btn-secondary" href="@Url.Action("Index", "Produtores")">Voltar</a>
 
         <div style="float: right;">
-            <input type="submit" style="text-align: right; margin-left: 10px;" value="Salvar" class="btn btn-primary gradient-button" />
-            <a href="@Url.Action("Delete", "Produtores", new { id = Model.Id })" class="btn btn-danger">Excluir</a>
+            <button type="submit" class="btn btn-primary gradient-button">
+                <i class="bi bi-check-circle-fill"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                </svg>
+                Salvar
+            </button>
+            <a href="@Url.Action("Delete", "Produtores", new { id = Model.Id })" class="btn btn-primary gradient-button">
+                <i class="bi bi-trash3-fill"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
+                </svg>
+                Excluir
+            </a>
+
         </div>
     </div>
 }
 
 <body> 
     <div class="conteudo-superior">
-    <div class="tabs">
-        <div class="tabs__sidebar">
-            <button class="tabs__button active" data-for-tab="1" onclick="selecionarGuia(this)">Vínculos</button>
-            <button class="tabs__button" data-for-tab="2" onclick="selecionarGuia(this)">Solicitação</button>
+        <div class="tabs">
+            <div class="tabs__sidebar">
+                <button class="tabs__button active" data-for-tab="1" onclick="selecionarGuia(this)">Vínculos</button>
+                <button class="tabs__button" data-for-tab="2" onclick="selecionarGuia(this)">Solicitação</button>
+                <button class="tabs__button" data-for-tab="3" onclick="selecionarGuia(this)">Documentos</button>
+            </div>
+            <div class="tabs__content" data-tab="1">
+                <h2>Vínculo</h2>
+                <p>Propriedade</p>
+            </div>
+            <div class="tabs__content" data-tab="2">
+                <h2>Solicitação</h2>
+                <p>Situação</p>
+            </div>
+            <div class="tabs__content" data-tab="3">
+                <h2>Documentos</h2>
+                <p>Nenhum documento</p>
+            </div>
         </div>
-        <div class="tabs__content" data-tab="1">
-            <h2>Vínculo</h2>
-            <p>Propriedade</p>
-        </div>
-        <div class="tabs__content" data-tab="2">
-            <h2>Solicitação</h2>
-            <p>Situação</p>
-        </div>
-    </div>
-    <script>
-        function selecionarGuia(botao) {
-            const tabsContainer = document.querySelector('.tabs');
-            const tabNumber = botao.dataset.forTab;
-            const tabToActivate = tabsContainer.querySelector('.tabs__content[data-tab="' + tabNumber + '"]');
+        <script>
+            function selecionarGuia(botao) {
+                const tabsContainer = document.querySelector('.tabs');
+                const tabNumber = botao.dataset.forTab;
+                const tabToActivate = tabsContainer.querySelector('.tabs__content[data-tab="' + tabNumber + '"]');
 
-            const allButtons = tabsContainer.querySelectorAll('.tabs__button');
-            allButtons.forEach((button) => {
-                button.classList.remove('active');
-            });
+                const allButtons = tabsContainer.querySelectorAll('.tabs__button');
+                allButtons.forEach((button) => {
+                    button.classList.remove('active');
+                });
 
-            const allTabs = tabsContainer.querySelectorAll('.tabs__content');
-            allTabs.forEach((tab) => {
-                tab.classList.remove('active');
-            });
+                const allTabs = tabsContainer.querySelectorAll('.tabs__content');
+                allTabs.forEach((tab) => {
+                    tab.classList.remove('active');
+                });
 
-            botao.classList.add('active');
-            tabToActivate.classList.add('active');
-        }
-    </script>
+                botao.classList.add('active');
+                tabToActivate.classList.add('active');
+            }
+
+        </script>
     </div>
 </body>
-
-

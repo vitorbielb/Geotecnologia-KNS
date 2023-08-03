@@ -3,30 +3,57 @@
     <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
 </head>
 <body>
-<h2 style="font-size: 50px;">Produtores</h2>
+    <h2 style="font-size: 50px;">Produtores</h2>
 
-<table class="table">
+    
         <div style="text-align: right;">
-        <button type="submit" class="btn btn-primary gradient-button" onclick="location.href='@Url.Action("Create")'">Novo cadastro</button>
-    </div>
-        <tr style="background-color: #FFF; color: #258cfb;">
-            <th>ID</th>
-            <th>Nome</th>
-            <th>CPF/CNPJ</th>
-            <th>Indústria</th>
-        </tr>
-        @foreach (var produtor in Model)
-        {
-            <tr>
-                <td>@Html.DisplayFor(x => produtor.Id)</td>
-                <td>@Html.DisplayFor(x => produtor.Nome)</td>
-                <td>@Html.DisplayFor(x => produtor.Cpf)</td>
-                <td>@Html.DisplayFor(x => produtor.Industria)</td>
-                <td>
-                    <a href="@Url.Action("Edit", new { id = produtor.Id })" class="btn btn-primary gradient-button">Editar</a>
+            <button type="submit" class="btn btn-primary gradient-button" onclick="location.href='@Url.Action("Create")'">
+                <i class="bi bi-plus-circle"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+                </svg>
+                Novo cadastro
+            </button>
+        </div>
+    <table class="table">
+            <thead>
+                <tr style="background-color: #FFF; color: #258cfb;">
 
-                </td>
-            </tr>
-        }
-</table>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Id)
+                    </th>
+                    <th>
+
+                        @Html.DisplayNameFor(model => model.Nome)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Cpf)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Industria)
+                    </th>
+
+                </tr>
+            </thead>
+            @foreach (var produtor in Model)
+            {
+                <tr class="table-row-link" data-url="@Url.Action("Edit", "Produtores", new { id = produtor.Id })">
+                    <td>@Html.DisplayFor(x => produtor.Id)</td>
+                    <td>@Html.DisplayFor(x => produtor.Nome)</td>
+                    <td>@Html.DisplayFor(x => produtor.Cpf)</td>
+                    <td>@Html.DisplayFor(x => produtor.Industria)</td>
+                </tr>
+            }
+        </table>
 </body>
+<script>
+    // Adiciona um evento de clique em todas as linhas da tabela com a classe "table-row-link"
+    const rows = document.querySelectorAll('.table-row-link');
+    rows.forEach(row => {
+        row.addEventListener('click', function () {
+            const url = this.dataset.url;
+            window.location.href = url; // Redireciona para a URL da página de edição
+        });
+    });
+</script>

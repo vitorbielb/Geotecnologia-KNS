@@ -4,6 +4,7 @@ using GeotecnologiaKNS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeotecnologiaKNS.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230727182854_add-migration ModificaoNasPropriedadesCpfECnpjProdutorEPropriedade")]
+    partial class addmigrationModificaoNasPropriedadesCpfECnpjProdutorEPropriedade
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,8 +35,8 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.Property<string>("Cpf")
                         .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasMaxLength(18)
+                        .HasColumnType("nvarchar(18)");
 
                     b.Property<string>("Industria")
                         .IsRequired()
@@ -74,8 +77,19 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Ccir")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CicloProducao")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Cnpj")
+                        .IsRequired()
+                        .HasMaxLength(18)
+                        .HasColumnType("nvarchar(18)");
+
+                    b.Property<string>("Incra")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Industria")
@@ -86,8 +100,14 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("LicencaAmbiental")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Longitude")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Matricula")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Municipio")
@@ -100,6 +120,9 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<string>("OrigemCoordenadas")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Outros")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TipoCadastroRural")

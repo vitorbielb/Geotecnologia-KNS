@@ -18,16 +18,16 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Cliclo de produção")]
         public string CicloProducao { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Área")]
+        [Display(Name = "Área da propriedade (ha)")]
         public string Area { get; set; } 
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Área útil")]
+        [Display(Name = "Área útil (ha)")]
         public string AreaUtil { get; set; } 
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Latitude")]
+        [Display(Name = "Latitude (UTM)")]
         public string Latitude { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Longitude")]
+        [Display(Name = "Longitude (UTM)")]
         public string Longitude { get; set; }
         [Display(Name = "Origem coordenadas")]
         public string? OrigemCoordenadas { get; set; }
@@ -46,20 +46,9 @@ namespace GeotecnologiaKNS.Models
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Tipo de cadastro rural")]
         public string TipoCadastroRural { get; set; }
-        [Display(Name = "Matrícula")]
-        public string? Matricula { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Cadastro Ambiental Rural")]
         public string CadastroAmbientalRural { get; set; }
-        [Display(Name = "Licença Ambiental")]
-        public string? LicencaAmbiental { get; set; }
-        [Display(Name = "CCIR")]
-        public string? Ccir { get; set; }
-        [Display(Name = "INCRA")]
-        public string? Incra { get; set; }
-
-        [Display(Name = "Outros")]
-        public string? Outros { get; set; }
 
         public static Dictionary<Estado, List<string>> Municipios { get; } = new Dictionary<Estado, List<string>>
         {
