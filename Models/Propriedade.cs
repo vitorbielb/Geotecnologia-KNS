@@ -49,6 +49,7 @@ namespace GeotecnologiaKNS.Models
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Cadastro Ambiental Rural")]
         public string CadastroAmbientalRural { get; set; }
+        public List<Arquivo> Arquivos { get; set; }
 
         public static Dictionary<Estado, List<string>> Municipios { get; } = new Dictionary<Estado, List<string>>
         {

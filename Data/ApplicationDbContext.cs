@@ -17,9 +17,8 @@ namespace GeotecnologiaKNS.Data
 
 
         public DbSet<Propriedade> Propriedades { get; set; } = default!;
-
         public DbSet<Produtor> Produtores { get; set; }
-
+        public DbSet<Arquivo> Arquivos { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Ignorar a classe que não deve ser mapeada para o banco de dados

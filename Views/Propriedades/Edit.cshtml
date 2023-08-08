@@ -1,4 +1,4 @@
-﻿@model GeotecnologiaKNS.Models.Propriedade
+﻿@model GeotecnologiaKNS.Models.ProdutorPropriedadeViewModel
 
 <head>
     <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
@@ -14,14 +14,14 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <!-- Grupo 1 -->
             <div class="form-group">
-                <label asp-for="NomePropriedade" class="control-label"></label>
-                <input asp-for="NomePropriedade" class="form-control" />
-                @Html.ValidationMessageFor(model => model.NomePropriedade, "", new { @class = "error-message" })
+                <label asp-for="Propriedade.NomePropriedade" class="control-label"></label>
+                <input asp-for="Propriedade.NomePropriedade" class="form-control" />
+                @Html.ValidationMessageFor(model => model.Propriedade.NomePropriedade, "", new { @class = "error-message" })
             </div>
             <div class="form-group select-with-icon">
-                <label asp-for="Bioma" class="control-label"></label>
+                <label asp-for="Propriedade.Bioma" class="control-label"></label>
                 <div class="select-wrapper">
-                    <select asp-for="Bioma" class="form-control">
+                    <select asp-for="Propriedade.Bioma" class="form-control">
                         <option value="">Selecione...</option>
                         <option value="Amazonia">Amazônia</option>
                         <option value="Cerrado">Cerrado</option>
@@ -32,40 +32,40 @@
                     </select>
                     <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
-                @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
+                @Html.ValidationMessageFor(model => model.Propriedade.Bioma, "", new { @class = "error-message" })
             </div>
             <div class="form-group select-with-icon">
-                <label asp-for="UnidadeFederativa" class="control-label"></label>
+                <label asp-for="Propriedade.UnidadeFederativa" class="control-label"></label>
                 <div class="select-wrapper">
-                    <select asp-for="UnidadeFederativa" class="form-control" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)"></select>
+                    <select asp-for="Propriedade.UnidadeFederativa" class="form-control" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)"></select>
                     <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
-                @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
+                @Html.ValidationMessageFor(model => model.Propriedade.UnidadeFederativa, "", new { @class = "error-message" })
             </div>
             <div class="form-group">
-                <label asp-for="Municipio" class="control-label"></label>
-                <input asp-for="Municipio" class="form-control" />
-                <span asp-validation-for="Municipio" class="text-danger"></span>
+                <label asp-for="Propriedade.Municipio" class="control-label"></label>
+                <input asp-for="Propriedade.Municipio" class="form-control" />
+                <span asp-validation-for="Propriedade.Municipio" class="text-danger"></span>
             </div>
         </div>
         <div class="col-md-3">
             <!-- Grupo 2 -->
             <div class="form-group select-with-icon">
-                <label asp-for="TipoPropriedade" class="control-label"></label>
+                <label asp-for="Propriedade.TipoPropriedade" class="control-label"></label>
                 <div class="select-wrapper">
-                    <select asp-for="TipoPropriedade" class="form-control">
+                    <select asp-for="Propriedade.TipoPropriedade" class="form-control">
                         <option value="">Selecione...</option>
                         <option value="Confinamento">Confinamento</option>
                         <option value="PropriedadeRural">Propriedade Rural</option>
                     </select>
                     <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
-                @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
+                @Html.ValidationMessageFor(model => model.Propriedade.TipoPropriedade, "", new { @class = "error-message" })
             </div>
             <div class="form-group select-with-icon">
-                <label asp-for="CicloProducao" class="control-label"></label>
+                <label asp-for="Propriedade.CicloProducao" class="control-label"></label>
                 <div class="select-wrapper">
-                    <select asp-for="CicloProducao" class="form-control">
+                    <select asp-for="Propriedade.CicloProducao" class="form-control">
                         <option value="">Selecione...</option>
                         <option value="CRIA">CRIA</option>
                         <option value="RECRIA">RECRIA</option>
@@ -77,50 +77,50 @@
                     </select>
                     <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
-                @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
+                @Html.ValidationMessageFor(model => model.Propriedade.CicloProducao, "", new { @class = "error-message" })
             </div>
             <div class="form-group">
-                <label asp-for="Industria" class="control-label"></label>
-                <input asp-for="Industria" class="form-control" />
+                <label asp-for="Propriedade.Industria" class="control-label"></label>
+                <input asp-for="Propriedade.Industria" class="form-control" />
 
-                @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+                @Html.ValidationMessageFor(model => model.Propriedade.Industria, "", new { @class = "error-message" })
             </div>
         </div>
         <div class="col-md-3">
             <!-- Grupo 3 -->
             <div class="form-group">
-                <label asp-for="Latitude" class="control-label"></label>
-                <input asp-for="Latitude" class="form-control" />
-                @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
+                <label asp-for="Propriedade.Latitude" class="control-label"></label>
+                <input asp-for="Propriedade.Latitude" class="form-control" />
+                @Html.ValidationMessageFor(model => model.Propriedade.Latitude, "", new { @class = "error-message" })
             </div>
             <div class="form-group">
-                <label asp-for="Area" class="control-label"></label>
-                <input asp-for="Area" class="form-control" />
-                @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
+                <label asp-for="Propriedade.Area" class="control-label"></label>
+                <input asp-for="Propriedade.Area" class="form-control" />
+                @Html.ValidationMessageFor(model => model.Propriedade.Area, "", new { @class = "error-message" })
             </div>
             <div class="form-group">
-                <label asp-for="CadastroAmbientalRural" class="control-label"></label>
-                <input asp-for="CadastroAmbientalRural" class="form-control" />
+                <label asp-for="Propriedade.CadastroAmbientalRural" class="control-label"></label>
+                <input asp-for="Propriedade.CadastroAmbientalRural" class="form-control" />
 
-                @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
+                @Html.ValidationMessageFor(model => model.Propriedade.CadastroAmbientalRural, "", new { @class = "error-message" })
             </div>
         </div>
         <div class="col-md-3">
             <!-- Grupo 4 -->
             <div class="form-group">
-                <label asp-for="Longitude" class="control-label"></label>
-                <input asp-for="Longitude" class="form-control" />
-                @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
+                <label asp-for="Propriedade.Longitude" class="control-label"></label>
+                <input asp-for="Propriedade.Longitude" class="form-control" />
+                @Html.ValidationMessageFor(model => model.Propriedade.Longitude, "", new { @class = "error-message" })
             </div>
             <div class="form-group">
-                <label asp-for="AreaUtil" class="control-label"></label>
-                <input asp-for="AreaUtil" class="form-control" />
-                @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
+                <label asp-for="Propriedade.AreaUtil" class="control-label"></label>
+                <input asp-for="Propriedade.AreaUtil" class="form-control" />
+                @Html.ValidationMessageFor(model => model.Propriedade.AreaUtil, "", new { @class = "error-message" })
             </div>
             <div class="form-group select-with-icon">
-                <label asp-for="TipoCadastroRural" class="control-label"></label>
+                <label asp-for="Propriedade.TipoCadastroRural" class="control-label"></label>
                 <div class="select-wrapper">
-                    <select asp-for="TipoCadastroRural" class="form-control">
+                    <select asp-for="Propriedade.TipoCadastroRural" class="form-control">
                         <option value="">Selecione...</option>
                         <option value="SicarRecibo">Sicar - Recibo</option>
                         <option value="SicarProtocolo">Sicar/Protocolo</option>
@@ -132,7 +132,7 @@
                     </select>
                     <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
-                @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
+                @Html.ValidationMessageFor(model => model.Propriedade.TipoCadastroRural, "", new { @class = "error-message" })
             </div>
         </div>
     </div>
@@ -140,7 +140,7 @@
     <div class="form-group" style="margin-top: 40px;">
         <a asp-action="Index" class="btn btn-secondary">Voltar</a>
     </div>
-    <div style="float: right;">
+    <div style="float: right; margin-top: -40px;">
         <button type="submit" class="btn btn-primary gradient-button">
             <i class="bi bi-check-circle-fill"></i>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
@@ -148,7 +148,7 @@
             </svg>
             Salvar
         </button>
-        <a href="@Url.Action("Delete", "Propriedades", new { id = Model.Id })" class="btn btn-primary gradient-button">
+        <a href="@Url.Action("Delete", "Propriedades", new { id = Model.Propriedade.Id })" class="btn btn-primary gradient-button">
             <i class="bi bi-trash3-fill"></i>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
                 <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
@@ -158,50 +158,124 @@
     </div>
 </form>
 
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
 <body>
     <div class="conteudo-superior">
         <div class="tabs">
             <div class="tabs__sidebar">
                 <button class="tabs__button active" data-for-tab="1" onclick="selecionarGuia(this)">Vínculos</button>
-                <button class="tabs__button" data-for-tab="2" onclick="selecionarGuia(this)">Solicitação</button>
+                <button class="tabs__button" data-for-tab="2" onclick="selecionarGuia(this)">Situação</button>
                 <button class="tabs__button" data-for-tab="3" onclick="selecionarGuia(this)">Documentos</button>
             </div>
             <div class="tabs__content" data-tab="1">
-                <h2>Vínculo</h2>
-                <p>Propriedade</p>
+                <h2>Vínculos</h2>
+                <p>Menhum Vínculo</p>
             </div>
             <div class="tabs__content" data-tab="2">
                 <h2>Solicitação</h2>
                 <p>Situação</p>
             </div>
             <div class="tabs__content" data-tab="3">
-                <h2>Documentos</h2>
-                <p>Nenhum documento</p>
+                <form asp-action="UploadArquivos" enctype="multipart/form-data" method="post">
+                    <input type="hidden" name="propriedadeId" value="@Model.Propriedade.Id" />
+                    <input type="file" name="arquivos" multiple />
+                    <br />
+                    <button>Enviar Aquivo</button>
+                </form>
+
+                <div class="tabela-personalizada">
+                    <table class="table">
+                        <thead>
+                            <tr class="linha-especial">
+                                <th style="color: #0404B4">
+                                    @Html.DisplayNameFor(model => model.Arquivo.Descricao)
+                                </th>
+                                <th style="color: #0404B4"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Arquivos)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Descricao)
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <a class="btn btn-primary gradient-button" href="/Propriedades/Visualizar/@item.Id" target="_blank">
+                                            <i class="bi bi-eye-fill"></i>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
+                                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                                            </svg>
+                                            Visualizar
+                                        </a>
+                                        <button class="btn btn-primary gradient-button" onclick="confirmDelete('@item.Id')" data-file-id="@item.Id" data-propriedade-id="@Model.Propriedade.Id">
+                                            <i class="bi bi-trash3-fill"></i>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
+                                            </svg>
+                                            Excluir
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
+            <script>
+                function selecionarGuia(botao) {
+                    const tabsContainer = document.querySelector('.tabs');
+                    const tabNumber = botao.dataset.forTab;
+                    const tabToActivate = tabsContainer.querySelector('.tabs__content[data-tab="' + tabNumber + '"]');
+
+                    const allButtons = tabsContainer.querySelectorAll('.tabs__button');
+                    allButtons.forEach((button) => {
+                        button.classList.remove('active');
+                    });
+
+                    const allTabs = tabsContainer.querySelectorAll('.tabs__content');
+                    allTabs.forEach((tab) => {
+                        tab.classList.remove('active');
+                    });
+
+                    botao.classList.add('active');
+                    tabToActivate.classList.add('active');
+                }
+            </script>
+            <script>
+                function confirmDelete(fileId) {
+                    // Obter o ID da propriedade a partir do atributo de dados
+                    const propriedadeId = document.querySelector('[data-propriedade-id]').dataset.propriedadeId;
+
+                    // Envia o formulário com o fileId para a ação do controlador
+                    const form = document.createElement("form");
+                    form.method = "post";
+                    form.action = "/Propriedades/ExcluirArquivo/" + fileId;
+
+                    // Adicione o token de antifalsificação (se aplicável)
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    const inputToken = document.createElement("input");
+                    inputToken.type = "hidden";
+                    inputToken.name = "__RequestVerificationToken";
+                    inputToken.value = token;
+                    form.appendChild(inputToken);
+
+                    // Adicione o ID da propriedade como um campo oculto
+                    const inputPropriedadeId = document.createElement("input");
+                    inputPropriedadeId.type = "hidden";
+                    inputPropriedadeId.name = "propriedadeId";
+                    inputPropriedadeId.value = propriedadeId;
+                    form.appendChild(inputPropriedadeId);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            </script>
+
         </div>
-        <script>
-            function selecionarGuia(botao) {
-                const tabsContainer = document.querySelector('.tabs');
-                const tabNumber = botao.dataset.forTab;
-                const tabToActivate = tabsContainer.querySelector('.tabs__content[data-tab="' + tabNumber + '"]');
-
-                const allButtons = tabsContainer.querySelectorAll('.tabs__button');
-                allButtons.forEach((button) => {
-                    button.classList.remove('active');
-                });
-
-                const allTabs = tabsContainer.querySelectorAll('.tabs__content');
-                allTabs.forEach((tab) => {
-                    tab.classList.remove('active');
-                });
-
-                botao.classList.add('active');
-                tabToActivate.classList.add('active');
-            }
-        </script>
-    </div>
 </body>
 

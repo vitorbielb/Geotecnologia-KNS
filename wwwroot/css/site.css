@@ -282,7 +282,14 @@ footer {
         footer a:hover {
             text-decoration: underline; /* Adicionar sublinhado no link ao passar o mouse */
         }
-
+.tabela-personalizada tr {
+    /* Adicione aqui os estilos específicos que deseja para as linhas da tabela */
+    /* Por exemplo, se você quiser remover todos os estilos de formatação: */
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    /* Adicione outros estilos conforme necessário */
+}
 
 
 

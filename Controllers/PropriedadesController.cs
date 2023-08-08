@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using GeotecnologiaKNS.Data;
 using GeotecnologiaKNS.Models;
 
-namespace KNS.Controllers
+namespace GeotecnologiaKNS.Controllers
 {
     public class PropriedadesController : Controller
     {
@@ -73,24 +73,32 @@ namespace KNS.Controllers
         }
 
         // GET: Propriedades/Edit/5
+        // GET: Propriedades/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-
             if (id == null || _context.Propriedades == null)
-
             {
                 return NotFound();
             }
 
-
-            var propriedade = await _context.Propriedades.FindAsync(id);
+            var propriedade = await _context.Propriedades
+                .Include(p => p.Arquivos) // Incluindo a lista de arquivos associados à propriedade
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (propriedade == null)
             {
                 return NotFound();
             }
-            return View(propriedade);
+
+            var viewModel = new ProdutorPropriedadeViewModel
+            {
+                Propriedade = propriedade,
+                Arquivos = propriedade.Arquivos
+            };
+
+            return View(viewModel);
         }
+
 
         // POST: Propriedades/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -181,5 +189,56 @@ namespace KNS.Controllers
             return (_context.Propriedades?.Any(e => e.Id == id)).GetValueOrDefault();
 
         }
+        public IActionResult UploadArquivos(IList<IFormFile> arquivos, int propriedadeId)
+        {
+            IFormFile imagemCarregada = arquivos.FirstOrDefault();
+
+            if (imagemCarregada != null)
+            {
+                using MemoryStream ms = new MemoryStream();
+                imagemCarregada.OpenReadStream().CopyTo(ms);
+
+                Arquivo arqui = new Arquivo()
+                {
+                    Descricao = imagemCarregada.FileName,
+                    Dados = ms.ToArray(),
+                    ContentType = imagemCarregada.ContentType
+                };
+
+                _context.Arquivos.Add(arqui);
+                _context.SaveChanges();
+
+                // Capturar a variável propriedade 
+                var propriedade = _context.Propriedades.Include(p => p.Arquivos).FirstOrDefault(p => p.Id == propriedadeId);
+                if (propriedade != null)
+                {
+                    propriedade.Arquivos.Add(arqui);
+                    _context.SaveChanges();
+                }
+            }
+
+            // Redirecionar para a View 'Edit' com o ID da propriedade para atualização
+            return RedirectToAction("Edit", "Propriedades", new { id = propriedadeId });
+        }
+        public IActionResult Visualizar(int id)
+        {
+            var arquivosBanco = _context.Arquivos.FirstOrDefault(a => a.Id == id);
+
+            return File(arquivosBanco.Dados, arquivosBanco.ContentType);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ExcluirArquivo(int id, int propriedadeId)
+        {
+            var arquivo = await _context.Arquivos.FindAsync(id);
+            if (arquivo != null)
+            {
+                _context.Arquivos.Remove(arquivo);
+                await _context.SaveChangesAsync();
+            }
+            // Redireciona para a view Edit com o ID da propriedade
+            return RedirectToAction("Edit", new { id = propriedadeId });
+        }
+
     }
 }
