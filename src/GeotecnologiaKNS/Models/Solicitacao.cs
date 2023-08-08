@@ -50,10 +50,10 @@ namespace GeotecnologiaKNS.Models
         public List<AnaliseArquivo> Documentos { get; set; } = new();
 
         [Display(Name = "Situação da Solicitação")]
-        public StatusSolicitacao Status { get; set; } = StatusSolicitacao.Solicitado;
+        public Status Status { get; set; } = Status.Solicitado;
     }
 
-    public enum StatusSolicitacao
+    public enum Status
     {
         Solicitado = 0,
         Liberado = 1,
