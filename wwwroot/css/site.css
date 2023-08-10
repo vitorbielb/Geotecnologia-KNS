@@ -290,6 +290,11 @@ footer {
     background-color: transparent;
     /* Adicione outros estilos conforme necessário */
 }
+/* Estilo para campos desabilitados */
+.disabled-field {
+    cursor: not-allowed;
+}
+
 
 
 

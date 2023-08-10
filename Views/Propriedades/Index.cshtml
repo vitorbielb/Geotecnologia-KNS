@@ -16,7 +16,9 @@
 <table class="table">
     <thead>
         <tr style="background-color: #FFF; color: #258cfb;">
-
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.NomePropriedade)
             </th>
@@ -42,6 +44,7 @@
         @foreach (var item in Model)
         {
             <tr class="table-row-link" data-url="@Url.Action("Edit", "Propriedades", new { id = item.Id })">
+                <td>@Html.DisplayFor(modelItem => item.Id)</td>
                 <td>
                     @Html.DisplayFor(modelItem => item.NomePropriedade)
                 </td>
