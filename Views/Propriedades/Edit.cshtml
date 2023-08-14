@@ -146,7 +146,14 @@
             </div>
         </div>
     </div>
-
+    <div class="form-group select-with-icon">
+        <label asp-for="Propriedade.ProdutorId" class="control-label"></label>
+        <div class="select-wrapper">
+            <select asp-for="Propriedade.ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
+            <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
+        </div>
+        @Html.ValidationMessageFor(model => model.Propriedade.ProdutorId, "", new { @class = "error-message" })
+    </div>
     <div class="form-group" style="margin-top: 40px;">
         <a asp-action="Index" class="btn btn-secondary">Voltar</a>
     </div>

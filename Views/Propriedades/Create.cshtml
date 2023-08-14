@@ -38,7 +38,7 @@
             <div class="form-group select-with-icon">
                 <label asp-for="UnidadeFederativa" class="control-label"></label>
                 <div class="select-wrapper">
-                    <select asp-for="UnidadeFederativa" class="form-control" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)"></select>
+                    <select asp-for="UnidadeFederativa" class="form-control" asp-items="ViewBag.UnidadesFederativas" onchange="populateCities(this.value)"></select>
                     <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
                 @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
@@ -136,6 +136,14 @@
                     <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
                 @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
+            </div>
+             <div class="form-group select-with-icon">
+                <label asp-for="ProdutorId" class="control-label"></label>
+                <div class="select-wrapper">
+                    <select asp-for="ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
+                    <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
+                </div>
+                @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
             </div>
         </div>
     </div>

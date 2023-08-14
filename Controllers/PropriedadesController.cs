@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using GeotecnologiaKNS.Data;
-using GeotecnologiaKNS.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace GeotecnologiaKNS.Controllers
 {
@@ -22,10 +14,8 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades
         public async Task<IActionResult> Index()
         {
-
             return _context.Propriedades != null ?
                         View(await _context.Propriedades.ToListAsync()) :
-
                         Problem("Entity set 'ApplicationDbContext.Propriedade'  is null.");
         }
 
@@ -53,6 +43,7 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades/Create
         public IActionResult Create()
         {
+            FillProdutoresUnidadesFederativasViewBag();
             return View();
         }
 
@@ -61,14 +52,18 @@ namespace GeotecnologiaKNS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,Outros")] Propriedade propriedade)
+        public async Task<IActionResult> Create(Propriedade propriedade)
         {
+            propriedade.Produtor = _context.Produtores.Find(propriedade.ProdutorId)!;
+
             if (ModelState.IsValid)
             {
                 _context.Add(propriedade);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            
+            FillProdutoresUnidadesFederativasViewBag();
             return View(propriedade);
         }
 
@@ -76,6 +71,8 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+            FillProdutoresUnidadesFederativasViewBag();
+
             if (id == null || _context.Propriedades == null)
             {
                 return NotFound();
@@ -240,5 +237,14 @@ namespace GeotecnologiaKNS.Controllers
             return RedirectToAction("Edit", new { id = propriedadeId });
         }
 
+        private void FillProdutoresUnidadesFederativasViewBag()
+        {
+            ViewBag.UnidadesFederativas = UnidadesFederativasExtension.GetUnidadesFederativas();
+            ViewBag.Produtores = _context.Produtores
+                .ToSelectListItems(
+                    x => x.Nome,
+                    x => x.Id,
+                    options => options.Placeholder = "Selecione...");
+        }
     }
 }

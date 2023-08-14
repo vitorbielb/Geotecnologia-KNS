@@ -23,7 +23,6 @@ namespace GeotecnologiaKNS.Data
         {
             // Ignorar a classe que não deve ser mapeada para o banco de dados
             modelBuilder.Ignore<Dictionary<Estado, List<string>>>();
-
             base.OnModelCreating(modelBuilder);
         }
     }

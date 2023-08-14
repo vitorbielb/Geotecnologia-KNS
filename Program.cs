@@ -1,14 +1,3 @@
-using GeotecnologiaKNS.Data;
-using GeotecnologiaKNS.Repositories.Interfaces;
-using GeotecnologiaKNS.Repositories;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using GeotecnologiaKNS.Models;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Configurar a conexão com o banco de dados
@@ -19,6 +8,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GeotecnologiaKNS")));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
     options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -39,6 +29,9 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+//Atualiza as migrations automaticamente.
+await app.UpdateDatabaseAsync();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
