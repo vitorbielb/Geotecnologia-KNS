@@ -14,9 +14,9 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades
         public async Task<IActionResult> Index()
         {
-            return _context.Propriedades != null ?
-                        View(await _context.Propriedades.ToListAsync()) :
-                        Problem("Entity set 'ApplicationDbContext.Propriedade'  is null.");
+            var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
+            return View(model);
+                        
         }
 
         // GET: Propriedades/Details/5
@@ -87,13 +87,7 @@ namespace GeotecnologiaKNS.Controllers
                 return NotFound();
             }
 
-            var viewModel = new ProdutorPropriedadeViewModel
-            {
-                Propriedade = propriedade,
-                Arquivos = propriedade.Arquivos
-            };
-
-            return View(viewModel);
+            return View(propriedade);
         }
 
 

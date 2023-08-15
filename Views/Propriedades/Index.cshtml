@@ -23,6 +23,9 @@
                 @Html.DisplayNameFor(model => model.NomePropriedade)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.Produtor)
+            </th>
+            <th>
 
                 @Html.DisplayNameFor(model => model.UnidadeFederativa)
             </th>
@@ -33,9 +36,9 @@
                 @Html.DisplayNameFor(model => model.Industria)
             </th>
             <th>
-
                 @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
             </th>
+            
 
         </tr>
     </thead>
@@ -47,6 +50,9 @@
                 <td>@Html.DisplayFor(modelItem => item.Id)</td>
                 <td>
                     @Html.DisplayFor(modelItem => item.NomePropriedade)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Produtor.Nome)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.UnidadeFederativa)

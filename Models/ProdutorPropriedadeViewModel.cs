@@ -1,4 +1,6 @@
-﻿namespace GeotecnologiaKNS.Models
+﻿using static GeotecnologiaKNS.Utils.Global;
+
+namespace GeotecnologiaKNS.Models
 {
     public class ProdutorPropriedadeViewModel
     {
@@ -6,5 +8,6 @@
         public Propriedade Propriedade { get; set;}
         public Arquivo Arquivo { get; set;}
         public IEnumerable<Arquivo> Arquivos { get; set; }
+        public SelectListItemsOptions Itens { get; set; }
     }
 }
