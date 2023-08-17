@@ -1,9 +1,76 @@
 ﻿@model IEnumerable<GeotecnologiaKNS.Models.Propriedade>
 
 
-<h1 style="font-size: 50px;">Propriedades</h1>
+<h1 style="font-size: 40px;">Propriedades</h1>
 
-<div style="text-align: right;">
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Produtores</h4>
+                <p class="card-description">
+                </p>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr style="background-color: #FFF; color: #258cfb;">
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Id)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.NomePropriedade)
+                                </th>
+                                <th>
+
+                                    @Html.DisplayNameFor(model => model.UnidadeFederativa)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Municipio)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Industria)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
+                                </th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            @foreach (var item in Model)
+                            {
+                                <tr class="table-row-link" data-url="@Url.Action("Edit", "Propriedades", new { id = item.Id })">
+                                    <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.NomePropriedade)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.UnidadeFederativa)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Municipio)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Industria)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.CadastroAmbientalRural)
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="text-align: left;">
     <button type="submit" class="btn btn-primary gradient-button" onclick="location.href='@Url.Action("Create")'">
         <i class="bi bi-plus-circle"></i>
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
@@ -13,64 +80,11 @@
         Novo cadastro
     </button>
 </div>
-<table class="table">
-    <thead>
-        <tr style="background-color: #FFF; color: #258cfb;">
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NomePropriedade)
-            </th>
-            <th>
-
-                @Html.DisplayNameFor(model => model.UnidadeFederativa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Municipio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Industria)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
-            </th>
-            
-
-        </tr>
-    </thead>
-    <tbody>
-
-        @foreach (var item in Model)
-        {
-            <tr class="table-row-link" data-url="@Url.Action("Edit", "Propriedades", new { id = item.Id })">
-                <td>@Html.DisplayFor(modelItem => item.Id)</td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.NomePropriedade)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UnidadeFederativa)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Municipio)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Industria)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CadastroAmbientalRural)
-                </td>
-                
-            </tr>
-        }
-
-    </tbody>
-</table>
 <script>
     // Adiciona um evento de clique em todas as linhas da tabela com a classe "table-row-link"
     const rows = document.querySelectorAll('.table-row-link');
     rows.forEach(row => {
-        row.addEventListener('click', function () {
+        row.addEventListener('click', function() {
             const url = this.dataset.url;
             window.location.href = url; // Redireciona para a URL da página de edição
         });
