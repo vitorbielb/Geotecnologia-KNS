@@ -2,72 +2,78 @@
 
 
 <h1 style="font-size: 50px;">Solicitações</h1>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Propriedade</h4>
 
-<div style="text-align: right;">
-    
+            </div>
+            <table class="table">
+                <thead>
+                    <tr style="background-color: #FFF; color: #258cfb;">
+                        <th>
+                            @Html.DisplayNameFor(model => model.Id)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.NomePropriedade)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Produtor)
+                        </th>
+                        <th>
+
+                            @Html.DisplayNameFor(model => model.UnidadeFederativa)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Municipio)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Industria)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
+                        </th>
+                        <th>
+                            @Html.DisplayName("Status")
+                        </th>
+
+
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        <tr class="table-row-link" data-url="@Url.Action("Edit", "Propriedades", new { id = item.Id })">
+                            <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.NomePropriedade)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Produtor.Nome)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.UnidadeFederativa)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Municipio)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Industria)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CadastroAmbientalRural)
+                            </td>
+                            <td>
+                                <a type="submit" href="/Propriedades/Index" class="btn btn-secondary">Pendente</a>
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-<table class="table">
-    <thead>
-        <tr style="background-color: #FFF; color: #258cfb;">
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.NomePropriedade)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Produtor)
-            </th>
-            <th>
-
-                @Html.DisplayNameFor(model => model.UnidadeFederativa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Municipio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Industria)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
-            </th>
-            <th>
-                @Html.DisplayName("Status")
-            </th>
-
-
-        </tr>
-    </thead>
-    <tbody>
-
-        @foreach (var item in Model)
-        {
-            <tr class="table-row-link" data-url="@Url.Action("Edit", "Propriedades", new { id = item.Id })">
-                <td>@Html.DisplayFor(modelItem => item.Id)</td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.NomePropriedade)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Produtor.Nome)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UnidadeFederativa)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Municipio)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Industria)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.CadastroAmbientalRural)
-                </td>
-                <td>
-                    <a type="submit" href="/Propriedades/Index" class="btn btn-secondary">Pendente</a>
-                </td>
-
-            </tr>
-        }
-
-    </tbody>
-</table>

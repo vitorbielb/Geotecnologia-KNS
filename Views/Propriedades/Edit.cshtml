@@ -4,171 +4,170 @@
     <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<h1 style="font-size: 50px;">Propriedade</h1>
 
-<h4>Editar</h4>
-<hr />
-<form asp-action="Edit">
-    <div class="row">
-        <div class="col-md-3">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <!-- Grupo 1 -->
-            <div class="form-group">
-                <label asp-for="NomePropriedade" class="control-label"></label>
-                <input asp-for="NomePropriedade" class="form-control" />
-                @Html.ValidationMessageFor(model => model.NomePropriedade, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group select-with-icon">
-                <label asp-for="Bioma" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="Bioma" class="form-control">
-                        <option value="">Selecione...</option>
-                        <option value="Amazonia">Amazônia</option>
-                        <option value="Cerrado">Cerrado</option>
-                        <option value="MataAtlantica">Mata Atlântica</option>
-                        <option value="Caatinga">Caatinga</option>
-                        <option value="Pantanal">Pantanal</option>
-                        <option value="Pampas">Pampas</option>
-                    </select>
-                </div>
-                @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="UnidadeFederativa" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                </svg>
-                <select asp-for="UnidadeFederativa" class="form-control disabled-field" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)" disabled></select>
-                @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="Municipio" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                </svg>
-                <input asp-for="Municipio" class="form-control disabled-field" disabled />
-                <span asp-validation-for="Municipio" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <!-- Grupo 2 -->
-            <div class="form-group select-with-icon">
-                <label asp-for="TipoPropriedade" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="TipoPropriedade" class="form-control">
-                        <option value="">Selecione...</option>
-                        <option value="Confinamento">Confinamento</option>
-                        <option value="PropriedadeRural">Propriedade Rural</option>
-                    </select>
-                </div>
-                @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group select-with-icon">
-                <label asp-for="CicloProducao" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="CicloProducao" class="form-control">
-                        <option value="">Selecione...</option>
-                        <option value="CRIA">CRIA</option>
-                        <option value="RECRIA">RECRIA</option>
-                        <option value="ENGORDA">ENGORDA</option>
-                        <option value="CRIARECRIA">CRIA RECRIA</option>
-                        <option value="RECRIAENGORDA">RECRIA ENGORDA</option>
-                        <option value="CICLOCOMPLETO">CICLO COMPLETO</option>
-                        <option value="NAOINFORMADO">NÃO INFORMADO</option>
-                    </select>
-                </div>
-                @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="Industria" class="control-label"></label>
-                <input asp-for="Industria" class="form-control" />
+<h4 style="font-size: 40px;">Editar</h4>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Propriedade</h4>
+                <form asp-action="Edit">
+                    <div class="row">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <!-- Grupo 1 -->
+                        <div class="form-group">
+                            <label asp-for="NomePropriedade" class="control-label"></label>
+                            <input asp-for="NomePropriedade" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.NomePropriedade, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="Bioma" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="Bioma" class="form-control">
+                                    <option value="">Selecione...</option>
+                                    <option value="Amazonia">Amazônia</option>
+                                    <option value="Cerrado">Cerrado</option>
+                                    <option value="MataAtlantica">Mata Atlântica</option>
+                                    <option value="Caatinga">Caatinga</option>
+                                    <option value="Pantanal">Pantanal</option>
+                                    <option value="Pampas">Pampas</option>
+                                </select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="UnidadeFederativa" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <select asp-for="UnidadeFederativa" class="form-control disabled-field" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)" disabled></select>
+                            @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Municipio" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <input asp-for="Municipio" class="form-control disabled-field" disabled />
+                            <span asp-validation-for="Municipio" class="text-danger"></span>
+                        </div>
+                        <!-- Grupo 2 -->
+                        <div class="form-group select-with-icon">
+                            <label asp-for="TipoPropriedade" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="TipoPropriedade" class="form-control">
+                                    <option value="">Selecione...</option>
+                                    <option value="Confinamento">Confinamento</option>
+                                    <option value="PropriedadeRural">Propriedade Rural</option>
+                                </select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="CicloProducao" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="CicloProducao" class="form-control">
+                                    <option value="">Selecione...</option>
+                                    <option value="CRIA">CRIA</option>
+                                    <option value="RECRIA">RECRIA</option>
+                                    <option value="ENGORDA">ENGORDA</option>
+                                    <option value="CRIARECRIA">CRIA RECRIA</option>
+                                    <option value="RECRIAENGORDA">RECRIA ENGORDA</option>
+                                    <option value="CICLOCOMPLETO">CICLO COMPLETO</option>
+                                    <option value="NAOINFORMADO">NÃO INFORMADO</option>
+                                </select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Industria" class="control-label"></label>
+                            <input asp-for="Industria" class="form-control" />
 
-                @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
-            </div>
-        </div>
-        <div class="col-md-3">
-            <!-- Grupo 3 -->
-            <div class="form-group">
-                <label asp-for="Latitude" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                </svg>
-                <input asp-for="Latitude" class="form-control disabled-field" disabled  />
+                            @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+                        </div>
+                        <!-- Grupo 3 -->
+                        <div class="form-group">
+                            <label asp-for="Latitude" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <input asp-for="Latitude" class="form-control disabled-field" disabled />
 
-                @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="Area" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                </svg>
-                <input asp-for="Area" class="form-control disabled-field" disabled />
-                @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="CadastroAmbientalRural" class="control-label"></label>
-                <input asp-for="CadastroAmbientalRural" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Area" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <input asp-for="Area" class="form-control disabled-field" disabled />
+                            @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CadastroAmbientalRural" class="control-label"></label>
+                            <input asp-for="CadastroAmbientalRural" class="form-control" />
 
-                @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
-            </div>
-        </div>
-        <div class="col-md-3">
-            <!-- Grupo 4 -->
-            <div class="form-group">
-                <label asp-for="Longitude" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                </svg>
-                <input asp-for="Longitude" class="form-control disabled-field" disabled />
-                @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="AreaUtil" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                </svg>
-                <input asp-for="AreaUtil" class="form-control disabled-field" disabled />
-                @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group select-with-icon">
-                <label asp-for="TipoCadastroRural" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="TipoCadastroRural" class="form-control">
-                        <option value="">Selecione...</option>
-                        <option value="SicarRecibo">Sicar - Recibo</option>
-                        <option value="SicarProtocolo">Sicar/Protocolo</option>
-                        <option value="CarEstadual">Car Estadual</option>
-                        <option value="CodigoSenacsa">Código Senacsa</option>
-                        <option value="RSPP">RSPP</option>
-                        <option value="RENSPA">RENSPA</option>
-                        <option value="DICOSE">DICOSE</option>
-                    </select>
-                </div>
-                @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
+                            @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
+                        </div>
+                        <!-- Grupo 4 -->
+                        <div class="form-group">
+                            <label asp-for="Longitude" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <input asp-for="Longitude" class="form-control disabled-field" disabled />
+                            @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="AreaUtil" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <input asp-for="AreaUtil" class="form-control disabled-field" disabled />
+                            @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="TipoCadastroRural" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="TipoCadastroRural" class="form-control">
+                                    <option value="">Selecione...</option>
+                                    <option value="SicarRecibo">Sicar - Recibo</option>
+                                    <option value="SicarProtocolo">Sicar/Protocolo</option>
+                                    <option value="CarEstadual">Car Estadual</option>
+                                    <option value="CodigoSenacsa">Código Senacsa</option>
+                                    <option value="RSPP">RSPP</option>
+                                    <option value="RENSPA">RENSPA</option>
+                                    <option value="DICOSE">DICOSE</option>
+                                </select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                    <div class="form-group select-with-icon">
+                        <label asp-for="ProdutorId" class="control-label"></label>
+                        <div class="select-wrapper">
+                            <select asp-for="ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
+                        </div>
+                        @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
+                    </div>
+                    <div class="form-group" style="margin-top: 40px;">
+                        <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+                    </div>
+                    <div style="float: right; margin-top: -40px;">
+                        <button type="submit" class="btn btn-primary gradient-button">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                            </svg>
+                            Salvar
+                        </button>
+                        <a href="@Url.Action("Delete", "Propriedades", new { id = Model.Id })" class="btn btn-primary gradient-button">
+                            <i class="bi bi-trash3-fill"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
+                            </svg>
+                            Excluir
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <div class="form-group select-with-icon">
-        <label asp-for="ProdutorId" class="control-label"></label>
-        <div class="select-wrapper">
-            <select asp-for="ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
-        </div>
-        @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
-    </div>
-    <div class="form-group" style="margin-top: 40px;">
-        <a asp-action="Index" class="btn btn-secondary">Voltar</a>
-    </div>
-    <div style="float: right; margin-top: -40px;">
-        <button type="submit" class="btn btn-primary gradient-button">
-            <i class="bi bi-check-circle-fill"></i>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-            </svg>
-            Salvar
-        </button>
-        <a href="@Url.Action("Delete", "Propriedades", new { id = Model.Id })" class="btn btn-primary gradient-button">
-            <i class="bi bi-trash3-fill"></i>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
-            </svg>
-            Excluir
-        </a>
-    </div>
-</form>
+</div>
 
 @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");

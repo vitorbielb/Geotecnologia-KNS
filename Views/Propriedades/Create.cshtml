@@ -5,154 +5,157 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 
-<h1 style="font-size: 50px;">Cadastrar</h1>
 
-<h4>Propriedade</h4>
-<hr />
-<form asp-action="Create">
-    <div class="row">
-        <div class="col-md-3">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <!-- Grupo 1 -->
-            <div class="form-group">
-                <label asp-for="NomePropriedade" class="control-label"></label>
-                <input asp-for="NomePropriedade" class="form-control" />
-                @Html.ValidationMessageFor(model => model.NomePropriedade, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group select-with-icon">
-                <label asp-for="Bioma" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="Bioma" class="form-control">
-                        <option value="">Selecione...</option>
-                        <option value="Amazonia">Amazônia</option>
-                        <option value="Cerrado">Cerrado</option>
-                        <option value="MataAtlantica">Mata Atlântica</option>
-                        <option value="Caatinga">Caatinga</option>
-                        <option value="Pantanal">Pantanal</option>
-                        <option value="Pampas">Pampas</option>
-                    </select>
-                </div>
-                @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group select-with-icon">
-                <label asp-for="UnidadeFederativa" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="UnidadeFederativa" class="form-control" asp-items="ViewBag.UnidadesFederativas" onchange="populateCities(this.value)"></select>
-                </div>
-                @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group select-with-icon">
-                <label asp-for="Municipio" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="Municipio" class="form-control" id="citiesDropdown" disabled></select>
-                </div>
-                @Html.ValidationMessageFor(model => model.Municipio, "", new { @class = "error-message" })
-            </div>
-        </div>
-        <div class="col-md-3">
-            <!-- Grupo 2 -->
-            <div class="form-group select-with-icon">
-                <label asp-for="TipoPropriedade" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="TipoPropriedade" class="form-control">
-                        <option value="">Selecione...</option>
-                        <option value="Confinamento">Confinamento</option>
-                        <option value="PropriedadeRural">Propriedade Rural</option>
-                    </select>
-                </div>
-                @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group select-with-icon">
-                <label asp-for="CicloProducao" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="CicloProducao" class="form-control">
-                        <option value="">Selecione...</option>
-                        <option value="CRIA">CRIA</option>
-                        <option value="RECRIA">RECRIA</option>
-                        <option value="ENGORDA">ENGORDA</option>
-                        <option value="CRIARECRIA">CRIA RECRIA</option>
-                        <option value="RECRIAENGORDA">RECRIA ENGORDA</option>
-                        <option value="CICLOCOMPLETO">CICLO COMPLETO</option>
-                        <option value="NAOINFORMADO">NÃO INFORMADO</option>
-                    </select>
-                </div>
-                @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="Industria" class="control-label"></label>
-                <input asp-for="Industria" class="form-control" />
-                @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
-            </div>
-        </div>
-        <div class="col-md-3">
-            <!-- Grupo 3 -->
-            <div class="form-group">
-                <label asp-for="Latitude" class="control-label"></label>
-                <input asp-for="Latitude" class="form-control" />
-                @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
+<h4 style="font-size: 40px;">Cadastrar</h4>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Propriedade</h4>
+                <form asp-action="Create">
+                    <div class="row">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <!-- Grupo 1 -->
+                        <div class="form-group">
+                            <label asp-for="NomePropriedade" class="control-label"></label>
+                            <input asp-for="NomePropriedade" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.NomePropriedade, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="Bioma" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="Bioma" class="form-control">
+                                    <option value="">Selecione...</option>
+                                    <option value="Amazonia">Amazônia</option>
+                                    <option value="Cerrado">Cerrado</option>
+                                    <option value="MataAtlantica">Mata Atlântica</option>
+                                    <option value="Caatinga">Caatinga</option>
+                                    <option value="Pantanal">Pantanal</option>
+                                    <option value="Pampas">Pampas</option>
+                                </select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="UnidadeFederativa" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="UnidadeFederativa" class="form-control" asp-items="ViewBag.UnidadesFederativas" onchange="populateCities(this.value)"></select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="Municipio" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="Municipio" class="form-control" id="citiesDropdown" disabled></select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.Municipio, "", new { @class = "error-message" })
+                        </div>
+                        <!-- Grupo 2 -->
+                        <div class="form-group select-with-icon">
+                            <label asp-for="TipoPropriedade" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="TipoPropriedade" class="form-control">
+                                    <option value="">Selecione...</option>
+                                    <option value="Confinamento">Confinamento</option>
+                                    <option value="PropriedadeRural">Propriedade Rural</option>
+                                </select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="CicloProducao" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="CicloProducao" class="form-control">
+                                    <option value="">Selecione...</option>
+                                    <option value="CRIA">CRIA</option>
+                                    <option value="RECRIA">RECRIA</option>
+                                    <option value="ENGORDA">ENGORDA</option>
+                                    <option value="CRIARECRIA">CRIA RECRIA</option>
+                                    <option value="RECRIAENGORDA">RECRIA ENGORDA</option>
+                                    <option value="CICLOCOMPLETO">CICLO COMPLETO</option>
+                                    <option value="NAOINFORMADO">NÃO INFORMADO</option>
+                                </select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Industria" class="control-label"></label>
+                            <input asp-for="Industria" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+                        </div>
+                        <!-- Grupo 3 -->
+                        <div class="form-group">
+                            <label asp-for="Latitude" class="control-label"></label>
+                            <input asp-for="Latitude" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
 
-            </div>
-            <div class="form-group">
-                <label asp-for="Area" class="control-label"></label>
-                <input asp-for="Area" class="form-control" />
-                @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="CadastroAmbientalRural" class="control-label"></label>
-                <input asp-for="CadastroAmbientalRural" class="form-control" />
-                @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
-            </div>
-        </div>
-        <div class="col-md-3">
-            <!-- Grupo 4 -->
-            <div class="form-group">
-                <label asp-for="Longitude" class="control-label"></label>
-                <input asp-for="Longitude" class="form-control" />
-                @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group">
-                <label asp-for="AreaUtil" class="control-label"></label>
-                <input asp-for="AreaUtil" class="form-control" />
-                @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
-            </div>
-            <div class="form-group select-with-icon">
-                <label asp-for="TipoCadastroRural" class="control-label"></label>
-                <div class="select-wrapper">
-                    <select asp-for="TipoCadastroRural" class="form-control">
-                        <option value="">Selecione...</option>
-                        <option value="SicarRecibo">Sicar - Recibo</option>
-                        <option value="SicarProtocolo">Sicar/Protocolo</option>
-                        <option value="CarEstadual">Car Estadual</option>
-                        <option value="CodigoSenacsa">Código Senacsa</option>
-                        <option value="RSPP">RSPP</option>
-                        <option value="RENSPA">RENSPA</option>
-                        <option value="DICOSE">DICOSE</option>
-                    </select>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Area" class="control-label"></label>
+                            <input asp-for="Area" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CadastroAmbientalRural" class="control-label"></label>
+                            <input asp-for="CadastroAmbientalRural" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
+                        </div>
+                        <!-- Grupo 4 -->
+                        <div class="form-group">
+                            <label asp-for="Longitude" class="control-label"></label>
+                            <input asp-for="Longitude" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="AreaUtil" class="control-label"></label>
+                            <input asp-for="AreaUtil" class="form-control" />
+                            @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="TipoCadastroRural" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="TipoCadastroRural" class="form-control">
+                                    <option value="">Selecione...</option>
+                                    <option value="SicarRecibo">Sicar - Recibo</option>
+                                    <option value="SicarProtocolo">Sicar/Protocolo</option>
+                                    <option value="CarEstadual">Car Estadual</option>
+                                    <option value="CodigoSenacsa">Código Senacsa</option>
+                                    <option value="RSPP">RSPP</option>
+                                    <option value="RENSPA">RENSPA</option>
+                                    <option value="DICOSE">DICOSE</option>
+                                </select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
+                        </div>
+
+                        <div class="form-group select-with-icon">
+                            <label asp-for="ProdutorId" class="control-label"></label>
+                            <div class="select-wrapper">
+                                <select asp-for="ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                </form>
+
+                <div class="row">
+                    <div class="col-md-6 text-start">
+                        <a type="submit" href="/Propriedades/Index" class="btn btn-secondary">Voltar</a>
+                    </div>
+                    <div class="col-md-6 text-end">
+                         <button type="submit" class="btn btn-primary gradient-button">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                        </svg>
+                        Cadastrar
+                    </button>
+                    </div>
                 </div>
-                @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
             </div>
-             
-        </div>
-        <div class="form-group select-with-icon">
-            <label asp-for="ProdutorId" class="control-label"></label>
-            <div class="select-wrapper">
-                <select asp-for="ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
-            </div>
-            @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
         </div>
     </div>
-
-    <div class="form-group" style="margin-top: 40px;">
-        <a type="submit" href="/Propriedades/Index" class="btn btn-secondary">Voltar</a>
-        <button type="submit" class="btn btn-primary gradient-button">
-            <i class="bi bi-check-circle-fill"></i>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-            </svg>
-            Cadastrar
-            </button>
-    </div>
-</form>
+</div>
 
 @section Scripts {
     @{
@@ -166,7 +169,7 @@
                 data: { uf: uf },
                 dataType: "json",
 
-                success: function (data) {
+                success: function(data) {
 
                     var dropdown = $("#citiesDropdown");
                     dropdown.empty();
@@ -179,4 +182,4 @@
             });
         }
     </script>
-}
+    }
