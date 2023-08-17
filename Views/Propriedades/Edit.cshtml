@@ -30,7 +30,6 @@
                         <option value="Pantanal">Pantanal</option>
                         <option value="Pampas">Pampas</option>
                     </select>
-                    <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
                 @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
             </div>
@@ -59,7 +58,6 @@
                         <option value="Confinamento">Confinamento</option>
                         <option value="PropriedadeRural">Propriedade Rural</option>
                     </select>
-                    <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
                 @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
             </div>
@@ -76,7 +74,6 @@
                         <option value="CICLOCOMPLETO">CICLO COMPLETO</option>
                         <option value="NAOINFORMADO">NÃO INFORMADO</option>
                     </select>
-                    <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
                 @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
             </div>
@@ -140,7 +137,6 @@
                         <option value="RENSPA">RENSPA</option>
                         <option value="DICOSE">DICOSE</option>
                     </select>
-                    <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
                 </div>
                 @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
             </div>
@@ -150,7 +146,6 @@
         <label asp-for="ProdutorId" class="control-label"></label>
         <div class="select-wrapper">
             <select asp-for="ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
-            <span class="arrow-down"><i class="fas fa-chevron-down"></i></span>
         </div>
         @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
     </div>
