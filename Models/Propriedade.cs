@@ -51,7 +51,7 @@ namespace GeotecnologiaKNS.Models
         public string CadastroAmbientalRural { get; set; }
         public List<Arquivo>? Arquivos { get; set; }
       
-        [Required(ErrorMessage = "Campo obrigatório")]
+        [Required(ErrorMessage = "Campo obrigatório! Caso não tenha cadastrado um Produtor, cadastre-o na guia de 'Produtores'")]
         [Display(Name = "Produtor")]
         public int ProdutorId { get; set; }
 

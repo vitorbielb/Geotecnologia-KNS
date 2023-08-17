@@ -240,5 +240,10 @@ namespace GeotecnologiaKNS.Controllers
                     x => x.Id,
                     options => options.Placeholder = "Selecione...");
         }
+        public async Task<IActionResult> Monitoramento()
+        {
+            var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
+            return View(model);
+        }
     }
 }
