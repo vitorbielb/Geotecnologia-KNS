@@ -1,19 +1,135 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-GeotecnologiaKNS-64077687-d5ac-45bf-ab1b-14650a22b07e</UserSecretsId>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>aspnet-GeotecnologiaKNS-64077687-d5ac-45bf-ab1b-14650a22b07e</UserSecretsId>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.7" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.7" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="wwwroot\css\style.css" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Black.eot" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Black.ttf" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Black.woff" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Black.woff2" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Bold.eot" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Bold.ttf" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Bold.woff" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Bold.woff2" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Light.eot" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Light.ttf" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Light.woff" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Light.woff2" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Medium.eot" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Medium.ttf" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Medium.woff" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Medium.woff2" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Regular.eot" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Regular.ttf" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Regular.woff" />
+		<None Include="wwwroot\fonts\Roboto\Roboto-Regular.woff2" />
+		<None Include="wwwroot\images\auth\lockscreen-bg.jpg" />
+		<None Include="wwwroot\images\auth\login-bg.jpg" />
+		<None Include="wwwroot\images\auth\register-bg.jpg" />
+		<None Include="wwwroot\images\faces\face1.jpg" />
+		<None Include="wwwroot\images\faces\face10.jpg" />
+		<None Include="wwwroot\images\faces\face11.jpg" />
+		<None Include="wwwroot\images\faces\face12.jpg" />
+		<None Include="wwwroot\images\faces\face13.jpg" />
+		<None Include="wwwroot\images\faces\face14.jpg" />
+		<None Include="wwwroot\images\faces\face15.jpg" />
+		<None Include="wwwroot\images\faces\face16.jpg" />
+		<None Include="wwwroot\images\faces\face17.jpg" />
+		<None Include="wwwroot\images\faces\face18.jpg" />
+		<None Include="wwwroot\images\faces\face19.jpg" />
+		<None Include="wwwroot\images\faces\face2.jpg" />
+		<None Include="wwwroot\images\faces\face20.jpg" />
+		<None Include="wwwroot\images\faces\face21.jpg" />
+		<None Include="wwwroot\images\faces\face22.jpg" />
+		<None Include="wwwroot\images\faces\face23.jpg" />
+		<None Include="wwwroot\images\faces\face24.jpg" />
+		<None Include="wwwroot\images\faces\face25.jpg" />
+		<None Include="wwwroot\images\faces\face26.jpg" />
+		<None Include="wwwroot\images\faces\face27.jpg" />
+		<None Include="wwwroot\images\faces\face3.jpg" />
+		<None Include="wwwroot\images\faces\face4.jpg" />
+		<None Include="wwwroot\images\faces\face5.jpg" />
+		<None Include="wwwroot\images\faces\face6.jpg" />
+		<None Include="wwwroot\images\faces\face7.jpg" />
+		<None Include="wwwroot\images\faces\face8.jpg" />
+		<None Include="wwwroot\images\faces\face9.jpg" />
+		<None Include="wwwroot\images\logo-mini.svg" />
+		<None Include="wwwroot\images\logo.svg" />
+		<None Include="wwwroot\js\chart.js" />
+		<None Include="wwwroot\js\Chart.min.js" />
+		<None Include="wwwroot\js\dashboard.js" />
+		<None Include="wwwroot\js\data-table.js" />
+		<None Include="wwwroot\js\dataTables.bootstrap4.js" />
+		<None Include="wwwroot\js\documentation.js" />
+		<None Include="wwwroot\js\file-upload.js" />
+		<None Include="wwwroot\js\gulpfile.js" />
+		<None Include="wwwroot\js\hoverable-collapse.js" />
+		<None Include="wwwroot\js\jquery.cookie.js" />
+		<None Include="wwwroot\js\jquery.dataTables.js" />
+		<None Include="wwwroot\js\off-canvas.js" />
+		<None Include="wwwroot\js\tabs.js" />
+		<None Include="wwwroot\js\template.js" />
+		<None Include="wwwroot\scss\components\plugin-overrides\_data-tables.scss" />
+		<None Include="wwwroot\scss\components\_badges.scss" />
+		<None Include="wwwroot\scss\components\_bootstrap-progress.scss" />
+		<None Include="wwwroot\scss\components\_buttons.scss" />
+		<None Include="wwwroot\scss\components\_cards.scss" />
+		<None Include="wwwroot\scss\components\_checkbox-radio.scss" />
+		<None Include="wwwroot\scss\components\_dropdown.scss" />
+		<None Include="wwwroot\scss\components\_forms.scss" />
+		<None Include="wwwroot\scss\components\_icons.scss" />
+		<None Include="wwwroot\scss\components\_lists.scss" />
+		<None Include="wwwroot\scss\components\_tables.scss" />
+		<None Include="wwwroot\scss\landing-screens\_auth.scss" />
+		<None Include="wwwroot\scss\mixins\_animation.scss" />
+		<None Include="wwwroot\scss\mixins\_badges.scss" />
+		<None Include="wwwroot\scss\mixins\_blockqoute.scss" />
+		<None Include="wwwroot\scss\mixins\_buttons.scss" />
+		<None Include="wwwroot\scss\mixins\_cards.scss" />
+		<None Include="wwwroot\scss\mixins\_misc.scss" />
+		<None Include="wwwroot\scss\style.scss" />
+		<None Include="wwwroot\scss\_background.scss" />
+		<None Include="wwwroot\scss\_demo.scss" />
+		<None Include="wwwroot\scss\_fonts.scss" />
+		<None Include="wwwroot\scss\_footer.scss" />
+		<None Include="wwwroot\scss\_functions.scss" />
+		<None Include="wwwroot\scss\_layouts.scss" />
+		<None Include="wwwroot\scss\_misc.scss" />
+		<None Include="wwwroot\scss\_navbar.scss" />
+		<None Include="wwwroot\scss\_reset.scss" />
+		<None Include="wwwroot\scss\_sidebar.scss" />
+		<None Include="wwwroot\scss\_typography.scss" />
+		<None Include="wwwroot\scss\_utilities.scss" />
+		<None Include="wwwroot\scss\_variables.scss" />
+		<None Include="wwwroot\scss\_vertical-wrapper.scss" />
+		<None Include="wwwroot\vendors\base\bootstrap.min.js.map" />
+		<None Include="wwwroot\vendors\base\vendor.bundle.base.css" />
+		<None Include="wwwroot\vendors\base\vendor.bundle.base.js" />
+		<None Include="wwwroot\vendors\chart.js\Chart.min.js" />
+		<None Include="wwwroot\vendors\datatables.net-bs4\dataTables.bootstrap4.css" />
+		<None Include="wwwroot\vendors\datatables.net-bs4\dataTables.bootstrap4.js" />
+		<None Include="wwwroot\vendors\datatables.net\jquery.dataTables.js" />
+		<None Include="wwwroot\vendors\mdi\css\materialdesignicons.min.css" />
+		<None Include="wwwroot\vendors\mdi\css\materialdesignicons.min.css.map" />
+		<None Include="wwwroot\vendors\mdi\fonts\materialdesignicons-webfont.eot" />
+		<None Include="wwwroot\vendors\mdi\fonts\materialdesignicons-webfont.ttf" />
+		<None Include="wwwroot\vendors\mdi\fonts\materialdesignicons-webfont.woff" />
+		<None Include="wwwroot\vendors\mdi\fonts\materialdesignicons-webfont.woff2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.21" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.21" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.21" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.21" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.21" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.16" />
+	</ItemGroup>
 
 </Project>
