@@ -168,125 +168,38 @@
         </div>
     </div>
 </div>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Vinculos</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Situação</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Documentos</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        1
+                    </div>
+                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        2
+                    </div>
+                    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                        3
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @{
     await Html.RenderPartialAsync("_ValidationScriptsPartial");
 }
-<body>
-    <div class="conteudo-superior">
-        <div class="tabs">
-            <div class="tabs__sidebar">
-                <button class="tabs__button active" data-for-tab="1" onclick="selecionarGuia(this)">Vínculos</button>
-                <button class="tabs__button" data-for-tab="2" onclick="selecionarGuia(this)">Situação</button>
-                <button class="tabs__button" data-for-tab="3" onclick="selecionarGuia(this)">Documentos</button>
-            </div>
-            <div class="tabs__content" data-tab="1">
-                <h2>Vínculos</h2>
-                <p>Menhum Vínculo</p>
-            </div>
-            <div class="tabs__content" data-tab="2">
-                <h2>Solicitação</h2>
-                <p>Situação</p>
-            </div>
-            <div class="tabs__content" data-tab="3">
-                <form asp-action="UploadArquivos" enctype="multipart/form-data" method="post">
-                    <input type="hidden" name="propriedadeId" value="@Model.Id" />
-                    <input type="file" name="arquivos" multiple />
-                    <br />
-                    <button>Enviar Aquivo</button>
-                </form>
-
-                <div class="tabela-personalizada">
-                    <table class="table">
-                        <thead>
-                            <tr class="linha-especial">
-                                <th style="color: #0404B4">
-                                    @Html.DisplayName("Descrição do arquivo")
-                                </th>
-                                <th style="color: #0404B4"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model.Arquivos)
-                            {
-                                <tr>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Descricao)
-                                    </td>
-                                    <td style="text-align: right;">
-                                        <a class="btn btn-primary gradient-button" href="/Propriedades/Visualizar/@item.Id" target="_blank">
-                                            <i class="bi bi-eye-fill"></i>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
-                                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
-                                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-                                            </svg>
-                                            Visualizar
-                                        </a>
-                                        <button class="btn btn-primary gradient-button" onclick="confirmDelete('@item.Id')" data-file-id="@item.Id" data-propriedade-id="@Model.Id">
-                                            <i class="bi bi-trash3-fill"></i>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
-                                            </svg>
-                                            Excluir
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-            <script>
-                function selecionarGuia(botao) {
-                    const tabsContainer = document.querySelector('.tabs');
-                    const tabNumber = botao.dataset.forTab;
-                    const tabToActivate = tabsContainer.querySelector('.tabs__content[data-tab="' + tabNumber + '"]');
-
-                    const allButtons = tabsContainer.querySelectorAll('.tabs__button');
-                    allButtons.forEach((button) => {
-                        button.classList.remove('active');
-                    });
-
-                    const allTabs = tabsContainer.querySelectorAll('.tabs__content');
-                    allTabs.forEach((tab) => {
-                        tab.classList.remove('active');
-                    });
-
-                    botao.classList.add('active');
-                    tabToActivate.classList.add('active');
-                }
-            </script>
-            <script>
-                function confirmDelete(fileId) {
-                    // Obter o ID da propriedade a partir do atributo de dados
-                    const propriedadeId = document.querySelector('[data-propriedade-id]').dataset.propriedadeId;
-
-                    // Envia o formulário com o fileId para a ação do controlador
-                    const form = document.createElement("form");
-                    form.method = "post";
-                    form.action = "/Propriedades/ExcluirArquivo/" + fileId;
-
-                    // Adicione o token de antifalsificação (se aplicável)
-                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                    const inputToken = document.createElement("input");
-                    inputToken.type = "hidden";
-                    inputToken.name = "__RequestVerificationToken";
-                    inputToken.value = token;
-                    form.appendChild(inputToken);
-
-                    // Adicione o ID da propriedade como um campo oculto
-                    const inputPropriedadeId = document.createElement("input");
-                    inputPropriedadeId.type = "hidden";
-                    inputPropriedadeId.name = "propriedadeId";
-                    inputPropriedadeId.value = propriedadeId;
-                    form.appendChild(inputPropriedadeId);
-
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            </script>
-
-        </div>
-</body>
 
