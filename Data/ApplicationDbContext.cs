@@ -25,5 +25,6 @@ namespace GeotecnologiaKNS.Data
             modelBuilder.Ignore<Dictionary<Estado, List<string>>>();
             base.OnModelCreating(modelBuilder);
         }
+        public DbSet<GeotecnologiaKNS.Models.Solicitacao>? Solicitacao { get; set; }
     }
 }

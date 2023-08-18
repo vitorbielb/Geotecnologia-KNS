@@ -1,0 +1,56 @@
+﻿@model GeotecnologiaKNS.Models.Solicitacao
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Solicitacao</h4>
+                <div class="row">
+                    <div class="col-md-4">
+                        <form asp-action="Create">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <label asp-for="PropriedadeId" class="control-label"></label>
+                                <select asp-for="PropriedadeId" class="form-control" asp-items="ViewBag.PropriedadeId"></select>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Solicitante" class="control-label"></label>
+                                <input asp-for="Solicitante" class="form-control" value="@User.Identity?.Name" />
+                                <span asp-validation-for="Solicitante" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="DataSolicitacao" class="control-label"></label>
+                                <input asp-for="DataSolicitacao" class="form-control" />
+                                <span asp-validation-for="DataSolicitacao" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="Observacao" class="control-label"></label>
+                                <input asp-for="Observacao" class="form-control" />
+                                <span asp-validation-for="Observacao" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-primary" />
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+                }

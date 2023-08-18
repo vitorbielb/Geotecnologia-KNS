@@ -137,7 +137,7 @@
                             @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
                         </div>
                     </div>
-                    <div class="form-group select-with-icon">
+                    <div class="form-group select-with-icon" hidden>
                         <label asp-for="ProdutorId" class="control-label"></label>
                         <div class="select-wrapper">
                             <select asp-for="ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
