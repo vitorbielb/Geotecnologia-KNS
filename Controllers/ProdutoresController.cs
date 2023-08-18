@@ -62,6 +62,8 @@ public class ProdutoresController : Controller
     // GET: Produtores/Edit/5
     public ActionResult Edit(int id)
     {
+        ViewBag.VinculoId = id;
+
         var produtor = _produtorRepository.ObterPorId(id);
 
         if (produtor == null)

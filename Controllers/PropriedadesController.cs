@@ -73,6 +73,8 @@ namespace GeotecnologiaKNS.Controllers
         {
             FillProdutoresUnidadesFederativasViewBag();
 
+            ViewBag.VinculoId = id;
+
             if (id == null || _context.Propriedades == null)
             {
                 return NotFound();
