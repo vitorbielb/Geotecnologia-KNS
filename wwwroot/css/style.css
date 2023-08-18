@@ -24405,16 +24405,6 @@ dl {
         padding: 0;
     }
 
-        .sidebar .nav.sub-menu .nav-item::before {
-            content: '';
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            border-radius: 50%;
-            background: #000;
-            margin-top: 15px;
-        }
-
         .sidebar .nav.sub-menu .nav-item .nav-link {
             color: #656565;
             padding: 0.6rem 1rem;
