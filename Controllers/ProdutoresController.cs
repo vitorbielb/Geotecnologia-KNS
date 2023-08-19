@@ -1,6 +1,9 @@
 ﻿using GeotecnologiaKNS.Models;
 using GeotecnologiaKNS.Repositories.Interfaces;
+using GeotecnologiaKNS.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using System;
 
 namespace GeotecnologiaKNS.Controllers;
@@ -48,9 +51,11 @@ public class ProdutoresController : Controller
     }
 
     // GET: Produtores/Edit/5
-    public ActionResult Edit(int id)
+    public async Task<ActionResult> EditAsync(int id)
     {
-        var produtor = _context.Produtores.Find(id);
+        var produtor = await _context.Produtores
+                                     .Include(x => x.Documentos)
+                                     .FirstAsync(x => x.Id == id);
 
         if (produtor == null)
         {
@@ -106,11 +111,28 @@ public class ProdutoresController : Controller
     }
 
     [HttpPost, ActionName("Upload")]
-    public ActionResult Upload(int vinculoId, Arquivo arquivo)
+    public async Task<ActionResult> UploadAsync(ProdutorArquivoViewModel arquivo)
     {
-        var produtor = _context.Produtores.Find(vinculoId);
-        produtor.Documentos ??= new List<Arquivo> { arquivo };
-        return Ok();
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        ViewBag.VinculoId = arquivo.VinculoId;
+
+        //talvez por o vinculo de volta
+        var produtor = await _context.Produtores
+                                     .Include(x => x.Documentos)
+                                     .FirstAsync(x => x.Id == arquivo.VinculoId); 
+        
+        produtor.Documentos ??= new List<ProdutorArquivo>();
+
+        produtor.Documentos.Add(arquivo);
+        _context.Produtores.Update(produtor);
+
+        await _context.SaveChangesAsync();
+
+        return View("_file-upload", produtor.Documentos);
     }
 }
 

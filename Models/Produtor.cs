@@ -22,6 +22,6 @@ namespace GeotecnologiaKNS.Models
         [StringLength(100, ErrorMessage = "O nome da indústria deve ter no máximo 100 caracteres")]
         public string Industria { get; set; }
 
-        public List<Arquivo>? Documentos { get; set; }
+        public List<ProdutorArquivo>? Documentos { get; set; }
     }
 }

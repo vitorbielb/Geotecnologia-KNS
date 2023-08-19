@@ -1,3 +1,6 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configurar a conexão com o banco de dados
@@ -17,6 +20,8 @@ builder.Services.AddScoped<ISolicitacaoRepository, SolicitacaoRepository>();
 builder.Services.AddScoped<IProdutorRepository, ProdutorRepository>();
 builder.Services.AddScoped<IPropriedadeRepository, PropriedadeRepository>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
 
 var app = builder.Build();
 
