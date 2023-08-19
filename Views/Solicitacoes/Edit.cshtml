@@ -14,7 +14,7 @@
                     <input type="hidden" asp-for="Id" />
                     <div class="form-group">
                         <label asp-for="PropriedadeId" class="control-label"></label>
-                        <select asp-for="PropriedadeId" class="form-control" asp-items="ViewBag.PropriedadeId"></select>
+                        <select asp-for="PropriedadeId" class="form-control form-control-sm" asp-items="ViewBag.PropriedadeId"></select>
                         <span asp-validation-for="PropriedadeId" class="text-danger"></span>
                     </div>
                     <div class="form-group">
@@ -43,17 +43,27 @@
                         <span asp-validation-for="Observacao" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <label asp-for="Parecer" class="control-label"></label>
-                        <input asp-for="Parecer" class="form-control" />
-                        <span asp-validation-for="Parecer" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
                         <label asp-for="Status" class="control-label"></label>
-                        <select asp-for="Status" class="form-control" asp-items="ViewBag.Status"></select>
+                        <select asp-for="Status" class="form-control form-control-sm" asp-items="ViewBag.Status"></select>
                         <span asp-validation-for="Status" class="text-danger"></span>
                     </div>
                     <div class="form-group">
-                        <input type="submit" value="Save" class="btn btn-primary" />
+                        <label asp-for="Parecer" class="control-label"></label>
+                        <textarea asp-for="Parecer" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="Parecer" class="text-danger"></span>
+                    </div>
+                    <div class="form-group" style="margin-top: 40px;">
+                        <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+                    </div>
+
+                    <div style="float: right; margin-top: -40px;">
+                        <button type="submit" class="btn btn-primary gradient-button">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                            </svg>
+                            Salvar
+                        </button>
                     </div>
                 </form>
             </div>
@@ -61,12 +71,8 @@
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    }
+}

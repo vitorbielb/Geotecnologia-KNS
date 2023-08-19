@@ -1,4 +1,5 @@
 ﻿@model GeotecnologiaKNS.Models.Propriedade
+@inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
 
 <head>
     <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
@@ -23,7 +24,7 @@
                         <div class="form-group select-with-icon">
                             <label asp-for="Bioma" class="control-label"></label>
                             <div class="select-wrapper">
-                                <select asp-for="Bioma" class="form-control">
+                                <select asp-for="Bioma" class="form-control form-control-sm">
                                     <option value="">Selecione...</option>
                                     <option value="Amazonia">Amazônia</option>
                                     <option value="Cerrado">Cerrado</option>
@@ -39,7 +40,7 @@
                             <label asp-for="UnidadeFederativa" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
                                 <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
                             </svg>
-                            <select asp-for="UnidadeFederativa" class="form-control disabled-field" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)" disabled></select>
+                            <select asp-for="UnidadeFederativa" class="form-control form-control-sm disabled-field" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)" disabled></select>
                             @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
                         </div>
                         <div class="form-group">
@@ -53,7 +54,7 @@
                         <div class="form-group select-with-icon">
                             <label asp-for="TipoPropriedade" class="control-label"></label>
                             <div class="select-wrapper">
-                                <select asp-for="TipoPropriedade" class="form-control">
+                                <select asp-for="TipoPropriedade" class="form-control form-control-sm">
                                     <option value="">Selecione...</option>
                                     <option value="Confinamento">Confinamento</option>
                                     <option value="PropriedadeRural">Propriedade Rural</option>
@@ -64,7 +65,7 @@
                         <div class="form-group select-with-icon">
                             <label asp-for="CicloProducao" class="control-label"></label>
                             <div class="select-wrapper">
-                                <select asp-for="CicloProducao" class="form-control">
+                                <select asp-for="CicloProducao" class="form-control form-control-sm">
                                     <option value="">Selecione...</option>
                                     <option value="CRIA">CRIA</option>
                                     <option value="RECRIA">RECRIA</option>
@@ -123,7 +124,7 @@
                         <div class="form-group select-with-icon">
                             <label asp-for="TipoCadastroRural" class="control-label"></label>
                             <div class="select-wrapper">
-                                <select asp-for="TipoCadastroRural" class="form-control">
+                                <select asp-for="TipoCadastroRural" class="form-control form-control-sm">
                                     <option value="">Selecione...</option>
                                     <option value="SicarRecibo">Sicar - Recibo</option>
                                     <option value="SicarProtocolo">Sicar/Protocolo</option>
@@ -140,7 +141,7 @@
                     <div class="form-group select-with-icon" hidden>
                         <label asp-for="ProdutorId" class="control-label"></label>
                         <div class="select-wrapper">
-                            <select asp-for="ProdutorId" class="form-control" asp-items="ViewBag.Produtores"></select>
+                            <select asp-for="ProdutorId" class="form-control form-control-sm" asp-items="ViewBag.Produtores"></select>
                         </div>
                         @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
                     </div>
@@ -188,7 +189,7 @@
                         <partial name="_propriedadeProdutor" model="Model.Produtor"></partial>
                     </div>
                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-                        <partial name="_listaSolicitacoes"></partial>
+                        <partial name="_listaSolicitacoes" model="repository.GetSolicitacoesByPropriedade(Model.Id)"></partial>
                     </div>
                     <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
                         3

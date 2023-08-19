@@ -1,4 +1,6 @@
 ﻿@model Produtor
+@inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
+
 <head>
     <link rel="stylesheet" href="C:\Users\vitor\source\repos\GeotecnologiaKNS\wwwroot\css\site.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -93,10 +95,10 @@
                 </ul>
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                        <partial name="_listaSolicitacoes"></partial>
+                        <partial name="_listaSolicitacoes" model="repository.GetSolicitacoesByProdutor(Model.Id)"></partial>
                     </div>
                     <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-                        3
+                        <partial name="_file-upload" model="new List<Arquivo>()"></partial>
                     </div>
                 </div>
             </div>
