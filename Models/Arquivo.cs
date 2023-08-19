@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GeotecnologiaKNS.Models
 {
-    [ModelBinder(BinderType = typeof(ArquivoEntityBinder))]
     public class Arquivo
     {
         public int Id { get; set; }
@@ -12,4 +11,9 @@ namespace GeotecnologiaKNS.Models
         public byte[] Dados { get; set; }
         public string ContentType { get; set; }
     }
+  
+    public class ProdutorArquivo : Arquivo { }
+
+    public class PropriedadeArquivo : Arquivo { }
+
 }

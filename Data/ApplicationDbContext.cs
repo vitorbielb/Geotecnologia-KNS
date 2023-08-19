@@ -18,14 +18,18 @@ namespace GeotecnologiaKNS.Data
 
         public DbSet<Propriedade> Propriedades { get; set; } = default!;
         public DbSet<Produtor> Produtores { get; set; }
-        public DbSet<Arquivo> Arquivos { get; set; }
+        public DbSet<PropriedadeArquivo> PropriedadesArquivos { get; set; }
+        public DbSet<ProdutorArquivo> ProdutoresArquivos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Produtor>()
-                        .HasMany<Arquivo>();
-
             modelBuilder.Entity<Propriedade>()
-                        .HasMany<Arquivo>();
+                        .HasMany(x => x.Documentos);
+            
+            modelBuilder.Entity<Produtor>()
+                        .HasMany(x => x.Documentos);
+
+            base.OnModelCreating(modelBuilder);
         }
         public DbSet<Solicitacao>? Solicitacao { get; set; }
     }
