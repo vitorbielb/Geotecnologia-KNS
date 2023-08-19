@@ -21,10 +21,12 @@ namespace GeotecnologiaKNS.Data
         public DbSet<Arquivo> Arquivos { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Ignorar a classe que não deve ser mapeada para o banco de dados
-            modelBuilder.Ignore<Dictionary<Estado, List<string>>>();
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Produtor>()
+                        .HasMany<Arquivo>();
+
+            modelBuilder.Entity<Propriedade>()
+                        .HasMany<Arquivo>();
         }
-        public DbSet<GeotecnologiaKNS.Models.Solicitacao>? Solicitacao { get; set; }
+        public DbSet<Solicitacao>? Solicitacao { get; set; }
     }
 }

@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace GeotecnologiaKNS.Models
 {
+    [ModelBinder(BinderType = typeof(ArquivoEntityBinder))]
     public class Arquivo
     {
         public int Id { get; set; }

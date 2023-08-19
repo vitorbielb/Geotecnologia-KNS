@@ -1,5 +1,5 @@
 ﻿@using GeotecnologiaKNS.Views
-@inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
+@model IEnumerable<Solicitacao>
 
 <div class="row">
     <div class="col-lg-12 grid-margin stretch-card">
@@ -12,26 +12,26 @@
                         <thead>
                             <tr style="background-color: #FFF; color: #258cfb;">
                                 <th>
-                                    @Html.DisplayName("Propriedade")
+                                    @Html.DisplayNameFor(model => model.Propriedade)
                                 </th>
                                 <th>
-                                    @Html.DisplayName("Solicitante")
+                                    @Html.DisplayNameFor(model => model.Solicitante)
                                 </th>
                                 <th>
-                                    @Html.DisplayName("DataSolicitacao")
+                                    @Html.DisplayNameFor(model => model.DataSolicitacao)
                                 </th>
                                 <th>
-                                    @Html.DisplayName("Analista")
+                                    @Html.DisplayNameFor(model => model.Analista)
                                 </th>
                                 <th>
-                                    @Html.DisplayName("DataAnalise")    
+                                    @Html.DisplayNameFor(model => model.DataAnalise)
                                 </th>
                                 <th>
-                                    @Html.DisplayName("Status")
+                                    @Html.DisplayNameFor(model => model.Status)
                                 </th>
                             </tr>
                         </thead>
-                        @foreach (Solicitacao solicitacao in repository.GetSolicitacoesByProdutor(ViewBag.VinculoId))
+                        @foreach (var solicitacao in Model)
                         {
                             <tr class="table-row-link" @*data-url="@Url.Action("Edit", "Produtores", new { id = produtor.Id })"*@>
                                 <td>@Html.DisplayFor(x => solicitacao.Propriedade.NomePropriedade)</td>

@@ -7,31 +7,18 @@ namespace GeotecnologiaKNS.Controllers;
 
 public class ProdutoresController : Controller
 {
-    private readonly IProdutorRepository _produtorRepository;
+    private readonly ApplicationDbContext _context;
 
-    public ProdutoresController(IProdutorRepository produtorRepository)
+    public ProdutoresController(ApplicationDbContext dbcontext)
     {
-        _produtorRepository = produtorRepository;
+        _context = dbcontext;
     }
 
     // GET: Produtores
-    public ActionResult Index()
+    public async Task<ActionResult> IndexAsync()
     {
-        var produtores = _produtorRepository.ObterTodos();
+        var produtores = await _context.Produtores.ToListAsync();
         return View(produtores);
-    }
-
-    // GET: Produtores/Details/5
-    public ActionResult Details(int id)
-    {
-        var produtor = _produtorRepository.ObterPorId(id);
-
-        if (produtor == null)
-        {
-            return HttpNotFound();
-        }
-
-        return View(produtor);
     }
 
     private ActionResult HttpNotFound()
@@ -48,11 +35,12 @@ public class ProdutoresController : Controller
     // POST: Produtores/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Create(Produtor produtor)
+    public async Task<ActionResult> CreateAsync(Produtor produtor)
     {
         if (ModelState.IsValid)
         {
-            _produtorRepository.CadastrarProdutor(produtor);
+            await _context.Produtores.AddAsync(produtor);
+            await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
@@ -62,26 +50,26 @@ public class ProdutoresController : Controller
     // GET: Produtores/Edit/5
     public ActionResult Edit(int id)
     {
-        ViewBag.VinculoId = id;
-
-        var produtor = _produtorRepository.ObterPorId(id);
+        var produtor = _context.Produtores.Find(id);
 
         if (produtor == null)
         {
             return HttpNotFound();
         }
 
+        ViewBag.VinculoId = produtor.Id;
         return View(produtor);
     }
 
     // POST: Produtores/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public ActionResult Edit(Produtor produtor)
+    public async Task<ActionResult> EditAsync(Produtor produtor)
     {
         if (ModelState.IsValid)
         {
-            _produtorRepository.AtualizarProdutor(produtor);
+            _context.Produtores.Update(produtor);
+            await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
 
@@ -91,7 +79,7 @@ public class ProdutoresController : Controller
     // GET: Produtores/Delete/5
     public ActionResult Delete(int id)
     {
-        var produtor = _produtorRepository.ObterPorId(id);
+        var produtor = _context.Produtores.Find(id);
 
         if (produtor == null)
         {
@@ -104,16 +92,25 @@ public class ProdutoresController : Controller
     // POST: Produtores/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
-    public ActionResult DeleteConfirmed(int id)
+    public async Task<ActionResult> DeleteConfirmedAsync(int id)
     {
-        var produtor = _produtorRepository.ObterPorId(id);
+        var produtor = _context.Produtores.Find(id);
 
         if (produtor != null)
         {
-            _produtorRepository.RemoverProdutor(produtor);
+            _context.Produtores.Remove(produtor);
+            await _context.SaveChangesAsync();
         }
 
         return RedirectToAction("Index");
+    }
+
+    [HttpPost, ActionName("Upload")]
+    public ActionResult Upload(int vinculoId, Arquivo arquivo)
+    {
+        var produtor = _context.Produtores.Find(vinculoId);
+        produtor.Documentos ??= new List<Arquivo> { arquivo };
+        return Ok();
     }
 }
 

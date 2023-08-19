@@ -56,5 +56,7 @@ namespace GeotecnologiaKNS.Models
         public int ProdutorId { get; set; }
 
         public Produtor? Produtor { get; set; }
+
+        public List<Arquivo>? Documentos { get; set; }
     }
 }
