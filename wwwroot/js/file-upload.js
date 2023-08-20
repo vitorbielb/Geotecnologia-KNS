@@ -1,25 +1,13 @@
-(function ($) {
-    'use strict';
-    $(function () {
-        $('.file-upload-browse').on('click', function () {
-            var file = $(this).parent().parent().parent().find('.file-upload-default');
-            file.trigger('click');
-        });
-        $('.file-upload-default').on('change', function () {
-            $(this).parent().find('.form-control').val($(this).val().replace(/C:\\fakepath\\/i, ''));
-        });
-    });
-})(jQuery);
+function selectfile(el) {
+    var file = el.parent().parent().parent().find('.file-upload-default');
+    file.trigger('click');
+}
+
+function setfilename(el) {
+    el.parent().find('.form-control').val(el.val().replace(/C:\\fakepath\\/i, ''));
+}
 
 function uploadfile(vinculoId) {
-    //const fileInput = $('.file-upload-default')[0];
-    // Check if the file input element exists
-    //if (fileInput) {
-    // Check if files have been selected
-    //if (fileInput.files.length > 0) {
-    // Get the first selected file
-    //const file = fileInput.files[0];
-
     const file = $('.file-upload-default')[0].files[0];
     readFileAsByteArray(file).then(byteArray => {
         var formData = new FormData();
@@ -68,3 +56,30 @@ function readFileAsByteArray(file) {
         reader.readAsArrayBuffer(file);
     });
 }
+
+function setdeletefilemodal(el) {
+    const modal = $('#deletefileModal');
+    const file = el.parent().parent().children()[0];
+    modal.find('.modal-body').html(file.innerHTML);
+    modal.find('.btn-danger').click(function () {
+        modal.find()
+        const id = $(file).find('.hidden').val();
+        $.ajax({
+            type: 'POST',
+            url: '../DeleteFile?id=' + id,
+            success: function (response) {
+                $(document).find('.modal-backdrop').remove();
+                $('#file-upload-content').html(response);
+            }
+        });
+    });
+}
+
+//function viewFile(el) {
+//    const file = el.parent().parent().children()[0];
+//    const id = $(file).find('.hidden').val();
+//    $.ajax({
+//        type: 'POST',
+//        url: '../ViewFile?id=' + id
+//    });
+//}
