@@ -1,10 +1,4 @@
-﻿using GeotecnologiaKNS.Models;
-using GeotecnologiaKNS.Repositories.Interfaces;
-using GeotecnologiaKNS.ViewModels;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace GeotecnologiaKNS.Controllers;
 
@@ -62,7 +56,6 @@ public class ProdutoresController : Controller
             return HttpNotFound();
         }
 
-        ViewBag.VinculoId = produtor.Id;
         return View(produtor);
     }
 
@@ -118,13 +111,10 @@ public class ProdutoresController : Controller
             return ValidationProblem(ModelState);
         }
 
-        ViewBag.VinculoId = arquivo.VinculoId;
-
-        //talvez por o vinculo de volta
         var produtor = await _context.Produtores
                                      .Include(x => x.Documentos)
-                                     .FirstAsync(x => x.Id == arquivo.VinculoId); 
-        
+                                     .FirstAsync(x => x.Id == arquivo.VinculoId);
+
         produtor.Documentos ??= new List<ProdutorArquivo>();
 
         produtor.Documentos.Add(arquivo);
@@ -132,7 +122,40 @@ public class ProdutoresController : Controller
 
         await _context.SaveChangesAsync();
 
-        return View("_file-upload", produtor.Documentos);
+        return View("_file-list", produtor);
+    }
+
+    [HttpPost, ActionName("DeleteFile")]
+    public async Task<ActionResult> DeleteFileAsync(int id)
+    {
+        var arquivo = await _context.ProdutoresArquivos.FindAsync(id);
+
+        if (arquivo == null)
+        {
+            return Problem();
+        }
+
+        var produtor = await _context.Produtores
+                                     .Include(x => x.Documentos)
+                                     .FirstAsync(x => x.Documentos!.Contains(arquivo));
+
+        _context.ProdutoresArquivos.Remove(arquivo);
+        await _context.SaveChangesAsync();
+
+        return View("_file-list", produtor);
+    }
+
+    [HttpGet("ViewFile/{id}")]
+    public async Task<ActionResult> ViewFileAsync(int id)
+    {
+        var arquivo = await _context.ProdutoresArquivos.FindAsync(id);
+
+        if (arquivo == null)
+        {
+            return Problem();
+        }
+
+        return File(arquivo.Dados, arquivo.ContentType);
     }
 }
 

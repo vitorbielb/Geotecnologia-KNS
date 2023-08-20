@@ -2,11 +2,8 @@
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Produtor
+    public class Produtor : FileEntity
     {
-        [Display(Name = "ID")]
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 100 caracteres")]
@@ -21,7 +18,5 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Indústria")]
         [StringLength(100, ErrorMessage = "O nome da indústria deve ter no máximo 100 caracteres")]
         public string Industria { get; set; }
-
-        public List<ProdutorArquivo>? Documentos { get; set; }
     }
 }
