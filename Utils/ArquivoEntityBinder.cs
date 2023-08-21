@@ -2,13 +2,14 @@
 
 namespace GeotecnologiaKNS.Utils
 {
-    internal class ArquivoEntityBinder<T> : IModelBinder
-        where T : ArquivoViewModel, new()
+    internal class ArquivoEntityBinder<TViewModel, TModel> : IModelBinder
+        where TModel : Arquivo
+        where TViewModel : ArquivoViewModel<TModel>, new()
     {
         public async Task BindModelAsync(ModelBindingContext bindingContext)
         {
             var form = await bindingContext.HttpContext.Request.ReadFormAsync();
-            bindingContext.Result = ModelBindingResult.Success(new T
+            bindingContext.Result = ModelBindingResult.Success(new TViewModel
             {
                 VinculoId = int.Parse(form["vinculoId"]),
                 Descricao = form["Descricao"],

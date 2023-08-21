@@ -180,26 +180,6 @@ namespace GeotecnologiaKNS.Controllers
             return (_context.Propriedades?.Any(e => e.Id == id)).GetValueOrDefault();
 
         }
-       
-        //public IActionResult Visualizar(int id)
-        //{
-        //    var arquivosBanco = _context.Arquivos.FirstOrDefault(a => a.Id == id);
-
-        //    return File(arquivosBanco.Dados, arquivosBanco.ContentType);
-        //}
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> ExcluirArquivo(int id, int propriedadeId)
-        //{
-        //    var arquivo = await _context.Arquivos.FindAsync(id);
-        //    if (arquivo != null)
-        //    {
-        //        _context.Arquivos.Remove(arquivo);
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    // Redireciona para a view Edit com o ID da propriedade
-        //    return RedirectToAction("Edit", new { id = propriedadeId });
-        //}
 
         private void FillProdutoresUnidadesFederativasViewBag()
         {
@@ -214,6 +194,61 @@ namespace GeotecnologiaKNS.Controllers
         {
             var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
             return View(model);
+        }
+
+        [HttpPost, ActionName("Upload")]
+        public async Task<ActionResult> UploadAsync(PropriedadeArquivoViewModel arquivo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var propriedade = await _context.Propriedades
+                                            .Include(x => x.Documentos)
+                                            .FirstAsync(x => x.Id == arquivo.VinculoId);
+
+            propriedade.Documentos ??= new List<PropriedadeArquivo>();
+
+            propriedade.Documentos.Add(arquivo.Model);
+            _context.Propriedades.Update(propriedade);
+
+            await _context.SaveChangesAsync();
+
+            return View("_file-list", propriedade);
+        }
+
+        [HttpPost, ActionName("DeleteFile")]
+        public async Task<ActionResult> DeleteFileAsync(int id)
+        {
+            var arquivo = await _context.PropriedadesArquivos.FindAsync(id);
+
+            if (arquivo == null)
+            {
+                return Problem();
+            }
+
+            var produtor = await _context.Propriedades
+                                         .Include(x => x.Documentos)
+                                         .FirstAsync(x => x.Documentos!.Contains(arquivo));
+
+            _context.PropriedadesArquivos.Remove(arquivo);
+            await _context.SaveChangesAsync();
+
+            return View("_file-list", produtor);
+        }
+
+        [HttpGet("Propriedades/ViewFile/{id}")]
+        public async Task<ActionResult> ViewFileAsync(int id)
+        {
+            var arquivo = await _context.PropriedadesArquivos.FindAsync(id);
+
+            if (arquivo == null)
+            {
+                return Problem();
+            }
+
+            return File(arquivo.Dados, arquivo.ContentType);
         }
     }
 }

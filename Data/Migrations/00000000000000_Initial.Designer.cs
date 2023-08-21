@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeotecnologiaKNS.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230818132654_ChangeSolicitanteOnSolicitacao")]
-    partial class ChangeSolicitanteOnSolicitacao
+    [Migration("20230821124216_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -23,36 +23,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Arquivo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("Dados")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PropriedadeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PropriedadeId");
-
-                    b.ToTable("Arquivos");
-                });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
                 {
@@ -80,6 +50,36 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Produtores");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.ProdutorArquivo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Dados")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProdutorId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProdutorId");
+
+                    b.ToTable("ProdutoresArquivos");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Propriedade", b =>
@@ -155,6 +155,36 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.ToTable("Propriedades");
                 });
 
+            modelBuilder.Entity("GeotecnologiaKNS.Models.PropriedadeArquivo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Dados")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PropriedadeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropriedadeId");
+
+                    b.ToTable("PropriedadesArquivos");
+                });
+
             modelBuilder.Entity("GeotecnologiaKNS.Models.Solicitacao", b =>
                 {
                     b.Property<int>("Id")
@@ -176,6 +206,9 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Parecer")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("PropriedadeId")
                         .HasColumnType("int");
 
@@ -183,7 +216,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Status")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -395,11 +428,11 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Arquivo", b =>
+            modelBuilder.Entity("GeotecnologiaKNS.Models.ProdutorArquivo", b =>
                 {
-                    b.HasOne("GeotecnologiaKNS.Models.Propriedade", null)
-                        .WithMany("Arquivos")
-                        .HasForeignKey("PropriedadeId");
+                    b.HasOne("GeotecnologiaKNS.Models.Produtor", null)
+                        .WithMany("Documentos")
+                        .HasForeignKey("ProdutorId");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Propriedade", b =>
@@ -411,6 +444,13 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Produtor");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.PropriedadeArquivo", b =>
+                {
+                    b.HasOne("GeotecnologiaKNS.Models.Propriedade", null)
+                        .WithMany("Documentos")
+                        .HasForeignKey("PropriedadeId");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Solicitacao", b =>
@@ -475,9 +515,14 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
+                {
+                    b.Navigation("Documentos");
+                });
+
             modelBuilder.Entity("GeotecnologiaKNS.Models.Propriedade", b =>
                 {
-                    b.Navigation("Arquivos");
+                    b.Navigation("Documentos");
                 });
 #pragma warning restore 612, 618
         }

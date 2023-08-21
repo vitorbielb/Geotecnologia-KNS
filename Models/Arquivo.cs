@@ -1,30 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Arquivo
+    public abstract class Arquivo
     {
         public int Id { get; set; }
-        [Display(Name = "Domentos da propriedade")]
         public string Descricao { get; set; }
         public byte[] Dados { get; set; }
         public string ContentType { get; set; }
-
-        [NotMapped] 
-        public virtual int VinculoId { get; set; }
+        [NotMapped] public abstract int VinculoId { get; set; }
     }
 
     public class ProdutorArquivo : Arquivo
     {
-        public int ProdutorId { get; set; }
-        public override int VinculoId => ProdutorId;
+        [ForeignKey("Produtor")] public override int VinculoId { get; set; }
     }
 
     public class PropriedadeArquivo : Arquivo
     {
-        public int PropriedadeId { get; set; }
-        public override int VinculoId => PropriedadeId;
+        [ForeignKey("Propriedade")] public override int VinculoId { get; set; }
     }
 }

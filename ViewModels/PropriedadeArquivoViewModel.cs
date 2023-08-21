@@ -2,10 +2,10 @@
 
 namespace GeotecnologiaKNS.ViewModels
 {
-    [ModelBinder(BinderType = typeof(ArquivoEntityBinder<ProdutorArquivoViewModel, ProdutorArquivo>))]
-    public class ProdutorArquivoViewModel : ArquivoViewModel<ProdutorArquivo>
+    [ModelBinder(BinderType = typeof(ArquivoEntityBinder<PropriedadeArquivoViewModel, PropriedadeArquivo>))]
+    public class PropriedadeArquivoViewModel : ArquivoViewModel<PropriedadeArquivo>
     {
-        public override ProdutorArquivo Model => new()
+        public override PropriedadeArquivo Model => new()
         {
             VinculoId = VinculoId,
             ContentType = ContentType,
