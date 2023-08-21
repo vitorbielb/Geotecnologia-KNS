@@ -47,7 +47,9 @@ public class ProdutoresController : Controller
     // GET: Produtores/Edit/5
     public async Task<ActionResult> EditAsync(int id)
     {
+
         var produtor = await _context.Produtores
+                                     .Include(x => x.Propriedades)
                                      .Include(x => x.Documentos)
                                      .FirstAsync(x => x.Id == id);
 
