@@ -24,8 +24,8 @@ namespace GeotecnologiaKNS.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Propriedade>()
-                        .HasMany(x => x.Documentos);
-            
+                      .HasMany(x => x.Documentos);
+
             modelBuilder.Entity<Produtor>()
                         .HasMany(x => x.Documentos);
 

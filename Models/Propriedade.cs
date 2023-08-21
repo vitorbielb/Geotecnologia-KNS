@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Http;
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Propriedade
+    public class Propriedade : EntityKey
     {
-        [Display(Name = "ID")]
-        public int Id { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome propriedade")]
         [StringLength(150, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 150 caracteres")]
@@ -55,7 +53,6 @@ namespace GeotecnologiaKNS.Models
         public int ProdutorId { get; set; }
 
         public Produtor? Produtor { get; set; }
-
         public List<PropriedadeArquivo>? Documentos { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Produtor : FileEntity
+    public class Produtor : EntityKey
     {
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome")]
@@ -18,5 +18,8 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Indústria")]
         [StringLength(100, ErrorMessage = "O nome da indústria deve ter no máximo 100 caracteres")]
         public string Industria { get; set; }
+
+        public List<ProdutorArquivo>? Documentos { get; set; }
+
     }
 }

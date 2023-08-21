@@ -117,7 +117,7 @@ public class ProdutoresController : Controller
 
         produtor.Documentos ??= new List<ProdutorArquivo>();
 
-        produtor.Documentos.Add(arquivo);
+        produtor.Documentos.Add(arquivo.Model);
         _context.Produtores.Update(produtor);
 
         await _context.SaveChangesAsync();
@@ -145,7 +145,7 @@ public class ProdutoresController : Controller
         return View("_file-list", produtor);
     }
 
-    [HttpGet("ViewFile/{id}")]
+    [HttpGet("Produtores/ViewFile/{id}")]
     public async Task<ActionResult> ViewFileAsync(int id)
     {
         var arquivo = await _context.ProdutoresArquivos.FindAsync(id);
