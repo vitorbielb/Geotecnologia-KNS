@@ -47,7 +47,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Produtores");
+                    b.ToTable("Produtores", (string)null);
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.ProdutorArquivo", b =>
@@ -77,7 +77,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasIndex("ProdutorId");
 
-                    b.ToTable("ProdutoresArquivos");
+                    b.ToTable("ProdutoresArquivos", (string)null);
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Propriedade", b =>
@@ -150,7 +150,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasIndex("ProdutorId");
 
-                    b.ToTable("Propriedades");
+                    b.ToTable("Propriedades", (string)null);
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.PropriedadeArquivo", b =>
@@ -180,7 +180,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasIndex("PropriedadeId");
 
-                    b.ToTable("PropriedadesArquivos");
+                    b.ToTable("PropriedadesArquivos", (string)null);
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Solicitacao", b =>
@@ -220,7 +220,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasIndex("PropriedadeId");
 
-                    b.ToTable("Solicitacao");
+                    b.ToTable("Solicitacao", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

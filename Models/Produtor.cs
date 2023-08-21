@@ -20,6 +20,7 @@ namespace GeotecnologiaKNS.Models
         public string Industria { get; set; }
 
         public List<ProdutorArquivo>? Documentos { get; set; }
+        public List<Propriedade>? Propriedades { get; set; }
 
     }
 }
