@@ -18,5 +18,10 @@
         {
             return _context.Solicitacao.Include(x => x.Propriedade).Where(x => x.Propriedade != null && x.Propriedade.ProdutorId == produtorId);
         }
+
+        public IEnumerable<Solicitacao> GetRecentsSolicitacoes()
+        {
+            return _context.Solicitacao.Include(x => x.Propriedade).Take(10);
+        }
     }
 }
