@@ -18,7 +18,7 @@ namespace GeotecnologiaKNS.Views
         static Dictionary<Status, string> _statusDict = new()
         {
             { Status.Monitorada, "success" },
-            { Status.Solicitado, "secondary" },
+            { Status.Solicitado, "primary" },
             { Status.Bloqueado, "danger" },
             { Status.Alerta, "warning" },
         };
