@@ -21,7 +21,7 @@
 
         public IEnumerable<Solicitacao> GetRecentsSolicitacoes()
         {
-            return _context.Solicitacao.Include(x => x.Propriedade).Take(10);
+            return _context.Solicitacao.Include(x => x.Propriedade).OrderByDescending(x => x.DataSolicitacao).Take(10);
         }
     }
 }
