@@ -48,7 +48,7 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Solicitacoes/Create
         public IActionResult Create()
         {
-            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "Area");
+            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "NomePropriedade");
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace GeotecnologiaKNS.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "Area", solicitacao.PropriedadeId);
+            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "NomePropriedade", solicitacao.PropriedadeId);
             return View(solicitacao);
         }
 
@@ -88,7 +88,7 @@ namespace GeotecnologiaKNS.Controllers
             {
                 return NotFound();
             }
-            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "Area", solicitacao.PropriedadeId);
+            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "NomePropriedade", solicitacao.PropriedadeId);
             return View(solicitacao);
         }
 
@@ -124,7 +124,7 @@ namespace GeotecnologiaKNS.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "Area", solicitacao.PropriedadeId);
+            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "NomePropriedade", solicitacao.PropriedadeId);
             return View(solicitacao);
         }
 

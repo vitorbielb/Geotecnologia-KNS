@@ -25,9 +25,9 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Data da análise")]
         public DateTime? DataAnalise { get; set; }
 
-        [Required(ErrorMessage = "Campo obrigatório")]
+        
         [Display(Name = "Observação")]
-        public string Observacao { get; set; }
+        public string? Observacao { get; set; }
 
         [Display(Name = "Parecer")]
         public string? Parecer { get; set; }
