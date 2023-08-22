@@ -2,14 +2,42 @@
 @{
     ViewData["Title"] = "Home Page";
 }
+
 @inject ISolicitacaoRepository repository
 
 <div class="row">
+    <div class="col-md-12 grid-margin">
+        <div class="d-flex justify-content-between flex-wrap">
+            <div class="d-flex align-items-end flex-wrap">
+                <div class="me-md-3 me-xl-5">
+                    <h2>Bem vindo</h2>
+                    <p class="mb-md-0">Seu dashboard e analytics.</p>
+                </div>
+                <div class="d-flex">
+                    <i class="mdi mdi-home text-muted hover-cursor"></i>
+                    <p class="text-muted mb-0 hover-cursor">&nbsp;/&nbsp;Dashboard&nbsp;/&nbsp;</p>
+                    <p class="text-primary mb-0 hover-cursor">Analytics</p>
+                </div>
+            </div>
+           @* <div class="d-flex justify-content-between align-items-end flex-wrap">
+                <button type="button" class="btn btn-light bg-white btn-icon me-3 d-none d-md-block ">
+                    <i class="mdi mdi-download text-muted"></i>
+                </button>
+                <button type="button" class="btn btn-light bg-white btn-icon me-3 mt-2 mt-xl-0">
+                    <i class="mdi mdi-clock-outline text-muted"></i>
+                </button>
+                <button type="button" class="btn btn-light bg-white btn-icon me-3 mt-2 mt-xl-0">
+                    <i class="mdi mdi-plus text-muted"></i>
+                </button>
+                <button class="btn btn-primary mt-2 mt-xl-0">Generate report</button>
+            </div>*@
+        </div>
+    </div>
+</div>
+<div class="row">
     <div class="col-lg-6 grid-margin stretch-card">
         <div class="card">
-            <div class="card-body">
-                <partial name="_map"></partial>
-            </div>
+            <partial name="_map"></partial>
         </div>
     </div>
     <div class="col-lg-6 grid-margin stretch-card">
@@ -28,19 +56,17 @@
         <div class="card">
             <div class="card-body">
                 <p class="card-title">Solicitações Recentes</p>
-                <div class="table-responsive">
+                <div class="table">
                     <div id="recent-purchases-listing_wrapper" class="dataTables_wrapper container-fluid dt-bootstrap4 no-footer">
-                        <div class="row"><div class="col-sm-12 col-md-6"></div><div class="col-sm-12 col-md-6"></div></div><div class="row">
+                        <div class="row">
                             <div class="col-sm-12">
                                 <table id="recent-purchases-listing" class="table dataTable no-footer" role="grid">
                                     <thead>
                                         <tr role="row">
-                                            <th class="sorting_asc" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" style="width: 239.967px;" aria-label="Propriedade: clique para ordenar descendente">Propriedade</th>
-                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" style="width: 305.25px;" aria-label="Solicitante: clique para ordenar descendente">Solicitante</th>
-                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" style="width: 220.833px;" aria-label="Data da Solicitação: clique para ordenar descendente">Data da Solicitação</th>
-                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" style="width: 116.4px;" aria-label="Analista: clique para ordenar descendente">Analista</th>
-                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" style="width: 167.1px;" aria-label="Data da Análise: clique para ordenar descendente">Data da Análise</th>
-                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" style="width: 241.183px;" aria-label="Status: clique para ordenar descendente">Status</th>
+                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" aria-label="Propriedade: clique para ordenar descendente">Propriedade</th>
+                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" aria-label="Data da Solicitação: clique para ordenar descendente">Data da Solicitação</th>
+                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" aria-label="Data da Análise: clique para ordenar descendente">Data da Análise</th>
+                                            <th class="sorting" tabindex="0" aria-controls="recent-purchases-listing" rowspan="1" colspan="1" aria-label="Status: clique para ordenar descendente">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -48,9 +74,7 @@
                                         {
                                             <tr role="row" class="odd">
                                                 <td>@Html.DisplayFor(x => item.Propriedade.NomePropriedade)</td>
-                                                <td>@Html.DisplayFor(x => item.Solicitante)</td>
                                                 <td>@Html.DisplayFor(x => item.DataSolicitacao)</td>
-                                                <td>@Html.DisplayFor(x => item.Analista)</td>
                                                 <td>@Html.DisplayFor(x => item.DataAnalise)</td>
                                                 <td>@Html.DisplayStatusFor(x => item.Status)</td>
                                             </tr>
