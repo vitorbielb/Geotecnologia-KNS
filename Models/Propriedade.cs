@@ -1,10 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Http;
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Propriedade : EntityKey
+    public class Propriedade : IIndustriaInfo, IPrimaryKeyInfo<int>
     {
+        public int Id { get; set; }
+
+        [ForeignKey(nameof(Industria))]
+        public int TenantId { get; set; }
+        public Industria Industria { get; }
+
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome propriedade")]
         [StringLength(150, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 150 caracteres")]
@@ -34,13 +41,10 @@ namespace GeotecnologiaKNS.Models
         public string Bioma { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Unidade Federativa")]
-        public Estado UnidadeFederativa { get; set; }
+        public Estados UnidadeFederativa { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Município")]
         public string Municipio { get; set; }
-        [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Indústria")]
-        public string Industria { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Tipo de cadastro rural")]
         public string TipoCadastroRural { get; set; }

@@ -1,6 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 
 <nav class="navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
     <div class="navbar-brand-wrapper d-flex justify-content-center">
@@ -69,8 +68,8 @@
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
-                        <img src="~/images/faces/face5.jpg" alt="profile" />
-                        <span class="nav-profile-name">@User.Identity?.Name</span>
+                        <img src="@User.Identity!.Logo()" alt="profile" />
+                        <span class="nav-profile-name">@User.Identity!.Name</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
                         @*<a class="dropdown-item">

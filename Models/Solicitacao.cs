@@ -1,10 +1,16 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Solicitacao
+    public class Solicitacao : IIndustriaInfo, IPrimaryKeyInfo<int>
     {
         public int Id { get; set; }
+
+
+        [ForeignKey(nameof(Industria))]
+        public int TenantId { get; set; }
+        public Industria Industria { get; }
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Propriedade")]

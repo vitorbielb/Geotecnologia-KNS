@@ -7,12 +7,12 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+            <a class="nav-link" data-bs-toggle="collapse" href="#ui-monitoramento" aria-expanded="false" aria-controls="ui-monitoramento">
                 <i class="mdi mdi-monitor menu-icon"></i>
                 <span class="menu-title">Monitoramento</span>
                 <i class="menu-arrow"></i>
             </a>
-            <div class="collapse" id="ui-basic">
+            <div class="collapse" id="ui-monitoramento">
                 <ul class="nav flex-column sub-menu">
 
                     <li class="nav-item">
@@ -42,5 +42,49 @@
                 </ul>
             </div>
         </li>
+        @if (User.Identity != null && 
+            (User.Identity.HasEnabled("tenant_read") || 
+             User.Identity.HasEnabled("usuario_read")))
+        {
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+                    <i class="mdi mdi-buffer menu-icon"></i>
+                    <span class="menu-title">Painel Administrador</span>
+                    <i class="menu-arrow"></i>
+                </a>
+                <div class="collapse" id="ui-basic">
+                    @if (User.Identity.HasEnabled("tenant_read"))
+                    {
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Index", "Industrias")">
+                                    <i class="menu-icon mdi mdi-domain"></i>
+                                    Industrias
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                    @if (User.Identity.HasEnabled("usuario_read"))
+                    {
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Index", "Solicitacoes")">
+                                    <i class="menu-icon mdi mdi-account "></i>
+                                    Usuarios
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Index", "Permissions")">
+                                    <i class="menu-icon mdi mdi-security"></i>
+                                    Permissões
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </li>
+        }
     </ul>
 </nav>

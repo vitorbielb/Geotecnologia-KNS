@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GeotecnologiaKNS.Controllers
 {
+    [Authorize]
     public class PropriedadesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -16,7 +18,7 @@ namespace GeotecnologiaKNS.Controllers
         {
             var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
             return View(model);
-                        
+
         }
 
         // GET: Propriedades/Details/5
@@ -62,7 +64,7 @@ namespace GeotecnologiaKNS.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            
+
             FillProdutoresUnidadesFederativasViewBag();
             return View(propriedade);
         }
@@ -169,7 +171,7 @@ namespace GeotecnologiaKNS.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public ActionResult GetCitiesByUF(Estado uf)
+        public ActionResult GetCitiesByUF(Estados uf)
         {
             return Json(UnidadesFederativasExtension.GetCities(uf));
         }

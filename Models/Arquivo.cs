@@ -2,7 +2,7 @@
 
 namespace GeotecnologiaKNS.Models
 {
-    public abstract class Arquivo
+    public abstract class Arquivo : IPrimaryKeyInfo<int>
     {
         public int Id { get; set; }
         public string Descricao { get; set; }

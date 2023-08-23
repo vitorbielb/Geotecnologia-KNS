@@ -3,9 +3,18 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>aspnet-GeotecnologiaKNS-64077687-d5ac-45bf-ab1b-14650a22b07e</UserSecretsId>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Remove="permissions.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="permissions.json" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="wwwroot\css\style.css" />
@@ -137,6 +146,7 @@
 
 	<ItemGroup>
 	  <Folder Include="Data\Migrations\" />
+	  <Folder Include="wwwroot\images\industrias\" />
 	</ItemGroup>
 
 </Project>

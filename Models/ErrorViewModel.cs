@@ -1,4 +1,4 @@
-namespace GeotecnologiaKNS.ViewModels
+namespace GeotecnologiaKNS.Models
 {
     public class ErrorViewModel
     {

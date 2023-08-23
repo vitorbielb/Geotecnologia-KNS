@@ -1,4 +1,4 @@
-﻿namespace GeotecnologiaKNS.ViewModels
+﻿namespace GeotecnologiaKNS.Models
 {
     public abstract class ArquivoViewModel<TModel> : Arquivo
     {
