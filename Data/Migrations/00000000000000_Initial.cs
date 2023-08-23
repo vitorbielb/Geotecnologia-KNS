@@ -328,6 +328,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                 name: "IX_Solicitacao_PropriedadeId",
                 table: "Solicitacao",
                 column: "PropriedadeId");
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

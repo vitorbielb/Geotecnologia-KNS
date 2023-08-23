@@ -4,6 +4,5 @@ global using GeotecnologiaKNS.Repositories;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.EntityFrameworkCore;
 global using GeotecnologiaKNS.Models;
-global using GeotecnologiaKNS.ViewModels;
 global using GeotecnologiaKNS;
 global using GeotecnologiaKNS.Utils;

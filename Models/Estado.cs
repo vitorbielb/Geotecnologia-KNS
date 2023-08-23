@@ -6,7 +6,8 @@ namespace GeotecnologiaKNS.Models
 {
     using static Propriedade;
 
-    public enum Estado
+    public enum Estados
+
     {
         [Display(Name = "Acre")]
         AC,
@@ -97,7 +98,7 @@ namespace GeotecnologiaKNS.Models
             List<SelectListItem> selectListItems = new List<SelectListItem> { new SelectListItem("Selecione...", null, true) };
 
             selectListItems
-                .AddRange(typeof(Estado)
+                .AddRange(typeof(Estados)
                 .GetFields()
                 .Select(GetUnidadeFederativaSelectListItem)
                 .Where(x => !string.IsNullOrWhiteSpace(x.Text) && !string.IsNullOrWhiteSpace(x.Value)));
@@ -105,7 +106,7 @@ namespace GeotecnologiaKNS.Models
             return selectListItems;
         }
 
-        public static IEnumerable<SelectListItem> GetCities(this Estado unidadesFederativa)
+        public static IEnumerable<SelectListItem> GetCities(this Estados unidadesFederativa)
         {
             return Global.Municipios[unidadesFederativa]
                 .Select(GetMunicipioSelectListItem)

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace GeotecnologiaKNS.ViewModels
+namespace GeotecnologiaKNS.Models
 {
     [ModelBinder(BinderType = typeof(ArquivoEntityBinder<ProdutorArquivoViewModel, ProdutorArquivo>))]
     public class ProdutorArquivoViewModel : ArquivoViewModel<ProdutorArquivo>

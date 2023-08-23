@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using GeotecnologiaKNS.Data;
 using GeotecnologiaKNS.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GeotecnologiaKNS.Controllers
 {
+    [Authorize]
     public class SolicitacoesController : Controller
     {
         private readonly ApplicationDbContext _context;
