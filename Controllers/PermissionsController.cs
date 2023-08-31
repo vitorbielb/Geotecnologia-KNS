@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PermissionsModel = GeotecnologiaKNS.Models.PermissionsModel;
 
 namespace GeotecnologiaKNS.Controllers
 {
@@ -19,7 +20,7 @@ namespace GeotecnologiaKNS.Controllers
 
             int tenantId = User.Identity.TenantId();
             var industrias = await GetIndustriasAsync(tenantId);
-            Permissions model = new(industrias);
+            PermissionsModel model = new(industrias);
             return View(model);
         }
 

@@ -1,3 +1,4 @@
+using GeotecnologiaKNS.Infra;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -95,21 +96,15 @@ namespace GeotecnologiaKNS.Areas.Identity.Pages.Account
             var user = CreateUser();
             _context.Users.Add(user);
 
-            SetPasswordHash(user);
+            var hashedPassword = _passwordHasher.HashPassword(user, Input.Password);
+            user.SecurityStamp = Guid.NewGuid().ToString();
+            user.PasswordHash = hashedPassword;
 
             _context.SaveChanges();
 
-            await _userManager.AddToRoleAsync(user, Global.Roles.ApplicationAdmin);
+            await _userManager.AddToRoleAsync(user, PermissionsByRole.ApplicationAdminRoleName);
 
             return RedirectToPage("./Login");
-        }
-
-        private void SetPasswordHash(ApplicationUser user)
-        {
-            var hashedPassword = _passwordHasher.HashPassword(user, Input.Password);
-
-            user.SecurityStamp = Guid.NewGuid().ToString();
-            user.PasswordHash = hashedPassword;
         }
 
         private ApplicationUser CreateUser()

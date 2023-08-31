@@ -4,15 +4,15 @@ using System.Security.Claims;
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Permissions
+    public class PermissionsModel
     {
         private readonly IEnumerable<Industria> _industrias = default!;
 
-        public Permissions()
+        public PermissionsModel()
         {
         }
 
-        public Permissions(IEnumerable<Industria> industrias)
+        public PermissionsModel(IEnumerable<Industria> industrias)
         {
             _industrias = industrias;
         }

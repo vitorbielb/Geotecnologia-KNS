@@ -9,14 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Remove="permissions.json" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <EmbeddedResource Include="permissions.json" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Include="wwwroot\css\style.css" />
 		<None Include="wwwroot\fonts\Roboto\Roboto-Black.eot" />
 		<None Include="wwwroot\fonts\Roboto\Roboto-Black.ttf" />

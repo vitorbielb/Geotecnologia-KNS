@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Security.Principal;
 
@@ -60,7 +58,7 @@ public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationU
             user.TenantId));
 }
 
-public static class AppClaimsPrincipalFactoryExtensions
+public static class AppClaimsPrincipalExt
 {
     public static string Industria(this IIdentity identity)
     {
@@ -77,14 +75,14 @@ public static class AppClaimsPrincipalFactoryExtensions
     public static bool IsApplicationAdmin(this IIdentity identity)
     {
         var claim = ((ClaimsIdentity)identity).FindFirst(ClaimTypes.Role);
-        return claim!.Value == Global.Roles.ApplicationAdmin;
+        return claim!.Value == PermissionsByRole.ApplicationAdminRoleName;
     }
 
 
     public static bool IsTenantAdmin(this IIdentity identity)
     {
         var claim = ((ClaimsIdentity)identity).FindFirst(ClaimTypes.Role);
-        return claim!.Value == Global.Roles.TenantAdmin;
+        return claim!.Value == PermissionsByRole.TenantAdminRoleName;
     }
 
 
@@ -107,9 +105,41 @@ public static class AppClaimsPrincipalFactoryExtensions
         return string.Empty;
     }
 
-    public static bool HasEnabled(this IIdentity identity, string feature)
+    public static bool HasEnabled<T>(this IIdentity identity, Expression<Func<T, object>>? operation = null)
+        where T : IFeature, new()
     {
-        var claim = ((ClaimsIdentity)identity).FindFirst(feature);
-        return claim?.Value == "enabled";
+        if (operation == null)
+        {
+            return ((ClaimsIdentity)identity).Claims
+                                             .Where(c => c.Type.StartsWith(new T().FeatureName))
+                                             .All(c => c.Value == Global.Enabled);
+        }
+
+        var operationName = OperationAcessor.GetName(operation);
+
+        return ((ClaimsIdentity)identity).Claims
+                                         .Where(c => c.Type.StartsWith(new T().FeatureName) && c.Type.EndsWith(operationName))
+                                         .All(c => c.Value == Global.Enabled);
+    }
+}
+
+class OperationAcessor : ExpressionVisitor
+{
+    private string? _operationName;
+
+    public static string GetName(Expression operation)
+    {
+        return new OperationAcessor(operation)._operationName!;
+    }
+
+    private OperationAcessor(Expression operation)
+    {
+        Visit(operation);
+    }
+
+    protected override Expression VisitMember(MemberExpression node)
+    {
+        _operationName = node.Member.Name;
+        return node;
     }
 }

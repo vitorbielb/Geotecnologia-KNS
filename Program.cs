@@ -31,10 +31,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("tenant_create", builder => builder.RequireClaim("tenant_create", "enabled"));
-    options.AddPolicy("tenant_read", builder => builder.RequireClaim("tenant_read", "enabled"));
-    options.AddPolicy("tenant_update", builder => builder.RequireClaim("tenant_update", "enabled"));
-    options.AddPolicy("tenant_delete", builder => builder.RequireClaim("tenant_delete", "enabled"));
 });
 
 builder.Services.AddScoped<ISolicitacaoRepository, SolicitacaoRepository>();

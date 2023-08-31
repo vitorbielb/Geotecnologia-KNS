@@ -21,7 +21,7 @@ namespace GeotecnologiaKNS.Areas.Identity.Pages.Account
 
         }
 
-        public async Task<IActionResult> OnGetAsync()
+        public IActionResult OnGet()
         {
             if (_context.Industrias.Any())
             {

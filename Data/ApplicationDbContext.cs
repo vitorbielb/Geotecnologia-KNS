@@ -1,26 +1,25 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections;
-using System.Diagnostics;
-using System.Reflection;
-using System.Security.Claims;
+#pragma warning disable CS8618
 
 namespace GeotecnologiaKNS.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-       : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IServiceProvider services)
+            : base(options)
         {
+            foreach (IEntityHandler handler in services.GetServices<IEntityHandler>())
+            {
+                //SavedChanges += handler.Handle;
+            }
         }
 
-        public DbSet<Industria> Industrias { get; set; } = default!;
-        public DbSet<Propriedade> Propriedades { get; set; } = default!;
-        public DbSet<Produtor> Produtores { get; set; } = default!;
-        public DbSet<PropriedadeArquivo> PropriedadesArquivos { get; set; } = default!;
-        public DbSet<ProdutorArquivo> ProdutoresArquivos { get; set; } = default!;
-        public DbSet<Solicitacao>? Solicitacao { get; set; } = default!;
+        public DbSet<Industria> Industrias { get; set; }
+        public DbSet<Propriedade> Propriedades { get; set; }
+        public DbSet<Produtor> Produtores { get; set; }
+        public DbSet<PropriedadeArquivo> PropriedadesArquivos { get; set; }
+        public DbSet<ProdutorArquivo> ProdutoresArquivos { get; set; }
+        public DbSet<Solicitacao>? Solicitacao { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,7 +30,7 @@ namespace GeotecnologiaKNS.Data
                 .HasOne(e => e.Industria)
                 .WithMany(c => c.Propriedades)
                 .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Produtor>()
                 .HasMany(x => x.Documentos);
@@ -40,19 +39,19 @@ namespace GeotecnologiaKNS.Data
                 .HasOne(e => e.Industria)
                 .WithMany(c => c.Produtores)
                 .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Solicitacao>()
                 .HasOne(e => e.Industria)
                 .WithMany(c => c.Solicitacoes)
                 .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApplicationUser>()
                 .HasOne(e => e.Industria)
                 .WithMany(c => c.Usuarios)
                 .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent cascading delete
+                .OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
         }
