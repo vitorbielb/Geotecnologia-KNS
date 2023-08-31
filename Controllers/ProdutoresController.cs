@@ -34,7 +34,7 @@ public class ProdutoresController : Controller
     // POST: Produtores/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> CreateAsync(Produtor produtor)
+    public async Task<ActionResult> CreateAsync(Models.Produtor produtor)
     {
         if (ModelState.IsValid)
         {
@@ -66,7 +66,7 @@ public class ProdutoresController : Controller
     // POST: Produtores/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> EditAsync(Produtor produtor)
+    public async Task<ActionResult> EditAsync(Models.Produtor produtor)
     {
         if (ModelState.IsValid)
         {

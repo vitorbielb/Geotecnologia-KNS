@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using GeotecnologiaKNS.Infra;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeotecnologiaKNS.Controllers
 {
-    [Authorize(Roles = Global.Roles.ApplicationAdmin)]
+    [Authorize(Roles = PermissionsByRole.ApplicationAdminRoleName)]
     public class IndustriasController : Controller
     {
         private readonly ApplicationDbContext _context;

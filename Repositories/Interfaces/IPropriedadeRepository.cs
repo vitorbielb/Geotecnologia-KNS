@@ -5,12 +5,12 @@ namespace GeotecnologiaKNS.Repositories.Interfaces
 {
     public interface IPropriedadeRepository
     {
-        IEnumerable<Propriedade> ObterTodasPropriedades();
-        Propriedade ObterPropriedadePorId(int id);
-        void CadastrarPropriedade(Propriedade propriedade);
-        void AtualizarPropriedade(Propriedade propriedade);
-        void RemoverPropriedade(Propriedade propriedade);
-        void Save(Propriedade propriedade);
+        IEnumerable<Models.Propriedade> ObterTodasPropriedades();
+        Models.Propriedade ObterPropriedadePorId(int id);
+        void CadastrarPropriedade(Models.Propriedade propriedade);
+        void AtualizarPropriedade(Models.Propriedade propriedade);
+        void RemoverPropriedade(Models.Propriedade propriedade);
+        void Save(Models.Propriedade propriedade);
     }
 }
 

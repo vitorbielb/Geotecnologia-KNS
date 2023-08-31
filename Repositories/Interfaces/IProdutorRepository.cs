@@ -4,11 +4,11 @@ namespace GeotecnologiaKNS.Repositories.Interfaces
 {
     public interface IProdutorRepository
     {
-        IEnumerable<Produtor> ObterTodos();
-        Produtor ObterPorId(int id);
-        void CadastrarProdutor(Produtor produtor);
-        void AtualizarProdutor(Produtor produtor);
-        void RemoverProdutor(Produtor produtor);
+        IEnumerable<Models.Produtor> ObterTodos();
+        Models.Produtor ObterPorId(int id);
+        void CadastrarProdutor(Models.Produtor produtor);
+        void AtualizarProdutor(Models.Produtor produtor);
+        void RemoverProdutor(Models.Produtor produtor);
         
     }
 }
