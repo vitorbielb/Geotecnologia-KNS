@@ -44,6 +44,7 @@
         </li>
         @if (User.Identity != null && 
             (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read) || 
+             User.Identity.HasEnabled<Features.Role>(operation => operation.Read) || 
              User.Identity.HasEnabled<Features.User>(operation => operation.Read)))
         {
             <li class="nav-item">
@@ -64,6 +65,17 @@
                             </li>
                         </ul>
                     }
+                    @if (User.Identity.HasEnabled<Features.Role>(operation => operation.Read))
+                    {
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Index", "Roles")">
+                                    <i class="menu-icon mdi mdi-security-network"></i>
+                                    Funções
+                                </a>
+                            </li>
+                        </ul>
+                    }
                     @if (User.Identity.HasEnabled<Features.User>(operation => operation.Read))
                     {
                         <ul class="nav flex-column sub-menu">
@@ -71,14 +83,6 @@
                                 <a class="nav-link" href="@Url.Action("Index", "Solicitacoes")">
                                     <i class="menu-icon mdi mdi-account "></i>
                                     Usuarios
-                                </a>
-                            </li>
-                        </ul>
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item">
-                                <a class="nav-link" href="@Url.Action("Index", "Permissions")">
-                                    <i class="menu-icon mdi mdi-security"></i>
-                                    Permissões
                                 </a>
                             </li>
                         </ul>

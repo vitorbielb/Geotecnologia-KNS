@@ -1,10 +1,9 @@
-﻿using GeotecnologiaKNS.Infra;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeotecnologiaKNS.Controllers
 {
-    [Authorize(Roles = PermissionsByRole.ApplicationAdminRoleName)]
+    [Authorize(Roles = nameof(Roles.ApplicationAdmin))]
     public class IndustriasController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -15,7 +14,6 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias
-        [Authorize(Policy = "tenant_read")]
         public async Task<IActionResult> Index()
         {
               return _context.Industrias != null ? 
@@ -24,7 +22,6 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias/Details/5
-        [Authorize(Policy = "tenant_read")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Industrias == null)
@@ -43,7 +40,6 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias/Create
-        [Authorize(Policy = "tenant_create")]
         public IActionResult Create()
         {
             return View();
@@ -53,7 +49,6 @@ namespace GeotecnologiaKNS.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [Authorize(Policy = "tenant_create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("TenantId,Imagem,Nome,NomeResumido,RazaoSocial,Cnpj")] Industria industria)
         {
@@ -67,7 +62,6 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias/Edit/5
-        [Authorize(Policy = "tenant_update")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Industrias == null)
@@ -87,7 +81,6 @@ namespace GeotecnologiaKNS.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [Authorize(Policy = "tenant_update")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("TenantId,Imagem,Nome,NomeResumido,RazaoSocial,Cnpj")] Industria industria)
         {
@@ -120,7 +113,6 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias/Delete/5
-        [Authorize(Policy = "tenant_delete")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Industrias == null)
@@ -140,7 +132,6 @@ namespace GeotecnologiaKNS.Controllers
 
         // POST: Industrias/Delete/5
         [HttpPost, ActionName("Delete")]
-        [Authorize(Policy = "tenant_delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
