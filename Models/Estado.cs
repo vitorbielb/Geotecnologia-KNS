@@ -108,7 +108,7 @@ namespace GeotecnologiaKNS.Models
 
         public static IEnumerable<SelectListItem> GetCities(this Estados unidadesFederativa)
         {
-            return Global.Municipios[unidadesFederativa]
+            return Regionalizacao.Municipios[unidadesFederativa]
                 .Select(GetMunicipioSelectListItem)
                 .Append(new SelectListItem("Selecione...", null, true));
         }

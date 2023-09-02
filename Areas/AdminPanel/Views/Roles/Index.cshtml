@@ -1,4 +1,4 @@
-﻿@model IEnumerable<GeotecnologiaKNS.Models.Propriedade>
+﻿@model IEnumerable<ApplicationRole>
 
 <div class="row">
     <div class="col-lg-12 grid-margin stretch-card">
@@ -12,51 +12,17 @@
                         <thead>
                             <tr style="background-color: #FFF; color: #258cfb;">
                                 <th>
-                                    @Html.DisplayNameFor(model => model.Id)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.NomePropriedade)
-                                </th>
-                                <th>
-
-                                    @Html.DisplayNameFor(model => model.UnidadeFederativa)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.Municipio)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.Industria)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
+                                    @Html.Display("Role")
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
-
                             @foreach (var item in Model)
                             {
-                                <tr class="table-row-link" data-url="@Url.Action("Edit", "Propriedades", new { id = item.Id })">
+                                <tr class="table-row-link" data-url="@Url.Action("Edit", "Roles", new { id = item.Id })">
                                     <td>@Html.DisplayFor(modelItem => item.Id)</td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.NomePropriedade)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.UnidadeFederativa)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Municipio)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.Industria)
-                                    </td>
-                                    <td>
-                                        @Html.DisplayFor(modelItem => item.CadastroAmbientalRural)
-                                    </td>
-
                                 </tr>
                             }
-
                         </tbody>
                     </table>
                 </div>
@@ -75,6 +41,7 @@
         Novo cadastro
     </button>
 </div>
+
 <script>
     // Adiciona um evento de clique em todas as linhas da tabela com a classe "table-row-link"
     const rows = document.querySelectorAll('.table-row-link');

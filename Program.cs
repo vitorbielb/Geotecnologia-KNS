@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,7 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>()
                 .AddUserManager<UserManager<ApplicationUser>>()
-                .AddRoles<IdentityRole>()
+                .AddRoles<ApplicationRole>()
                 .AddClaimsPrincipalFactory<AppClaimsPrincipalFactory>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -31,6 +32,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAuthorization(options =>
 {
+    options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 });
 
 builder.Services.AddScoped<ISolicitacaoRepository, SolicitacaoRepository>();
@@ -39,10 +41,10 @@ builder.Services.AddScoped<IPropriedadeRepository, PropriedadeRepository>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
+builder.Services.AddAdminPanel();
 builder.Services.AddScoped<ImageLoader>();
 var app = builder.Build();
 
-// Configurar o pipeline de solicitação HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -53,9 +55,8 @@ else
     app.UseHsts();
 }
 
-//Atualiza as migrations automaticamente.
 await app.UpdateDatabaseAsync();
-await app.SeedUserRolesClaimsAsync();
+await app.SeedRoleClaimsAsync();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

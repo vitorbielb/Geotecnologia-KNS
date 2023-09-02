@@ -1,0 +1,53 @@
+﻿@{
+    Layout = null;
+}
+
+@model List<IdentityRoleClaim<string>>
+
+<div class="table-responsive pt-3">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>
+                    Funcionalidade
+                </th>
+                <th>
+                    Habilitado
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(model => Model[i].ClaimType)
+                    </td>
+                    <td>
+                        <div class="form-check">
+                            <label class="form-check-label">
+                                <input name="Claims[@i].Id" type="hidden" value="@Model[i].Id">
+                                <input name="Claims[@i].RoleId" type="hidden" value="@Model[i].RoleId">
+                                <input name="Claims[@i].ClaimType" type="hidden" value="@Model[i].ClaimType">
+                                <input name="Claims[@i].ClaimValue" type="hidden" value="@Model[i].ClaimValue">
+
+                                @if (Model[i].ClaimValue == Enabled)
+                                {
+                                    <input type="checkbox" class="form-check-input" checked onclick="switchCheckBoxValue($(this))">
+                                }
+                                else
+                                {
+                                    <input type="checkbox" class="form-check-input" onclick="switchCheckBoxValue($(this))">
+                                }
+
+                                <i class="input-helper"></i>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script src="~/js/shared/_claimsEdit.js"></script>

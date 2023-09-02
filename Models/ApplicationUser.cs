@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Claims;
 
 namespace GeotecnologiaKNS.Models
@@ -10,5 +11,7 @@ namespace GeotecnologiaKNS.Models
         public int TenantId { get; set; }
 
         public Industria Industria { get; set; }
+
+        public List<IdentityUserClaim<string>> Claims { get; set; }
     }
 }

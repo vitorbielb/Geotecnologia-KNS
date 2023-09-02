@@ -51,9 +51,21 @@ public partial class Features
 
         public string FeatureName => nameof(Solicitacoes);
     }
+
+    public class Role : IFeature
+    {
+        public bool Create { get; set; }
+        public bool Read { get; set; }
+        public bool Update { get; set; }
+        public bool Delete { get; set; }
+
+        public string FeatureName => nameof(Roles);
+    }
 }
 
 public interface IFeature
 {
     public string FeatureName { get; }
 }
+
+public class NonFeatureAttribute : Attribute { }

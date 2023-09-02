@@ -3,15 +3,19 @@
 
 namespace GeotecnologiaKNS.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext
+        < ApplicationUser
+        , ApplicationRole
+        , string
+        , IdentityUserClaim<string>
+        , IdentityUserRole<string>
+        , IdentityUserLogin<string>
+        , IdentityRoleClaim<string>
+        , IdentityUserToken<string>>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IServiceProvider services)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            foreach (IEntityHandler handler in services.GetServices<IEntityHandler>())
-            {
-                //SavedChanges += handler.Handle;
-            }
         }
 
         public DbSet<Industria> Industrias { get; set; }
@@ -23,6 +27,8 @@ namespace GeotecnologiaKNS.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Propriedade>()
                 .HasMany(x => x.Documentos);
 
@@ -53,7 +59,17 @@ namespace GeotecnologiaKNS.Data
                 .HasForeignKey(e => e.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<ApplicationRole>()
+                .HasMany(x => x.Claims)
+                .WithOne()
+                .HasForeignKey(e => e.RoleId)
+                .HasConstraintName("RoleId");
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(x => x.Claims)
+                .WithOne()
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("UserId");
         }
     }
 }
