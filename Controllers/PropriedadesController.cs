@@ -54,7 +54,8 @@ namespace GeotecnologiaKNS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Models.Propriedade propriedade)
+        [TenantFilter]
+        public async Task<IActionResult> Create(Propriedade propriedade)
         {
             propriedade.Produtor = _context.Produtores.Find(propriedade.ProdutorId)!;
 
@@ -69,7 +70,6 @@ namespace GeotecnologiaKNS.Controllers
             return View(propriedade);
         }
 
-        // GET: Propriedades/Edit/5
         // GET: Propriedades/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -98,13 +98,9 @@ namespace GeotecnologiaKNS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,Outros")] Models.Propriedade propriedade)
+        [TenantFilter]
+        public async Task<IActionResult> Edit([Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,Outros")] Models.Propriedade propriedade)
         {
-            if (id != propriedade.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try

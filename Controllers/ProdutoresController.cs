@@ -21,7 +21,7 @@ public class ProdutoresController : Controller
     }
 
     private ActionResult HttpNotFound()
-    {
+    {   
         return NotFound();
     }
 
@@ -34,8 +34,11 @@ public class ProdutoresController : Controller
     // POST: Produtores/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> CreateAsync(Models.Produtor produtor)
+    [TenantFilter]
+    public async Task<ActionResult> CreateAsync(Produtor produtor)
     {
+        ModelState.Remove("Documentos");
+
         if (ModelState.IsValid)
         {
             await _context.Produtores.AddAsync(produtor);
@@ -49,7 +52,6 @@ public class ProdutoresController : Controller
     // GET: Produtores/Edit/5
     public async Task<ActionResult> EditAsync(int id)
     {
-
         var produtor = await _context.Produtores
                                      .Include(x => x.Propriedades)
                                      .Include(x => x.Documentos)
@@ -66,14 +68,25 @@ public class ProdutoresController : Controller
     // POST: Produtores/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult> EditAsync(Models.Produtor produtor)
+    [TenantFilter]
+    public async Task<ActionResult> EditAsync(Produtor produtor)
     {
+        ModelState.Remove("Documentos");
+
         if (ModelState.IsValid)
         {
             _context.Produtores.Update(produtor);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+
+        var persitedProdutor = await _context.Produtores
+                                     .Include(x => x.Propriedades)
+                                     .Include(x => x.Documentos)
+                                     .FirstAsync(x => x.Id == produtor.Id);
+
+        produtor.Propriedades = persitedProdutor.Propriedades;
+        produtor.Documentos = persitedProdutor.Documentos;
 
         return View(produtor);
     }

@@ -30,9 +30,9 @@ namespace GeotecnologiaKNS.Models
         [CnpjValid(ErrorMessage = "Cnpj invalido")]
         public string Cnpj { get; set; }
 
-        public ICollection<Produtor>? Produtores { get; set; }
+        public ICollection<Produtor> Produtores { get; set; }
 
-        public ICollection<Propriedade>? Propriedades { get; set; }
+        public ICollection<Propriedade> Propriedades { get; set; }
 
         public ICollection<Solicitacao>? Solicitacoes { get; set; }
 

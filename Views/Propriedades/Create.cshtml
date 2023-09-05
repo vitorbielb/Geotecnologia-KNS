@@ -1,9 +1,5 @@
 ﻿@model GeotecnologiaKNS.Models.Propriedade
 
-<head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
@@ -77,7 +73,7 @@
                         </div>
                         <div class="form-group">
                             <label asp-for="Industria" class="control-label"></label>
-                            <input asp-for="Industria" class="form-control" />
+                            <input class="form-control" value="@User.Identity.GetIndustria()" disabled />
                             @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
                         </div>
                         <!-- Grupo 3 -->

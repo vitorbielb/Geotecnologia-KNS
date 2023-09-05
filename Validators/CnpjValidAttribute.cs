@@ -4,21 +4,19 @@ using System.Text.RegularExpressions;
 namespace GeotecnologiaKNS.Validators
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
-    public class CnpjValid : ValidationAttribute
+    public class CnpjValidAttribute : ValidationAttribute
     {
-        public string ErrorMessage { get; set; }
-
         public override string FormatErrorMessage(string name)
         {
             return base.FormatErrorMessage(name);
         }
 
-        public override bool IsValid(object? value)
+        public override bool IsValid(object value)
         {
             return ValidateCNPJ(value?.ToString());
         }
 
-        public static bool ValidateCNPJ(string? cnpj)
+        public static bool ValidateCNPJ(string cnpj)
         {
             if (cnpj is null)
             {

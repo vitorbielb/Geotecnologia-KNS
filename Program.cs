@@ -35,6 +35,7 @@ builder.Services.AddAuthorization(options =>
     options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 });
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ISolicitacaoRepository, SolicitacaoRepository>();
 builder.Services.AddScoped<IProdutorRepository, ProdutorRepository>();
 builder.Services.AddScoped<IPropriedadeRepository, PropriedadeRepository>();
@@ -43,6 +44,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
 builder.Services.AddAdminPanel();
 builder.Services.AddScoped<ImageLoader>();
+builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
