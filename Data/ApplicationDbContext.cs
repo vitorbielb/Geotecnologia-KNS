@@ -13,27 +13,24 @@ namespace GeotecnologiaKNS.Data
         , IdentityRoleClaim<string>
         , IdentityUserToken<string>>
     {
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IUserContext _userContext;
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantProvider tenantProvider)
-            : base(options)
-        {
-            _tenantProvider = tenantProvider;
-        }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IUserContext userContext)
+            : base(options) => _userContext = userContext;
 
         public DbSet<Industria> Industrias { get; set; }
         public DbSet<Propriedade> Propriedades { get; set; }
         public DbSet<Produtor> Produtores { get; set; }
         public DbSet<PropriedadeArquivo> PropriedadesArquivos { get; set; }
         public DbSet<ProdutorArquivo> ProdutoresArquivos { get; set; }
-        public DbSet<Solicitacao>? Solicitacao { get; set; }
+        public DbSet<Solicitacao> Solicitacao { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Propriedade>()
-                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
 
             modelBuilder.Entity<Propriedade>()
                 .HasMany(x => x.Documentos);
@@ -45,7 +42,7 @@ namespace GeotecnologiaKNS.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Produtor>()
-                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
 
             modelBuilder.Entity<Produtor>()
                 .HasMany(x => x.Documentos);
@@ -57,7 +54,7 @@ namespace GeotecnologiaKNS.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Solicitacao>()
-                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
 
             modelBuilder.Entity<Solicitacao>()
                 .HasOne(e => e.Industria)
@@ -66,7 +63,7 @@ namespace GeotecnologiaKNS.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApplicationUser>()
-                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
 
             modelBuilder.Entity<ApplicationUser>()
                 .HasOne(e => e.Industria)
@@ -75,7 +72,9 @@ namespace GeotecnologiaKNS.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApplicationRole>()
-                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || 
+                                     _userContext.IsApplicationAdmin.GetValueOrDefault() ||
+                                     (x.Name != nameof(Infra.Roles.ApplicationAdmin) && _userContext.IsTenantAdmin.GetValueOrDefault() && x.TenantId == _userContext.TenantId));
 
             modelBuilder.Entity<ApplicationRole>()
                 .HasMany(x => x.Claims)

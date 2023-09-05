@@ -17,8 +17,8 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Solicitacoes
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Solicitacao.Include(s => s.Propriedade);
-            return View(await applicationDbContext.ToListAsync());
+            var solicitacoes = _context.Solicitacao.Include(s => s.Propriedade);
+            return View(await solicitacoes.ToListAsync());
         }
 
         // GET: Solicitacoes/Details/5

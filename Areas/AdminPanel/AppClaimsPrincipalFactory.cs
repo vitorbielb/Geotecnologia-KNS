@@ -113,21 +113,21 @@ public static class AppClaimsPrincipalExt
     public static bool IsApplicationAdmin(this IIdentity identity)
     {
         var claim = identity.ToClaimIdentity().FindFirst(ClaimTypes.Role);
-        return claim!.Value == nameof(Roles.ApplicationAdmin);
+        return claim?.Value == nameof(Roles.ApplicationAdmin);
     }
 
 
     public static bool IsTenantAdmin(this IIdentity identity)
     {
         var claim = identity.ToClaimIdentity().FindFirst(ClaimTypes.Role);
-        return claim!.Value == nameof(Roles.TenantAdmin);
+        return claim?.Value == nameof(Roles.TenantAdmin);
     }
 
 
-    public static int GetTenantId(this IIdentity identity)
+    public static int? GetTenantId(this IIdentity identity)
     {
         var claim = identity.ToClaimIdentity().FindFirst("tenantId");
-        if (claim == null) throw new InvalidOperationException("User tenant id should not be null.");
+        if (claim == null) return null;
         return int.Parse(claim.Value);
     }
 
@@ -177,9 +177,9 @@ class ClaimEqualityComparer : IEqualityComparer<Claim>
 {
     public bool Equals(Claim? x, Claim? y)
     {
-        if (x == null || y == null) 
-        { 
-            return false; 
+        if (x == null || y == null)
+        {
+            return false;
         }
 
         return x.Type == y.Type && x.Value == y.Value;
