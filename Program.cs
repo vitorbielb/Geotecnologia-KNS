@@ -9,7 +9,9 @@ builder.Configuration.AddJsonFile("appsettings.json");
 
 // Adicionar serviços ao contêiner
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("GeotecnologiaKNS")));
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("GeotecnologiaKNS"));
+}, ServiceLifetime.Scoped);
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -44,7 +46,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
 builder.Services.AddAdminPanel();
 builder.Services.AddScoped<ImageLoader>();
-builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+builder.Services.AddScoped<IUserContext, UserContext>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

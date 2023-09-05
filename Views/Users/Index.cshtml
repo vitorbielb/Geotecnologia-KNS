@@ -1,0 +1,76 @@
+﻿@model IEnumerable<GeotecnologiaKNS.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Usuarios";
+}
+
+
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Solicitações</h4>
+                <p class="card-description">
+                </p>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr style="background-color: #FFF; color: #258cfb;">
+                                <th>
+                                    @Html.DisplayNameFor(model => model.UserName)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Email)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Industria)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.PhoneNumber)
+                                </th>
+                            </tr>
+                        </thead>
+                        @foreach (var item in Model)
+                        {
+                            <tr class="table-row-link" data-url="@Url.Action("Edit", "Solicitacoes", new { id = item.Id })">
+                                <td>
+                                    @Html.DisplayFor(model => item.UserName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => item.Email)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => item.Industria.Nome)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(model => item.PhoneNumber)
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="text-align: left;">
+    <button type="submit" class="btn btn-primary gradient-button" onclick="location.href='@Url.Action("Create")'">
+        <i class="bi bi-plus-circle"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+        </svg>            Novo usuario
+    </button>
+</div>
+
+<script>
+    // Adiciona um evento de clique em todas as linhas da tabela com a classe "table-row-link"
+    const rows = document.querySelectorAll('.table-row-link');
+    rows.forEach(row => {
+        row.addEventListener('click', function() {
+            const url = this.dataset.url;
+            window.location.href = url; // Redireciona para a URL da página de edição
+        });
+    });
+</script>

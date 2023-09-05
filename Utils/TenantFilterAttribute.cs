@@ -5,10 +5,10 @@ namespace GeotecnologiaKNS.Utils;
 
 /// <summary>
 /// An <see cref="ActionFilterAttribute"/> that sets the TenantId property on the model passed to the action method. 
-/// It gets the tenantId from <see cref="ITenantProvider"/> service and checks if it's less or equal than zero,
+/// It gets the tenantId from <see cref="IUserContext"/> service and checks if it's less or equal than zero,
 /// it returns a 403 Forbidden status code. 
 /// Otherwise, it gets the first argument passed to the action method, 
-/// to set the value of the TenantId property to the tenantId obtained from <see cref="ITenantProvider"/> service
+/// to set the value of the TenantId property to the tenantId obtained from <see cref="IUserContext"/> service
 /// and update the action arguments with the updated model object.
 /// </summary>
 /// <remarks>
@@ -18,10 +18,10 @@ public class TenantFilterAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        int tenantId = context.HttpContext
-                              .RequestServices
-                              .GetRequiredService<ITenantProvider>()
-                              .TenantId;
+        int? tenantId = context.HttpContext
+                               .RequestServices
+                               .GetRequiredService<IUserContext>()
+                               .TenantId;
 
         if (tenantId <= 0)
         {
