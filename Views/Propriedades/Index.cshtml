@@ -48,7 +48,7 @@
                                         @Html.DisplayFor(modelItem => item.Municipio)
                                     </td>
                                     <td>
-                                        @Html.DisplayFor(modelItem => item.Industria)
+                                        @User.Identity.GetIndustria()
                                     </td>
                                     <td>
                                         @Html.DisplayFor(modelItem => item.CadastroAmbientalRural)

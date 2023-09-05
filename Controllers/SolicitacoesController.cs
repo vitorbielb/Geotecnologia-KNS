@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using GeotecnologiaKNS.Data;
-using GeotecnologiaKNS.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace GeotecnologiaKNS.Controllers
 {
@@ -59,6 +52,7 @@ namespace GeotecnologiaKNS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [TenantFilter]
         public async Task<IActionResult> Create([Bind("Id,PropriedadeId,Analista,Solicitante,DataSolicitacao,DataAnalise,Observacao,Status")] Solicitacao solicitacao)
         {
             if (ModelState.IsValid)
@@ -99,13 +93,9 @@ namespace GeotecnologiaKNS.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,PropriedadeId,Analista,Solicitante,DataSolicitacao,DataAnalise,Observacao,Status")] Solicitacao solicitacao)
+        [TenantFilter]
+        public async Task<IActionResult> Edit([Bind("Id,PropriedadeId,Analista,Solicitante,DataSolicitacao,DataAnalise,Observacao,Status")] Solicitacao solicitacao)
         {
-            if (id != solicitacao.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
@@ -163,14 +153,14 @@ namespace GeotecnologiaKNS.Controllers
             {
                 _context.Solicitacao.Remove(solicitacao);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool SolicitacaoExists(int id)
         {
-          return (_context.Solicitacao?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Solicitacao?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using GeotecnologiaKNS.Validators;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
@@ -25,8 +26,9 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Indústria")]
         [StringLength(100, ErrorMessage = "O nome da indústria deve ter no máximo 100 caracteres")]
 
-        public List<ProdutorArquivo>? Documentos { get; set; }
-        public List<Propriedade>? Propriedades { get; set; }
+        public List<ProdutorArquivo> Documentos { get; set; }
+
+        public List<Propriedade> Propriedades { get; set; }
 
     }
 }

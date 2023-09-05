@@ -4,7 +4,7 @@
 namespace GeotecnologiaKNS.Data
 {
     public class ApplicationDbContext : IdentityDbContext
-        < ApplicationUser
+        <ApplicationUser
         , ApplicationRole
         , string
         , IdentityUserClaim<string>
@@ -13,9 +13,12 @@ namespace GeotecnologiaKNS.Data
         , IdentityRoleClaim<string>
         , IdentityUserToken<string>>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        private readonly ITenantProvider _tenantProvider;
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITenantProvider tenantProvider)
             : base(options)
         {
+            _tenantProvider = tenantProvider;
         }
 
         public DbSet<Industria> Industrias { get; set; }
@@ -30,6 +33,9 @@ namespace GeotecnologiaKNS.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Propriedade>()
+                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
+
+            modelBuilder.Entity<Propriedade>()
                 .HasMany(x => x.Documentos);
 
             modelBuilder.Entity<Propriedade>()
@@ -37,6 +43,9 @@ namespace GeotecnologiaKNS.Data
                 .WithMany(c => c.Propriedades)
                 .HasForeignKey(e => e.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Produtor>()
+                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
 
             modelBuilder.Entity<Produtor>()
                 .HasMany(x => x.Documentos);
@@ -48,16 +57,25 @@ namespace GeotecnologiaKNS.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Solicitacao>()
+                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
+
+            modelBuilder.Entity<Solicitacao>()
                 .HasOne(e => e.Industria)
                 .WithMany(c => c.Solicitacoes)
                 .HasForeignKey(e => e.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApplicationUser>()
+                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
+
+            modelBuilder.Entity<ApplicationUser>()
                 .HasOne(e => e.Industria)
                 .WithMany(c => c.Usuarios)
                 .HasForeignKey(e => e.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ApplicationRole>()
+                .HasQueryFilter(x => _tenantProvider.TenantId == 0 || x.TenantId == _tenantProvider.TenantId);
 
             modelBuilder.Entity<ApplicationRole>()
                 .HasMany(x => x.Claims)

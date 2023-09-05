@@ -1,12 +1,6 @@
 ﻿@model Produtor
 @inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
 
-<head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-</head>
-
-
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
@@ -36,8 +30,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                @Html.LabelFor(model => model.Industria)
-                                @Html.TextBoxFor(model => model.Industria, new { @class = "form-control" })
+                                <label asp-for="Industria" class="control-label"></label>
+                                <input class="form-control" value="@User.Identity.GetIndustria()" disabled />
                                 @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
                             </div>
                         </div>

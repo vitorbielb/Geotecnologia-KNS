@@ -79,8 +79,7 @@
                         </div>
                         <div class="form-group">
                             <label asp-for="Industria" class="control-label"></label>
-                            <input asp-for="Industria" class="form-control" />
-
+                            <input class="form-control" value="@User.Identity.GetIndustria()" disabled />
                             @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
                         </div>
                         <!-- Grupo 3 -->

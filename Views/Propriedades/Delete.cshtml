@@ -79,7 +79,7 @@
                             @Html.DisplayNameFor(model => model.Industria)
                         </dt>
                         <dd class="col-sm-10">
-                            @Html.DisplayFor(model => model.Industria)
+                            @User.Identity.GetIndustria()
                         </dd>
                         <dt class="col-sm-2">
                             @Html.DisplayNameFor(model => model.TipoCadastroRural)
