@@ -32,7 +32,7 @@
                         </thead>
                         @foreach (var item in Model)
                         {
-                            <tr class="table-row-link" data-url="@Url.Action("Edit", "Solicitacoes", new { id = item.Id })">
+                            <tr class="table-row-link" data-url="@Url.Action("Edit", "Users", new { id = item.Id })">
                                 <td>
                                     @Html.DisplayFor(model => item.UserName)
                                 </td>
