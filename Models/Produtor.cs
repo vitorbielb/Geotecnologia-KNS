@@ -13,7 +13,7 @@ namespace GeotecnologiaKNS.Models
         public Industria Industria { get; }
 
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Nome")]
+        [Display(Name = "Produtor")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 100 caracteres")]
         public string Nome { get; set; }
 

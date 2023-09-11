@@ -21,7 +21,7 @@ public class ProdutoresController : Controller
     }
 
     private ActionResult HttpNotFound()
-    {   
+    {
         return NotFound();
     }
 
@@ -175,6 +175,3 @@ public class ProdutoresController : Controller
         return File(arquivo.Dados, arquivo.ContentType);
     }
 }
-
-
-
