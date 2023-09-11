@@ -17,7 +17,9 @@
                         <table class="table">
                             <thead>
                                 <tr style="background-color: #FFF; color: #258cfb;">
-
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Propriedade.Produtor.Nome)
+                                    </th>
                                     <th>
                                         @Html.DisplayNameFor(model => model.Propriedade)
                                     </th>
@@ -34,7 +36,13 @@
                                         @Html.DisplayNameFor(model => model.DataAnalise)
                                     </th>
                                     <th>
-                                        @Html.DisplayNameFor(model => model.Observacao)
+                                        @Html.DisplayNameFor(model => model.Propriedade.UnidadeFederativa)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Propriedade.Municipio)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Propriedade.Produtor.Cpf)
                                     </th>
                                     <th>
                                         @Html.DisplayNameFor(model => model.Status)
@@ -46,6 +54,9 @@
                             @foreach (var item in Model)
                             {
                                 <tr class="table-row-link" data-url="@Url.Action("Edit", "Solicitacoes", new { id = item.Id })">
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Propriedade.Produtor.Nome)
+                                    </td>
                                     <td>
                                         @Html.DisplayFor(modelItem => item.Propriedade.NomePropriedade)
                                     </td>
@@ -62,7 +73,13 @@
                                         @Html.DisplayFor(modelItem => item.DataAnalise)
                                     </td>
                                     <td>
-                                        @Html.DisplayFor(modelItem => item.Observacao)
+                                        @Html.DisplayFor(modelItem => item.Propriedade.UnidadeFederativa)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Propriedade.Municipio)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Propriedade.Produtor.Cpf)
                                     </td>
                                     <td>
                                         @Html.DisplayStatusFor(modelItem => item.Status)
