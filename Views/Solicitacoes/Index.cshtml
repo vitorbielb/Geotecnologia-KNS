@@ -53,7 +53,7 @@
                             </thead>
                             @foreach (var item in Model)
                             {
-                                <tr class="table-row-link" data-url="@Url.Action("Edit", "Solicitacoes", new { id = item.Id })">
+                                <tr class="table-row-link" data-url="@Url.Action("Details", "Solicitacoes", new { id = item.Id })">
                                     <td>
                                         @Html.DisplayFor(modelItem => item.Propriedade.Produtor.Nome)
                                     </td>
