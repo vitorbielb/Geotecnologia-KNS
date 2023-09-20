@@ -9,7 +9,6 @@
                 @using (Html.BeginForm())
                 {
                     @Html.AntiForgeryToken()
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -26,7 +25,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -43,10 +41,8 @@
                                 @Html.TextBoxFor(model => model.Id, new { @class = "form-control disabled-field", @disabled = "disabled" })
                                 @Html.ValidationMessageFor(model => model.Id, "", new { @class = "error-message" })
                             </div>
-
                         </div>
                     </div>
-
                     <div style="margin-top: 20px">
                         <a type="submit" class="btn btn-secondary" href="@Url.Action("Index", "Produtores")">Voltar</a>
 
@@ -65,11 +61,9 @@
                                 </svg>
                                 Excluir
                             </a>
-
                         </div>
                     </div>
                 }
-
             </div>
         </div>
     </div>

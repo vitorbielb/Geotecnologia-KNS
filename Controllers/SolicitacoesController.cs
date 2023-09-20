@@ -32,6 +32,8 @@ namespace GeotecnologiaKNS.Controllers
             var solicitacao = await _context.Solicitacao
                 .Include(x => x.Propriedade.Produtor)
                 .Include(s => s.Propriedade)
+                .Include(p => p.Propriedade.Documentos)
+                .Include(y => y.Propriedade.Produtor.Documentos)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (solicitacao == null)
             {

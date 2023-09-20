@@ -55,7 +55,6 @@ namespace GeotecnologiaKNS.Models
         [Required(ErrorMessage = "Campo obrigatório! Caso não tenha cadastrado um Produtor, cadastre-o na guia de 'Produtores'")]
         [Display(Name = "Produtor")]
         public int ProdutorId { get; set; }
-
         public Produtor? Produtor { get; set; }
         public List<PropriedadeArquivo>? Documentos { get; set; }
     }
