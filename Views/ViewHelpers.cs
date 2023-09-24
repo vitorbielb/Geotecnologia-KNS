@@ -7,6 +7,10 @@ namespace GeotecnologiaKNS.Views
 {
     public static class ViewHelpers
     {
+        public static IHtmlContent DisplayStatus<TModel>(this IHtmlHelper<TModel> htmlHelper, Status status)
+        {
+            return new HtmlString($"<a class=\"btn btn-{_statusDict[status]}\">{status}</a>");
+        }
         public static IHtmlContent DisplayStatusFor<TModel, TResult>(this IHtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TResult>> expression)
         {
             StatusGetter statusGetter = new StatusGetter();

@@ -1,142 +1,270 @@
-﻿@model GeotecnologiaKNS.Models.Solicitacao
+﻿@using GeotecnologiaKNS.Views;
+@model GeotecnologiaKNS.Models.Solicitacao
 @inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
+
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
     <style>
-        .shaded-container {
-            padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+        #map {
+            height: 100%;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
         }
     </style>
 </head>
 
-<div class="shaded-container" style="margin-bottom: 10px">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.Produtor.Nome" class="control-label"></label>
-                <div>@Model.Propriedade.Produtor.Nome</div>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    <!-- Grupo 1 -->
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.Produtor.Nome" class="control-label"></label>
+                            <div>@Model.Propriedade.Produtor.Nome</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.NomePropriedade" class="control-label"></label>
+                            <div>@Model.Propriedade.NomePropriedade</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group select-with-icon">
+                            <label asp-for="Propriedade.Bioma" class="control-label"></label>
+                            <div>@Model.Propriedade.Bioma</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.UnidadeFederativa" class="control-label"></label>
+                            <div>@Model.Propriedade.UnidadeFederativa</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.Municipio" class="control-label"></label>
+                            <div>@Model.Propriedade.Municipio</div>
+                        </div>
+                    </div>
+                    <!-- Adicionando mais campos -->
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.Latitude" class="control-label"></label>
+                            <div>@Model.Propriedade.Latitude</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.Longitude" class="control-label"></label>
+                            <div>@Model.Propriedade.Longitude</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.Area" class="control-label"></label>
+                            <div>@Model.Propriedade.Area</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.NomePropriedade" class="control-label"></label>
-                <div>@Model.Propriedade.NomePropriedade</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.UnidadeFederativa" class="control-label"></label>
-                <div>@Model.Propriedade.UnidadeFederativa</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.Municipio" class="control-label"></label>
-                <div>@Model.Propriedade.Municipio</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.Produtor.Cpf" class="control-label"></label>
-                <div>@Model.Propriedade.Produtor.Cpf</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.Produtor.Id" class="control-label"></label>
-                <div>@Model.Propriedade.Produtor.Id</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.Id" class="control-label"></label>
-                <div>@Model.Propriedade.Id</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.CicloProducao" class="control-label"></label>
-                <div>@Model.Propriedade.CicloProducao</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.Area" class="control-label"></label>
-                <div>@Model.Propriedade.Area</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.AreaUtil" class="control-label"></label>
-                <div>@Model.Propriedade.AreaUtil</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.Latitude" class="control-label"></label>
-                <div>@Model.Propriedade.Latitude</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="form-group">
-                <label asp-for="Propriedade.Longitude" class="control-label"></label>
-                <div>@Model.Propriedade.Longitude</div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    @Html.DisplayStatus(Model.Status)
+                </div>
             </div>
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body">
-                <div class="col-md-3">
-                    <div class="col-md-6">
-                        <dl class="row">
-                            <dt class="col-sm-3">Propriedade Id:</dt>
-                            <dd class="col-sm-9">@Model.PropriedadeId</dd>
+        <div class="col-md-6 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
 
-                            <dt class="col-sm-3">Analista:</dt>
-                            <dd class="col-sm-9">@Model.Analista</dd>
-                        </dl>
+
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="row">
+                        <h5 class="text-center">Protocolo</h5>
+                        <div class="form-group">
+
+                            <div class="form-group">
+                                <label class="control-label">Tipo do protocolo</label>
+                                <p>ANÁLISE DE RISCO</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label">Critérios do protocolo</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <ol>
+                                            <li>Lista Suja do Trabalho Escravo - MTE</li>
+                                            <li>Lista Áreas Embargadas - IBAMA</li>
+                                            <li>Lista Desmatamento Ilegal- LDI-PA</li>
+                                            <li>Unidade conservação</li>
+                                            <li>Quilombolas</li>
+                                            <li>SICAR</li>
+                                            <li>Comprovantes de vínculos</li>
+                                            <li>Licença ambienta rural</li>
+                                        </ol>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <ol start="9">
+                                            <li>Histórico de SICAR</li>
+                                            <li>PRODES Amazônico</li>
+                                            <li>Embargos IBAMA Polígonos</li>
+                                            <li>Terras Indígenas</li>
+                                            <li>Embargos Semas - MT</li>
+                                            <li>Embargos LDI Semas - PA</li>
+                                            <li>Obrigatoriedade Proprietário</li>
+                                            <li>Valida Data Viculo</li>
+                                        </ol>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <h5 class="text-center">Dados da solicitação</h5>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Propriedade.NomePropriedade" class="control-label"></label>
+                                <input asp-for="Propriedade.NomePropriedade" class="form-control form-control-sm" disabled />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Analista" class="control-label"></label>
+                                <input asp-for="Analista" class="form-control" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Solicitante" class="control-label"></label>
+                                <input asp-for="Solicitante" class="form-control" disabled />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="DataSolicitacao" class="control-label"></label>
+                                <input asp-for="DataSolicitacao" class="form-control" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="DataAnalise" class="control-label"></label>
+                                <input asp-for="DataAnalise" class="form-control" disabled />
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label asp-for="Observacao" class="control-label"></label>
+                                <input asp-for="Observacao" class="form-control" disabled />
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="col-md-3">
-                    <div class="col-md-6">
-                        <dl class="row">
-                            <dt class="col-sm-3">Solicitante:</dt>
-                            <dd class="col-sm-9">@Model.Solicitante</dd>
 
-                            <dt class="col-sm-3">Data de Solicitação:</dt>
-                            <dd class="col-sm-9">@Model.DataSolicitacao</dd>
-                        </dl>
-                    </div>
-                </div>
+    <div class="row">
+        <div class="col-md-12" style="line-height: 19px;">
+            <div class="card mx-10">
+                <div class="card">
+                    <div class="card-body">
 
-                <div class="col-md-3">
-                    <div class="col-md-6">
-                        <dl class="row">
-                            <dt class="col-sm-3">Data de Análise:</dt>
-                            <dd class="col-sm-9">@Model.DataAnalise</dd>
 
-                            <dt class="col-sm-3">Observação:</dt>
-                            <dd class="col-sm-9">@Model.Observacao</dd>
-                        </dl>
-                    </div>
-                </div>
+                        <div id="map"></div>
+                        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwvxpRK9Uqeb0w9zG5N8aBeYkLkFQQfBI&callback=initMap&libraries=drawing&v=weekly"
+                                defer></script>
+                        <script type="text/javascript">
+                            function initMap() {
+                                const map = new google.maps.Map(document.getElementById("map"), {
+                                    zoom: 4,
+                                    center: { lat: 24.886, lng: -70.268 },
+                                    disableDefaultUI: true,
+                                    mapTypeId: "terrain",
+                                });
 
-                <div class="col-md-3">
-                    <div class="col-md-6">
-                        <dl class="row">
-                            <dt class="col-sm-3">Status:</dt>
-                            <dd class="col-sm-9">@Model.Status</dd>
+                                //const drawingManager = new google.maps.drawing.DrawingManager({
+                                //    drawingMode: google.maps.drawing.OverlayType.POLYGON,
+                                //    drawingControl: false,
+                                //    drawingControlOptions: {
+                                //        position: google.maps.ControlPosition.TOP_CENTER
+                                //    },
+                                //    polygonOptions: {
+                                //        strokeColor: "#00b347",
+                                //        strokeWeight: 2,
+                                //        fillColor: "#00FF00",
+                                //        fillOpacity: 0.5
+                                //    }
+                                //});
+                                //drawingManager.setMap(map);
 
-                            <dt class="col-sm-3">Parecer:</dt>
-                            <dd class="col-sm-9">@Model.Parecer</dd>
-                        </dl>
+                                const triangleCoords = [
+                                    { lat: 25.774, lng: -80.19 },
+                                    { lat: 18.466, lng: -66.118 },
+                                    { lat: 32.321, lng: -64.757 },
+                                    { lat: 25.774, lng: -80.19 },
+                                ];
+                                // Construct the polygon.
+                                const bermudaTriangle = new google.maps.Polygon({
+                                    paths: triangleCoords,
+                                    strokeColor: "#FF0000",
+                                    strokeOpacity: 0.8,
+                                    strokeWeight: 2,
+                                    fillColor: "#FF0000",
+                                    fillOpacity: 0.35,
+                                });
+
+                                bermudaTriangle.setMap(map);
+                            }
+
+                            window.initMap = initMap;
+
+                        </script>
+
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="row">
+                            <h5 class="text-center">Parecer</h5>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <input asp-for="Parecer" class="form-control form-control-sm" disabled />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -150,24 +278,37 @@
             <div class="card-body">
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Vinculo</button>
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Propriedade vinculada</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="prod-tab" data-bs-toggle="tab" data-bs-target="#prod" type="button" role="tab" aria-controls="prod" aria-selected="false">Produtor vinculado</button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Outras solicitações</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Documentos</button>
+                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Documentos da propriedade</button>
+                    </li>
+
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="doc-tab" data-bs-toggle="tab" data-bs-target="#doc" type="button" role="tab" aria-controls="doc" aria-selected="false">Documentos do produtor</button>
                     </li>
                 </ul>
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                         <partial name="_produtorPropriedade" model="Model.Propriedade.Produtor.Propriedades"></partial>
                     </div>
+                    <div class="tab-pane fade" id="prod" role="tabpanel" aria-labelledby="prod-tab">
+                        <partial name="_propriedadeProdutor" model="Model.Propriedade.Produtor"></partial>
+                    </div>
                     <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                         <partial name="_listaSolicitacoes" model="repository.GetSolicitacoesByProdutor(Model.Propriedade.Produtor.Id).Where(x => x != Model)"></partial>
                     </div>
                     <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
                         <partial name="_file-list" model="Model.Propriedade"></partial>
+                    </div>
+                    <div class="tab-pane fade" id="doc" role="tabpanel" aria-labelledby="doc-tab">
+                        <partial name="_file-listP" model="Model.Propriedade.Produtor"></partial>
                     </div>
                 </div>
             </div>
