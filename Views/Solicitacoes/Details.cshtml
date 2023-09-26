@@ -80,10 +80,38 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.AreaUtil" class="control-label"></label>
+                            <div>@Model.Propriedade.AreaUtil</div>
+                        </div>
+                    </div>
+                    <!-- Adicionando mais campos -->
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.Produtor.Cpf" class="control-label"></label>
+                            <div>@Model.Propriedade.Produtor.Cpf</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.CicloProducao" class="control-label"></label>
+                            <div>@Model.Propriedade.CicloProducao</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.TipoPropriedade" class="control-label"></label>
+                            <div>@Model.Propriedade.TipoPropriedade</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 
 
 
@@ -101,177 +129,170 @@
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12 grid-margin stretch-card">
-        <div class="col-md-6 grid-margin stretch-card">
-            <div class="card">
-                <div class="card-body">
-
-
-                    <input type="hidden" asp-for="Id" />
-
-                    <div class="row">
-                        <h5 class="text-center">Protocolo</h5>
-                        <div class="form-group">
-
-                            <div class="form-group">
-                                <label class="control-label">Tipo do protocolo</label>
-                                <p>ANÁLISE DE RISCO</p>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label">Critérios do protocolo</label>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <ol>
-                                            <li>Lista Suja do Trabalho Escravo - MTE</li>
-                                            <li>Lista Áreas Embargadas - IBAMA</li>
-                                            <li>Lista Desmatamento Ilegal- LDI-PA</li>
-                                            <li>Unidade conservação</li>
-                                            <li>Quilombolas</li>
-                                            <li>SICAR</li>
-                                            <li>Comprovantes de vínculos</li>
-                                            <li>Licença ambienta rural</li>
-                                        </ol>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <ol start="9">
-                                            <li>Histórico de SICAR</li>
-                                            <li>PRODES Amazônico</li>
-                                            <li>Embargos IBAMA Polígonos</li>
-                                            <li>Terras Indígenas</li>
-                                            <li>Embargos Semas - MT</li>
-                                            <li>Embargos LDI Semas - PA</li>
-                                            <li>Obrigatoriedade Proprietário</li>
-                                            <li>Valida Data Viculo</li>
-                                        </ol>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                        <h5 class="text-center">Dados da solicitação</h5>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="Propriedade.NomePropriedade" class="control-label"></label>
-                                <input asp-for="Propriedade.NomePropriedade" class="form-control form-control-sm" disabled />
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="Analista" class="control-label"></label>
-                                <input asp-for="Analista" class="form-control" disabled />
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="Solicitante" class="control-label"></label>
-                                <input asp-for="Solicitante" class="form-control" disabled />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="DataSolicitacao" class="control-label"></label>
-                                <input asp-for="DataSolicitacao" class="form-control" disabled />
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="DataAnalise" class="control-label"></label>
-                                <input asp-for="DataAnalise" class="form-control" disabled />
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label asp-for="Observacao" class="control-label"></label>
-                                <input asp-for="Observacao" class="form-control" disabled />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
     <div class="col-md-6 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
+
+
                 <input type="hidden" asp-for="Id" />
+
                 <div class="row">
-                    <div id="map"></div>
-                    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwvxpRK9Uqeb0w9zG5N8aBeYkLkFQQfBI&callback=initMap&libraries=drawing&v=weekly"
-                            defer></script>
-                    <script type="text/javascript">
-                        function initMap() {
-                            const map = new google.maps.Map(document.getElementById("map"), {
-                                zoom: 4,
-                                center: { lat: 24.886, lng: -70.268 },
-                                disableDefaultUI: true,
-                                mapTypeId: "terrain",
-                            });
+                    <h5 class="text-center">Protocolo</h5>
+                    <div class="form-group">
 
-                            //const drawingManager = new google.maps.drawing.DrawingManager({
-                            //    drawingMode: google.maps.drawing.OverlayType.POLYGON,
-                            //    drawingControl: false,
-                            //    drawingControlOptions: {
-                            //        position: google.maps.ControlPosition.TOP_CENTER
-                            //    },
-                            //    polygonOptions: {
-                            //        strokeColor: "#00b347",
-                            //        strokeWeight: 2,
-                            //        fillColor: "#00FF00",
-                            //        fillOpacity: 0.5
-                            //    }
-                            //});
-                            //drawingManager.setMap(map);
-
-                            const triangleCoords = [
-                                { lat: 25.774, lng: -80.19 },
-                                { lat: 18.466, lng: -66.118 },
-                                { lat: 32.321, lng: -64.757 },
-                                { lat: 25.774, lng: -80.19 },
-                            ];
-                            // Construct the polygon.
-                            const bermudaTriangle = new google.maps.Polygon({
-                                paths: triangleCoords,
-                                strokeColor: "#FF0000",
-                                strokeOpacity: 0.8,
-                                strokeWeight: 2,
-                                fillColor: "#FF0000",
-                                fillOpacity: 0.35,
-                            });
-
-                            bermudaTriangle.setMap(map);
-                        }
-
-                        window.initMap = initMap;
-
-                    </script>
-
-                    <input type="hidden" asp-for="Id" />
-
-                    <div class="row">
-                        <h5 class="text-center">Parecer</h5>
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <input asp-for="Parecer" class="form-control form-control-sm" disabled />
+                        <div class="form-group">
+                            <label class="control-label">Tipo do protocolo</label>
+                            <p>ANÁLISE DE RISCO</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label">Critérios do protocolo</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ol>
+                                        <li>Lista Suja do Trabalho Escravo - MTE</li>
+                                        <li>Lista Áreas Embargadas - IBAMA</li>
+                                        <li>Lista Desmatamento Ilegal- LDI-PA</li>
+                                        <li>Unidade conservação</li>
+                                        <li>Quilombolas</li>
+                                        <li>SICAR</li>
+                                        <li>Comprovantes de vínculos</li>
+                                        <li>Licença ambienta rural</li>
+                                    </ol>
+                                </div>
+                                <div class="col-md-6">
+                                    <ol start="9">
+                                        <li>Histórico de SICAR</li>
+                                        <li>PRODES Amazônico</li>
+                                        <li>Embargos IBAMA Polígonos</li>
+                                        <li>Terras Indígenas</li>
+                                        <li>Embargos Semas - MT</li>
+                                        <li>Embargos LDI Semas - PA</li>
+                                        <li>Obrigatoriedade Proprietário</li>
+                                        <li>Valida Data Viculo</li>
+                                    </ol>
+                                </div>
                             </div>
+
+                        </div>
+                    </div>
+                    <h5 class="text-center">Dados da solicitação</h5>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Propriedade.NomePropriedade" class="control-label"></label>
+                            <input asp-for="Propriedade.NomePropriedade" class="form-control form-control-sm" disabled />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Analista" class="control-label"></label>
+                            <input asp-for="Analista" class="form-control" disabled />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Solicitante" class="control-label"></label>
+                            <input asp-for="Solicitante" class="form-control" disabled />
                         </div>
                     </div>
                 </div>
-                <!-- ... (restante do código) ... -->
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="DataSolicitacao" class="control-label"></label>
+                            <input asp-for="DataSolicitacao" class="form-control" disabled />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="DataAnalise" class="control-label"></label>
+                            <input asp-for="DataAnalise" class="form-control" disabled />
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Observacao" class="control-label"></label>
+                            <input asp-for="Observacao" class="form-control" disabled />
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <div class="col-md-6 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div id="map" style="height: 380px;"></div>
+
+                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwvxpRK9Uqeb0w9zG5N8aBeYkLkFQQfBI&callback=initMap&libraries=drawing&v=weekly"
+                        defer></script>
+                <script type="text/javascript">
+                    function initMap() {
+                        const map = new google.maps.Map(document.getElementById("map"), {
+                            zoom: 4,
+                            center: { lat: 24.886, lng: -70.268 },
+                            disableDefaultUI: true,
+                            mapTypeId: "terrain",
+                        });
+
+                        //const drawingManager = new google.maps.drawing.DrawingManager({
+                        //    drawingMode: google.maps.drawing.OverlayType.POLYGON,
+                        //    drawingControl: false,
+                        //    drawingControlOptions: {
+                        //        position: google.maps.ControlPosition.TOP_CENTER
+                        //    },
+                        //    polygonOptions: {
+                        //        strokeColor: "#00b347",
+                        //        strokeWeight: 2,
+                        //        fillColor: "#00FF00",
+                        //        fillOpacity: 0.5
+                        //    }
+                        //});
+                        //drawingManager.setMap(map);
+
+                        const triangleCoords = [
+                            { lat: 25.774, lng: -80.19 },
+                            { lat: 18.466, lng: -66.118 },
+                            { lat: 32.321, lng: -64.757 },
+                            { lat: 25.774, lng: -80.19 },
+                        ];
+                        // Construct the polygon.
+                        const bermudaTriangle = new google.maps.Polygon({
+                            paths: triangleCoords,
+                            strokeColor: "#FF0000",
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: "#FF0000",
+                            fillOpacity: 0.35,
+                        });
+
+                        bermudaTriangle.setMap(map);
+                    }
+
+                    window.initMap = initMap;
+
+                </script>
+
+                <div class="row">
+                    <h5 class="text-center" style="margin-top: 20px;">Parecer</h5>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div>@Model.Parecer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
 
 
 
-                        
 
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">

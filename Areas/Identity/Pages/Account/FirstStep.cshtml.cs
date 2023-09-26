@@ -12,6 +12,7 @@ namespace GeotecnologiaKNS.Areas.Identity.Pages.Account
             _context = context;
         }
 
+        public int Id { get; set; }
         [BindProperty]
         public InputModel Input { get; set; }
 
