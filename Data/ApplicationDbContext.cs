@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using GeotecnologiaKNS.Areas.Identity.Pages.Account;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 #pragma warning disable CS8618
 
 namespace GeotecnologiaKNS.Data
@@ -72,7 +73,7 @@ namespace GeotecnologiaKNS.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ApplicationRole>()
-                .HasQueryFilter(x => !_userContext.TenantId.HasValue || 
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue ||
                                      _userContext.IsApplicationAdmin.GetValueOrDefault() ||
                                      (x.Name != nameof(Infra.Roles.ApplicationAdmin) && _userContext.IsTenantAdmin.GetValueOrDefault() && x.TenantId == _userContext.TenantId));
 

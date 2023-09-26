@@ -1,5 +1,7 @@
-﻿using GeotecnologiaKNS.Validators;
+﻿using GeotecnologiaKNS.Areas.Identity.Pages.Account;
+using GeotecnologiaKNS.Validators;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
 {
@@ -26,7 +28,7 @@ namespace GeotecnologiaKNS.Models
         public string RazaoSocial { get; set; }
 
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Cnpj")]
+        [Display(Name = "CNPJ")]
         [CnpjValid(ErrorMessage = "Cnpj invalido")]
         public string Cnpj { get; set; }
 
