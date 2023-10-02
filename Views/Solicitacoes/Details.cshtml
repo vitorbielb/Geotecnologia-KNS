@@ -121,7 +121,7 @@
             <div class="card-body">
                 <input type="hidden" asp-for="Id" />
 
-                <div class="row">
+                <div class="row" style="width: 300px">
                     @Html.DisplayStatus(Model.Status)
                 </div>
             </div>
@@ -281,7 +281,7 @@
                     <h5 class="text-center" style="margin-top: 20px;">Parecer</h5>
                     <div class="col-md-12">
                         <div class="form-group">
-                            <div>@Model.Parecer</div>
+                            <div class="text-center" style="margin-top: 10px;">@Model.Parecer</div>
                         </div>
                     </div>
                 </div>
