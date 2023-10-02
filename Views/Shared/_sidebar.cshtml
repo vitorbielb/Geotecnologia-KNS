@@ -42,10 +42,10 @@
                 </ul>
             </div>
         </li>
-        @if (User.Identity != null && 
-            (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read) || 
-             User.Identity.HasEnabled<Features.Role>(operation => operation.Read) || 
-             User.Identity.HasEnabled<Features.User>(operation => operation.Read)))
+        @if (User.Identity != null &&
+        (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read) ||
+        User.Identity.HasEnabled<Features.Role>(operation => operation.Read) ||
+        User.Identity.HasEnabled<Features.User>(operation => operation.Read)))
         {
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
@@ -87,7 +87,23 @@
                             </li>
                         </ul>
                     }
-                </div>
+                    @if (User.Identity.HasEnabled<Features.User>(operation => operation.Read))
+                    {
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("Index", "Analista")">
+                                    <i class="menu-icon">
+                                        <svg width="14px" height="14px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect x="6" y="6" width="36" height="36" rx="3" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></rect> <path d="M6 14H40" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M30 22H42" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M30 30H42" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M23 22H24" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M23 30H24" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M14 6L14 42" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                                    </i>
+                                    Analistas
+                                </a>
+                            </li>
+                        </ul>
+                
+                    }
+                    
+            </div>
+
             </li>
         }
     </ul>

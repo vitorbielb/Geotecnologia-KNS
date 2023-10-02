@@ -11,13 +11,15 @@ namespace GeotecnologiaKNS.Views
         {
             return new HtmlString($"<a class=\"btn btn-{_statusDict[status]}\">{status}</a>");
         }
+
         public static IHtmlContent DisplayStatusFor<TModel, TResult>(this IHtmlHelper<TModel> htmlHelper, Expression<Func<TModel, TResult>> expression)
         {
             StatusGetter statusGetter = new StatusGetter();
             statusGetter.Visit(expression);
             var status = statusGetter.Value ?? throw new ArgumentNullException();
-            return new HtmlString($"<a class=\"btn btn-{_statusDict[status]}\">{status}</a>");
+            return new HtmlString($"<a class=\"btn btn-{_statusDict[status]} status-btn\">{status}</a>");
         }
+
 
         static Dictionary<Status, string> _statusDict = new()
         {

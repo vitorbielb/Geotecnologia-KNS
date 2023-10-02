@@ -25034,4 +25034,7 @@ dl {
     background-color: darkgrey;
     outline: 1px solid slategrey;
 }
+.status-btn {
+    width: 150px; /* Defina a largura desejada para os botões de status */
+}
 

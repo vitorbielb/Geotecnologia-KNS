@@ -51,6 +51,13 @@ public partial class Features
 
         public string FeatureName => nameof(Solicitacoes);
     }
+    public class Analista : IFeature
+    {
+        public bool Read { get; set; }
+        public bool Update { get; set; }
+
+        public string FeatureName => nameof(Analistas);
+    }
 
     public class Role : IFeature
     {

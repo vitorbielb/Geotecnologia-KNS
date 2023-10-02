@@ -12,6 +12,7 @@ public partial class Features
     public Propriedade Propriedades { get; set; }
     public Solicitacao Solicitacoes { get; set; }
     public Role Roles { get; set; }
+    public Analista Analistas { get; set; }
 
     #region Static methods
     public static IEnumerable<Claim> GetAll(string defaultValue)
@@ -62,7 +63,7 @@ public static class Roles
             p => p.Produtores.Read,
             p => p.Propriedades.Read,
             p => p.Solicitacoes.Read,
-            p => p.Solicitacoes.Update));
+            p => p.Analistas.Update));
 
     #region Static methods
     public static IEnumerable<RoleClaims> GetRoleClaims()
