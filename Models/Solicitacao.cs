@@ -44,7 +44,7 @@ namespace GeotecnologiaKNS.Models
     public enum Status
     {
         Solicitado,
-        Monitorada,
+        Liberado,
         Alerta,
         Bloqueado
     }
