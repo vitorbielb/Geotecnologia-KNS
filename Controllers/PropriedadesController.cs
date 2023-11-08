@@ -20,6 +20,11 @@ namespace GeotecnologiaKNS.Controllers
             return View(model);
 
         }
+        public async Task<IActionResult> IndexValidacao()
+        {
+            var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
+            return View(model);
+        }
 
         // GET: Propriedades/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -32,7 +37,7 @@ namespace GeotecnologiaKNS.Controllers
             }
 
             var propriedade = await _context.Propriedades
-
+                .Include(p => p.Documentos) // Incluindo a lista de arquivos associados à propriedade
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (propriedade == null)
             {
@@ -49,15 +54,12 @@ namespace GeotecnologiaKNS.Controllers
             return View();
         }
 
-        // POST: Propriedades/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [TenantFilter]
         public async Task<IActionResult> Create(Propriedade propriedade)
         {
-            propriedade.Produtor = _context.Produtores.Find(propriedade.ProdutorId)!;
+            propriedade.Produtor = _context.Produtores.Find(propriedade.Id)!;
 
             if (ModelState.IsValid)
             {
@@ -70,9 +72,14 @@ namespace GeotecnologiaKNS.Controllers
             return View(propriedade);
         }
 
-        // GET: Propriedades/Edit/5
+
         public async Task<IActionResult> Edit(int? id)
         {
+            ViewBag.Validacao = ((Validacao[])Enum.GetValues(typeof(Situacao)))
+              .ToSelectListItems(
+                  x => x.ToString(),
+                  (Func<Validacao, object>)(x => (int)x),
+                  options => options.Placeholder = "Selecione...");
             FillProdutoresUnidadesFederativasViewBag();
 
             if (id == null || _context.Propriedades == null)
@@ -99,7 +106,7 @@ namespace GeotecnologiaKNS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [TenantFilter]
-        public async Task<IActionResult> Edit([Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,Outros")] Models.Propriedade propriedade)
+        public async Task<IActionResult> Edit([Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,ProdutorId,Validacao,Outros")] Models.Propriedade propriedade)
         {
             if (ModelState.IsValid)
             {
@@ -182,7 +189,7 @@ namespace GeotecnologiaKNS.Controllers
         private void FillProdutoresUnidadesFederativasViewBag()
         {
             ViewBag.UnidadesFederativas = UnidadesFederativasExtension.GetUnidadesFederativas();
-            ViewBag.Produtores = _context.Produtores
+            ViewBag.Produtores = _context.Produtores.Where(produtores => produtores.Situacao == Situacao.Validado)
                 .ToSelectListItems(
                     x => x.Nome,
                     x => x.Id,

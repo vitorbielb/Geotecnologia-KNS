@@ -5,24 +5,32 @@
             <div class="card-body">
                 <p class="card-description">
                 </p>
+
                 <div class="table-responsive">
                     <table class="table">
-                        <thead>
-                            <tr style="background-color: #FFF; color: #258cfb;">
-                                <th>
+                        @if (Model != null && Model.Id != 0)
+                        {
+                            <thead>
+                                <tr style="background-color: #FFF; color: #258cfb;">
+                                    <th>
 
-                                    @Html.DisplayNameFor(model => model.Nome)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.Cpf)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.Industria)
-                                </th>
+                                        @Html.DisplayNameFor(model => model.Nome)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Cpf)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Industria)
+                                    </th>
 
-                            </tr>
-                        </thead>
-                        <tr class="table-row-link" @* data-url="@Url.Action("Edit", "Produtores", new { id = produtor.Id })*@">
+                                </tr>
+                            </thead>
+                        }
+                        else
+                        {
+                            <p>Nenhum vínculo</p>
+                        }
+                        <tr class="table-row-link" @*data-url="@Url.Action("Edit", "Produtores", new { id = produtor.Id })*@">
                             <td>@Html.DisplayFor(x => Model.Nome)</td>
                             <td>@Html.DisplayFor(x => Model.Cpf)</td>
                             <td>@Html.DisplayFor(x => Model.Industria)</td>

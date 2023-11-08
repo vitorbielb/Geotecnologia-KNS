@@ -1,4 +1,5 @@
-﻿@model GeotecnologiaKNS.Models.Propriedade
+﻿@using GeotecnologiaKNS.Views;
+@model GeotecnologiaKNS.Models.Propriedade
 @inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
 
 <head>
@@ -36,17 +37,13 @@
                             @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
                         </div>
                         <div class="form-group">
-                            <label asp-for="UnidadeFederativa" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                            </svg>
-                            <select asp-for="UnidadeFederativa" class="form-control form-control-sm disabled-field" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)" disabled></select>
+                            <label asp-for="UnidadeFederativa" class="control-label"></label>
+                            <select asp-for="UnidadeFederativa" class="form-control form-control-sm" asp-items="UnidadesFederativasExtension.GetUnidadesFederativas()" onchange="populateCities(this.value)"></select>
                             @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
                         </div>
                         <div class="form-group">
-                            <label asp-for="Municipio" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                            </svg>
-                            <input asp-for="Municipio" class="form-control disabled-field" disabled />
+                            <label asp-for="Municipio" class="control-label"></label>
+                            <input asp-for="Municipio" class="form-control" />
                             <span asp-validation-for="Municipio" class="text-danger"></span>
                         </div>
                         <!-- Grupo 2 -->
@@ -84,18 +81,13 @@
                         </div>
                         <!-- Grupo 3 -->
                         <div class="form-group">
-                            <label asp-for="Latitude" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                            </svg>
-                            <input asp-for="Latitude" class="form-control disabled-field" disabled />
-
+                            <label asp-for="Latitude" class="control-label"></label>
+                            <input asp-for="Latitude" class="form-control" />
                             @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
                         </div>
                         <div class="form-group">
-                            <label asp-for="Area" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                            </svg>
-                            <input asp-for="Area" class="form-control disabled-field" disabled />
+                            <label asp-for="Area" class="control-label"></label>
+                            <input asp-for="Area" class="form-control" />
                             @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
                         </div>
                         <div class="form-group">
@@ -106,17 +98,13 @@
                         </div>
                         <!-- Grupo 4 -->
                         <div class="form-group">
-                            <label asp-for="Longitude" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                            </svg>
-                            <input asp-for="Longitude" class="form-control disabled-field" disabled />
+                            <label asp-for="Longitude" class="control-label"></label>
+                            <input asp-for="Longitude" class="form-control" />
                             @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
                         </div>
                         <div class="form-group">
-                            <label asp-for="AreaUtil" class="control-label"></label> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
-                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
-                            </svg>
-                            <input asp-for="AreaUtil" class="form-control disabled-field" disabled />
+                            <label asp-for="AreaUtil" class="control-label"></label>
+                            <input asp-for="AreaUtil" class="form-control" />
                             @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
                         </div>
                         <div class="form-group select-with-icon">
@@ -143,6 +131,12 @@
                         </div>
                         @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
                     </div>
+
+                    <div class="form-group">
+                        <label asp-for="Validacao" class="control-label"></label>
+                        <select asp-for="Validacao" class="form-control form-control-sm" asp-items="ViewBag.Validacao"></select>
+                        <span asp-validation-for="Validacao" class="text-danger"></span>
+                    </div>
                     <div class="form-group" style="margin-top: 40px;">
                         <a asp-action="Index" class="btn btn-secondary">Voltar</a>
                     </div>
@@ -163,6 +157,19 @@
                         </a>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    @Html.DisplayValidacao(Model.Validacao)
+                </div>
             </div>
         </div>
     </div>

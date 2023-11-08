@@ -1,0 +1,61 @@
+﻿@using GeotecnologiaKNS.Views;
+@model IEnumerable<Produtor>
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Validações pendentes</h4>
+                <p class="card-description">
+                </p>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr style="background-color: #FFF; color: #258cfb;">
+
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Id)
+                                </th>
+                                <th>
+
+                                    @Html.DisplayNameFor(model => model.Nome)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Cpf)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Industria)
+                                </th>
+                                <th>
+                                    @Html.DisplayNameFor(model => model.Situacao)
+                                </th>
+                            </tr>
+                        </thead>
+                        @foreach (var produtor in Model)
+                        {
+                            <tr class="table-row-link" data-url="@Url.Action("Edit", "Produtores", new { id = produtor.Id })">
+                                <td>@Html.DisplayFor(x => produtor.Id)</td>
+                                <td>@Html.DisplayFor(x => produtor.Nome)</td>
+                                <td>@Html.DisplayFor(x => produtor.Cpf)</td>
+                                <td>@User.Identity.GetIndustria()</td>
+                                <td>
+                                    @Html.DisplaySituacaoFor(x => produtor.Situacao)
+                                </td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Adiciona um evento de clique em todas as linhas da tabela com a classe "table-row-link"
+    const rows = document.querySelectorAll('.table-row-link');
+    rows.forEach(row => {
+        row.addEventListener('click', function () {
+            const url = this.dataset.url;
+            window.location.href = url; // Redireciona para a URL da página de edição
+        });
+    });
+</script>

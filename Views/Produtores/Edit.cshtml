@@ -1,4 +1,5 @@
-﻿@model Produtor
+﻿@using GeotecnologiaKNS.Views;
+@model Produtor
 @inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
 
 <div class="row">
@@ -43,6 +44,11 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label asp-for="Situacao" class="control-label"></label>
+                        <select asp-for="Situacao" class="form-control form-control-sm" asp-items="ViewBag.Situacao"></select>
+                        <span asp-validation-for="Situacao" class="text-danger"></span>
+                    </div>
                     <div style="margin-top: 20px">
                         <a type="submit" class="btn btn-secondary" href="@Url.Action("Index", "Produtores")">Voltar</a>
 
@@ -64,6 +70,20 @@
                         </div>
                     </div>
                 }
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    @Html.DisplaySituacao(Model.Situacao)
+                </div>
             </div>
         </div>
     </div>
@@ -98,4 +118,6 @@
         </div>
     </div>
 </div>
-
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}

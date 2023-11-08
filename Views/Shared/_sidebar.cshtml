@@ -16,7 +16,7 @@
                 <ul class="nav flex-column sub-menu">
 
                     <li class="nav-item">
-                        <a class="nav-link" href="@Url.Action("Index", "Produtores")">
+                        <a class="nav-link" href="@Url.Action("IndexValidados", "Produtores")">
                             <i class="menu-icon">
                                 <svg width="14px" height="14px" viewBox="0 0 36.00 36.00" xmlns="http://www.w3.org/2000/svg" fill="#656565" stroke="#656565" stroke-width="0.00036"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="0.144"></g><g id="SVGRepo_iconCarrier"> <g id="Group_7" data-name="Group 7" transform="translate(-247 -205)"> <path id="Path_8" data-name="Path 8" d="M281,219a2,2,0,0,0,0-4h-5.1l-2.3-8.1a2.672,2.672,0,0,0-2.5-1.9h-12a2.807,2.807,0,0,0-2.5,1.9l-2.3,8.1H249a2,2,0,0,0,0,4h4.2a12.063,12.063,0,0,0,2.9,6H253a2.807,2.807,0,0,0-2.5,1.9l-3,12.1a1.431,1.431,0,0,0,1.5,1.9h32a1.458,1.458,0,0,0,1.5-1.9l-3-12.1A2.672,2.672,0,0,0,277,225h-3.1a12.063,12.063,0,0,0,2.9-6Zm-16,6a8.039,8.039,0,0,1-7.7-6h15.5A8.25,8.25,0,0,1,265,225Zm-5-16h10l1.7,6H258.3Zm-7.9,28,2-8H257v8Zm8.9,0v-8h8v8Zm16.9,0H273v-8h2.9Z" fill="#0000000"></path> </g> </g></svg>
                             </i>
@@ -92,18 +92,55 @@
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
                                 <a class="nav-link" href="@Url.Action("Index", "Analista")">
-                                    <i class="menu-icon">
-                                        <svg width="14px" height="14px" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <rect x="6" y="6" width="36" height="36" rx="3" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></rect> <path d="M6 14H40" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M30 22H42" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M30 30H42" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M23 22H24" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M23 30H24" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> <path d="M14 6L14 42" stroke="#656565" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
-                                    </i>
+                                    <i class="mdi mdi-clipboard-text menu-icon"></i>
                                     Analistas
                                 </a>
                             </li>
                         </ul>
-                
-                    }
-                    
-            </div>
 
+                    }
+
+                </div>
+
+            </li>
+        }
+        @if (User.Identity != null &&
+        (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read) ||
+        User.Identity.HasEnabled<Features.Role>(operation => operation.Read) ||
+        User.Identity.HasEnabled<Features.User>(operation => operation.Read)))
+        {
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#ui-validacao" aria-expanded="false" aria-controls="ui-validacao">
+                    <i class="menu-icon mdi mdi-checkbox-multiple-marked"></i>
+                    <span class="menu-title">Validações</span>
+                    <i class="menu-arrow"></i>
+                </a>
+                <div class="collapse" id="ui-validacao">
+                    @if (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read))
+                    {
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("IndexValidacaoProdutor", "ValidadesProdutor")">
+                                    <i class="menu-icon mdi mdi-checkbox-multiple-marked-circle-outline"></i>
+                                    Produtores
+                                </a>
+                            </li>
+                        </ul>
+
+                    }
+                    @if (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read))
+                    {
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="@Url.Action("IndexValidacaoPropriedade", "ValidadesPropriedade")">
+                                    <i class="menu-icon mdi mdi-checkbox-multiple-marked-circle"></i>
+                                    Propriedades
+                                </a>
+                            </li>
+                        </ul>
+
+                    }
+                </div>
             </li>
         }
     </ul>

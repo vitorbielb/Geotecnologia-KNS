@@ -6,6 +6,7 @@ namespace GeotecnologiaKNS.Models
 {
     public class Produtor : IIndustriaInfo, IPrimaryKeyInfo<int>
     {
+        [Key]
         public int Id { get; set; }
 
         [ForeignKey(nameof(Industria))]
@@ -30,5 +31,15 @@ namespace GeotecnologiaKNS.Models
 
         public List<Propriedade> Propriedades { get; set; }
 
+        public Solicitacao Solicitacoes { get; set; }
+        [Display(Name = "Situação")]
+        public Situacao Situacao { get; set; } = Situacao.Inválido;
+
     }
+}
+public enum Situacao
+{
+    Inválido,
+    Validado,
+
 }
