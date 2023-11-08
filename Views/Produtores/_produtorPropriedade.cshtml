@@ -5,54 +5,61 @@
             <div class="card-body">
                 <p class="card-description">
                 </p>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr style="background-color: #FFF; color: #258cfb;">
-                                <th>
-                                    @Html.DisplayNameFor(model => model.Id)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.NomePropriedade)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.UnidadeFederativa)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.Municipio)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.Industria)
-                                </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
-                                </th>
-                            </tr>
-                        </thead>
-                        @foreach (var propriedade in Model)
-                        {
-                            <tr class="table-row-link" data-url="@*Url.Action("Edit", "Propriedades", new { id = item.Id })*@">
-                                <td>@Html.DisplayFor(modelItem => propriedade.Id)</td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => propriedade.NomePropriedade)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => propriedade.UnidadeFederativa)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => propriedade.Municipio)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => propriedade.Industria)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => propriedade.CadastroAmbientalRural)
-                                </td>
-                            </tr>
-                        }
-                        
-                    </table>
-                </div>
+                @if (Model?.Any() ?? false)
+                {
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr style="background-color: #FFF; color: #258cfb;">
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Id)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.NomePropriedade)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.UnidadeFederativa)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Municipio)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Industria)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.CadastroAmbientalRural)
+                                    </th>
+                                </tr>
+                            </thead>
+                            @foreach (var propriedade in Model)
+                            {
+                                <tr class="table-row-link" data-url="@*Url.Action("Edit", "Propriedades", new { id = item.Id })*@">
+                                    <td>@Html.DisplayFor(modelItem => propriedade.Id)</td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => propriedade.NomePropriedade)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => propriedade.UnidadeFederativa)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => propriedade.Municipio)
+                                    </td>
+                                    <td>
+                                        @User.Identity.GetIndustria()
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => propriedade.CadastroAmbientalRural)
+                                    </td>
+                                </tr>
+                            }
+
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p>Nenhum vínculo</p>
+                }
             </div>
         </div>
     </div>

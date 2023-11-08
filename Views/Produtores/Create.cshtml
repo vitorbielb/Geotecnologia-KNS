@@ -8,12 +8,12 @@
                 <form asp-action="Create" method="post">
                     <div class="form-group">
                         <div class="row">
-                            <div class="col-md-6" style="margin-top: 40px;">
+                            <div class="col-md-6" style="margin-top: 10px;">
                                 <label asp-for="Nome" class="control-label"></label>
                                 <input asp-for="Nome" class="form-control" />
                                 @Html.ValidationMessageFor(model => model.Nome, "", new { @class = "error-message" })
                             </div>
-                            <div class="col-md-6" style="margin-top: 40px;">
+                            <div class="col-md-6" style="margin-top: 10px;">
                                 <label asp-for="Cpf" class="control-label"></label>
                                 <input asp-for="Cpf" class="form-control" />
                                 @Html.ValidationMessageFor(model => model.Cpf, "", new { @class = "error-message" })
@@ -26,6 +26,8 @@
                         <input class="form-control" value="@User.Identity.GetIndustria()" disabled />
                         @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
                     </div>
+
+                    <h5>ATENÇÃO! O cadastro só será considerado válido após a análise de nossa equipe técnica. Até que a análise seja concluída, ele será considerado inválido.</h5>
                     <div class="form-group" style="margin-top: 40px;">
                         <a type="submit" href="/Produtores/Index" class="btn btn-secondary">Voltar</a>
                     </div>

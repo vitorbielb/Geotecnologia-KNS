@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
 {
     public abstract class Arquivo : IPrimaryKeyInfo<int>
     {
         public int Id { get; set; }
+        [DisplayName("Descrição")]
         public string Descricao { get; set; }
         public byte[] Dados { get; set; }
         public string ContentType { get; set; }

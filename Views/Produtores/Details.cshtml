@@ -1,27 +1,32 @@
 ﻿@using GeotecnologiaKNS.Views;
-@model Produtor
+@model GeotecnologiaKNS.Models.Produtor
 @inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
 
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Validar Produtor</h4>
-                @using (Html.BeginForm())
-                {
-                    @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    <!-- Grupo 1 -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                @Html.LabelFor(model => model.Nome)
-                                @Html.TextBoxFor(model => model.Nome, new { @class = "form-control" })
+                                @Html.LabelFor(model => model.Nome) <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                                </svg>
+                                @Html.TextBoxFor(model => model.Nome, new { @class = "form-control disabled-field", @disabled = "disabled" })
                                 @Html.ValidationMessageFor(model => model.Nome, "", new { @class = "error-message" })
                             </div>
                         </div>
+
                         <div class="col-md-6">
                             <div class="form-group">
-                                @Html.LabelFor(model => model.Cpf)
-                                @Html.TextBoxFor(model => model.Cpf, new { @class = "form-control" })
+                                @Html.LabelFor(model => model.Cpf) <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                                </svg>
+                                @Html.TextBoxFor(model => model.Cpf, new { @class = "form-control disabled-field", @disabled = "disabled" })
                                 @Html.ValidationMessageFor(model => model.Cpf, "", new { @class = "error-message" })
                             </div>
                         </div>
@@ -29,7 +34,9 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label asp-for="Industria" class="control-label"></label>
+                                <label asp-for="Industria" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                                </svg>
                                 <input class="form-control" value="@User.Identity.GetIndustria()" disabled />
                                 @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
                             </div>
@@ -44,37 +51,15 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label asp-for="Situacao" class="control-label"></label>
-                        <select asp-for="Situacao" class="form-control form-control-sm" asp-items="ViewBag.Situacao"></select>
-                        <span asp-validation-for="Situacao" class="text-danger"></span>
-                    </div>
-                    <div style="margin-top: 20px">
-                        <a type="submit" class="btn btn-secondary" href="@Url.Action("IndexValidacaoProdutor", "ValidadesProdutor")">Voltar</a>
-
-                        <div style="float: right;">
-                            <button type="submit" class="btn btn-primary gradient-button">
-                                <i class="bi bi-check-circle-fill"></i>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-                                </svg>
-                                Salvar
-                            </button>
-                            <a href="@Url.Action("Delete", "Produtores", new { id = Model.Id })" class="btn btn-primary gradient-button">
-                                <i class="bi bi-trash3-fill"></i>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
-                                    <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z" />
-                                </svg>
-                                Excluir
-                            </a>
-                        </div>
-                    </div>
-                }
-
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+
+
+
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
@@ -111,7 +96,7 @@
                         <partial name="_listaSolicitacoes" model="repository.GetSolicitacoesByProdutor(Model.Id)"></partial>
                     </div>
                     <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-                        <partial name="_file-list" model="Model"></partial>
+                        <partial name="_file-list-ADM" model="Model"></partial>
                     </div>
                 </div>
             </div>

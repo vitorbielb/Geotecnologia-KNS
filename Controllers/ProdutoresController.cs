@@ -48,10 +48,13 @@ public class ProdutoresController : Controller
 
         return View(produtor);
     }
-
-    // GET: Produtores/Edit/5
     public async Task<ActionResult> EditAsync(int id)
     {
+        ViewBag.Situacao = ((Situacao[])Enum.GetValues(typeof(Situacao)))
+               .ToSelectListItems(
+                   x => x.ToString(),
+                   x => (int)x,
+                   options => options.Placeholder = "Selecione...");
         var produtor = await _context.Produtores
                                      .Include(x => x.Propriedades)
                                      .Include(x => x.Documentos)
@@ -64,8 +67,6 @@ public class ProdutoresController : Controller
 
         return View(produtor);
     }
-
-    // POST: Produtores/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
     [TenantFilter]
@@ -77,7 +78,7 @@ public class ProdutoresController : Controller
         {
             _context.Produtores.Update(produtor);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            return RedirectToAction("IndexValidacaoProdutor", "ValidadesProdutor");
         }
 
         var persitedProdutor = await _context.Produtores
@@ -90,6 +91,28 @@ public class ProdutoresController : Controller
 
         return View(produtor);
     }
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null || _context.Produtores == null)
+        {
+            return NotFound();
+        }
+
+        var produtores = await _context.Produtores
+            .Include(s => s.Propriedades)
+            .Include(p => p.Documentos)
+            .Include(y => y.Solicitacoes)
+            .FirstOrDefaultAsync(m => m.Id == id);
+        if (produtores == null)
+        {
+            return NotFound();
+        }
+
+        return View(produtores);
+    }
+
+    // GET: Produtores/Edit/5
+
 
     // GET: Produtores/Delete/5
     public ActionResult Delete(int id)

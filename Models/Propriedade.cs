@@ -24,10 +24,10 @@ namespace GeotecnologiaKNS.Models
         public string CicloProducao { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Área da propriedade (ha)")]
-        public string Area { get; set; } 
+        public string Area { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Área útil (ha)")]
-        public string AreaUtil { get; set; } 
+        public string AreaUtil { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Latitude (UTM)")]
         public string Latitude { get; set; }
@@ -51,11 +51,18 @@ namespace GeotecnologiaKNS.Models
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Cadastro Ambiental Rural")]
         public string CadastroAmbientalRural { get; set; }
-      
+
         [Required(ErrorMessage = "Campo obrigatório! Caso não tenha cadastrado um Produtor, cadastre-o na guia de 'Produtores'")]
         [Display(Name = "Produtor")]
         public int ProdutorId { get; set; }
         public Produtor? Produtor { get; set; }
         public List<PropriedadeArquivo>? Documentos { get; set; }
+        public Validacao Validacao { get; set; } = Validacao.Inválido;
+    }
+    public enum Validacao
+    {
+        Inválido,
+        Validado,
+
     }
 }

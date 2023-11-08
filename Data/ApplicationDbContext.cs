@@ -1,5 +1,6 @@
 ﻿using GeotecnologiaKNS.Areas.Identity.Pages.Account;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 #pragma warning disable CS8618
 
 namespace GeotecnologiaKNS.Data
@@ -26,9 +27,19 @@ namespace GeotecnologiaKNS.Data
         public DbSet<ProdutorArquivo> ProdutoresArquivos { get; set; }
         public DbSet<Solicitacao> Solicitacao { get; set; }
         public DbSet<Analista> Analistas { get; set; }
+        public DbSet<ValidadeProdutor> Validade { get; set; }
+        public DbSet<ValidadePropriedade> validadePropriedades { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            base.OnModelCreating(modelBuilder);
+            var keysProperties = modelBuilder.Model.GetEntityTypes().Select(x => x.FindPrimaryKey()).SelectMany(x => x.Properties);
+            foreach (var property in keysProperties)
+            {
+                property.ValueGenerated = ValueGenerated.OnAdd;
+            }
+
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Propriedade>()

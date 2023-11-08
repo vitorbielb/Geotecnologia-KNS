@@ -1,0 +1,183 @@
+﻿@using GeotecnologiaKNS.Views;
+@model GeotecnologiaKNS.Models.Propriedade
+@inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Propriedade</h4>
+                <form asp-action="Edit">
+                    <div class="row">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <!-- Grupo 1 -->
+                        <div class="form-group">
+                            <label asp-for="NomePropriedade" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            @Html.TextBoxFor(model => model.NomePropriedade, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.NomePropriedade, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="Bioma" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <div class="select-wrapper">
+                                @Html.TextBoxFor(model => model.Bioma, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="UnidadeFederativa" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            @Html.TextBoxFor(model => model.UnidadeFederativa, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Municipio" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            @Html.TextBoxFor(model => model.Municipio, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            <span asp-validation-for="Municipio" class="text-danger"></span>
+                        </div>
+                        <!-- Grupo 2 -->
+                        <div class="form-group select-with-icon">
+                            <label asp-for="TipoPropriedade" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <div class="select-wrapper">
+                                @Html.TextBoxFor(model => model.TipoPropriedade, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="CicloProducao" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <div class="select-wrapper">
+                                @Html.TextBoxFor(model => model.CicloProducao, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Industria" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <input class="form-control" value="@User.Identity.GetIndustria()" disabled />
+                            @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+                        </div>
+                        <!-- Grupo 3 -->
+                        <div class="form-group">
+                            <label asp-for="Latitude" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            @Html.TextBoxFor(model => model.Latitude, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Longitude" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            @Html.TextBoxFor(model => model.Longitude, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Area" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            @Html.TextBoxFor(model => model.Area, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="CadastroAmbientalRural" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            @Html.TextBoxFor(model => model.CadastroAmbientalRural, new { @class = "form-control disabled-field", @disabled = "disabled" })
+
+                            @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
+                        </div>
+                        <!-- Grupo 4 -->
+
+                        <div class="form-group">
+                            <label asp-for="AreaUtil" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            @Html.TextBoxFor(model => model.AreaUtil, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
+                        </div>
+                        <div class="form-group select-with-icon">
+                            <label asp-for="TipoCadastroRural" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                                <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                            </svg>
+                            <div class="select-wrapper">
+                                @Html.TextBoxFor(model => model.TipoCadastroRural, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                            </div>
+                            @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
+                        </div>
+                    </div>
+                    <div class="form-group select-with-icon" hidden>
+                        <label asp-for="ProdutorId" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
+                            <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
+                        </svg>
+                        @Html.TextBoxFor(model => model.ProdutorId, new { @class = "form-control disabled-field", @disabled = "disabled" })
+                        @Html.ValidationMessageFor(model => model.ProdutorId, "", new { @class = "error-message" })
+                    </div>                
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row">
+                    @Html.DisplayValidacao(Model.Validacao)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Vinculo</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Solicitações</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Documentos</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                        <partial name="_propriedadeProdutor" model="Model.Produtor"></partial>
+                    </div>
+                    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                        <partial name="_listaSolicitacoes" model="repository.GetSolicitacoesByPropriedade(Model.Id)"></partial>
+                    </div>
+                    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                        <partial name="_file-list-ADM" model="Model"></partial>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
+

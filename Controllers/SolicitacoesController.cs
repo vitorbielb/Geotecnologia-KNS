@@ -47,7 +47,7 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Solicitacoes/Create
         public IActionResult Create()
         {
-            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "NomePropriedade");
+            FillPropriedadesViewBag();
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace GeotecnologiaKNS.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "NomePropriedade", solicitacao.PropriedadeId);
+            FillPropriedadesViewBag();
             return View(solicitacao);
         }
 
@@ -110,6 +110,14 @@ namespace GeotecnologiaKNS.Controllers
         private bool SolicitacaoExists(int id)
         {
             return (_context.Solicitacao?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+        private void FillPropriedadesViewBag()
+        {
+            ViewBag.Propriedades = _context.Propriedades.Where(propriedades => propriedades.Validacao == Validacao.Validado)
+                .ToSelectListItems(
+                    x => x.NomePropriedade,
+                    x => x.Id,
+                    options => options.Placeholder = "Selecione...");
         }
     }
 }
