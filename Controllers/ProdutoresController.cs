@@ -48,9 +48,7 @@ public class ProdutoresController : Controller
 
         return View(produtor);
     }
-
-    // GET: Produtores/Edit/5
-    public async Task<ActionResult> EditProdutorAsync(int id)
+    public async Task<ActionResult> EditAsync(int id)
     {
         ViewBag.Situacao = ((Situacao[])Enum.GetValues(typeof(Situacao)))
                .ToSelectListItems(
@@ -69,17 +67,52 @@ public class ProdutoresController : Controller
 
         return View(produtor);
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [TenantFilter]
     public async Task<ActionResult> EditAsync(Produtor produtor)
     {
-
         ModelState.Remove("Documentos");
 
-        // Salva as alterações no banco de dados
-        await _context.SaveChangesAsync();
+        if (ModelState.IsValid)
+        {
+            _context.Produtores.Update(produtor);
+            await _context.SaveChangesAsync();
+            return RedirectToAction("IndexValidacaoProdutor", "ValidadesProdutor");
+        }
 
-        // Redireciona para a página de index
-        return RedirectToAction("Index");
+        var persitedProdutor = await _context.Produtores
+                                     .Include(x => x.Propriedades)
+                                     .Include(x => x.Documentos)
+                                     .FirstAsync(x => x.Id == produtor.Id);
+
+        produtor.Propriedades = persitedProdutor.Propriedades;
+        produtor.Documentos = persitedProdutor.Documentos;
+
+        return View(produtor);
     }
+    public async Task<IActionResult> Details(int? id)
+    {
+        if (id == null || _context.Produtores == null)
+        {
+            return NotFound();
+        }
+
+        var produtores = await _context.Produtores
+            .Include(s => s.Propriedades)
+            .Include(p => p.Documentos)
+            .Include(y => y.Solicitacoes)
+            .FirstOrDefaultAsync(m => m.Id == id);
+        if (produtores == null)
+        {
+            return NotFound();
+        }
+
+        return View(produtores);
+    }
+
+    // GET: Produtores/Edit/5
+
 
     // GET: Produtores/Delete/5
     public ActionResult Delete(int id)

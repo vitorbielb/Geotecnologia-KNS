@@ -6,7 +6,7 @@
     <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Produtor</h4>
+                <h4 class="card-title">Validar Produtor</h4>
                 @using (Html.BeginForm())
                 {
                     @Html.AntiForgeryToken()
@@ -50,7 +50,7 @@
                         <span asp-validation-for="Situacao" class="text-danger"></span>
                     </div>
                     <div style="margin-top: 20px">
-                        <a type="submit" class="btn btn-secondary" href="@Url.Action("Index", "Produtores")">Voltar</a>
+                        <a type="submit" class="btn btn-secondary" href="@Url.Action("IndexValidacaoProdutor", "ValidadesProdutor")">Voltar</a>
 
                         <div style="float: right;">
                             <button type="submit" class="btn btn-primary gradient-button">

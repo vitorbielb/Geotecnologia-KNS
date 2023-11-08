@@ -19,5 +19,6 @@ namespace GeotecnologiaKNS.Controllers
             var produtores = await _context.Produtores.ToListAsync();
             return View(produtores);
         }
+
     }
 }

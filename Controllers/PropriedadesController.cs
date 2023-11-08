@@ -29,16 +29,22 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            ViewBag.Validacao = ((Validacao[])Enum.GetValues(typeof(Situacao)))
+              .ToSelectListItems(
+                  x => x.ToString(),
+                  (Func<Validacao, object>)(x => (int)x),
+                  options => options.Placeholder = "Selecione...");
+            FillProdutoresUnidadesFederativasViewBag();
 
             if (id == null || _context.Propriedades == null)
-
             {
                 return NotFound();
             }
 
             var propriedade = await _context.Propriedades
                 .Include(p => p.Documentos) // Incluindo a lista de arquivos associados à propriedade
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (propriedade == null)
             {
                 return NotFound();
@@ -126,7 +132,7 @@ namespace GeotecnologiaKNS.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("IndexValidacaoPropriedade", "ValidadesPropriedade");
             }
             return View(propriedade);
         }

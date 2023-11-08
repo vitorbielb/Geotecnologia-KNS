@@ -4,7 +4,7 @@
 
 namespace GeotecnologiaKNS.Data.Migrations
 {
-    public partial class Atualizacao : Migration
+    public partial class Atualizado : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -18,7 +18,7 @@ namespace GeotecnologiaKNS.Data.Migrations
             migrationBuilder.AddColumn<int>(
                 name: "Situacao",
                 table: "Produtores",
-                type: "int", 
+                type: "int",
                 nullable: false,
                 defaultValue: 0);
 

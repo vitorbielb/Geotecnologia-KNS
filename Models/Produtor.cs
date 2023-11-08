@@ -36,10 +36,10 @@ namespace GeotecnologiaKNS.Models
         public Situacao Situacao { get; set; } = Situacao.Inválido;
 
     }
-}
-public enum Situacao
-{
-    Inválido,
-    Validado,
+    public enum Situacao
+    {
+        Inválido,
+        Validado,
 
+    }
 }

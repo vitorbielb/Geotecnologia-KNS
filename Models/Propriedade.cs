@@ -59,11 +59,10 @@ namespace GeotecnologiaKNS.Models
         public List<PropriedadeArquivo>? Documentos { get; set; }
         public Validacao Validacao { get; set; } = Validacao.Inválido;
     }
-   
-}
-public enum Validacao
-{
-    Inválido,
-    Validado,
+    public enum Validacao
+    {
+        Inválido,
+        Validado,
 
+    }
 }

@@ -9,16 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Remove="Views\Produtores\Details.cshtml" />
-	  <Content Remove="Views\ValidadesPropriedade\IndexValidacaoPropriedade.cshtml" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Include="Views\Produtores\Details.cshtml" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="Views\ValidadesPropriedade\IndexValidacaoPropriedade.cshtml" />
 		<None Include="wwwroot\css\style.css" />
 		<None Include="wwwroot\fonts\Roboto\Roboto-Black.eot" />
 		<None Include="wwwroot\fonts\Roboto\Roboto-Black.ttf" />

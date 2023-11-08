@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeotecnologiaKNS.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231108114917_Atualizacao")]
-    partial class Atualizacao
+    [Migration("20231108123601_Atualizado")]
+    partial class Atualizado
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
