@@ -13,7 +13,7 @@ namespace GeotecnologiaKNS.Controllers
         {
             _context = context;
         }
-        public async Task<IActionResult> IndexValidacaoPropriedade()
+        public async Task<IActionResult> Index()
         {
             var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
             return View(model);

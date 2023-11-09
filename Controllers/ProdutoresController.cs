@@ -78,7 +78,7 @@ public class ProdutoresController : Controller
         {
             _context.Produtores.Update(produtor);
             await _context.SaveChangesAsync();
-            return RedirectToAction("IndexValidacaoProdutor", "ValidadesProdutor");
+            return RedirectToAction("Index", "ValidadesProdutor");
         }
 
         var persitedProdutor = await _context.Produtores

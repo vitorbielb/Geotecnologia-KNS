@@ -40,7 +40,7 @@
                                     @Html.DisplayFor(model => item.Email)
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(model => item.Industria.Nome)
+                                    @User.Identity.GetIndustria()
                                 </td>
                                 <td>
                                     @Html.DisplayFor(model => item.PhoneNumber)
