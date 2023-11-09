@@ -14,7 +14,7 @@ namespace GeotecnologiaKNS.Controllers
             _context = context;
         }
 
-        public async Task<ActionResult> IndexValidacaoProdutorAsync()
+       public async Task<ActionResult> IndexAsync()
         {
             var produtores = await _context.Produtores.ToListAsync();
             return View(produtores);

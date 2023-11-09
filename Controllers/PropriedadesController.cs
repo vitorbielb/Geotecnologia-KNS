@@ -132,7 +132,7 @@ namespace GeotecnologiaKNS.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("IndexValidacaoPropriedade", "ValidadesPropriedade");
+                return RedirectToAction("Index", "ValidadesPropriedade");
             }
             return View(propriedade);
         }
