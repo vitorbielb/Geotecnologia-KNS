@@ -11,12 +11,12 @@
                             <div class="col-md-6" style="margin-top: 10px;">
                                 <label asp-for="Nome" class="control-label"></label>
                                 <input asp-for="Nome" class="form-control" />
-                                @Html.ValidationMessageFor(model => model.Nome, "", new { @class = "error-message" })
+                                <span asp-validation-for="Nome" class="text-danger"></span>
                             </div>
                             <div class="col-md-6" style="margin-top: 10px;">
                                 <label asp-for="Cpf" class="control-label"></label>
                                 <input asp-for="Cpf" class="form-control" />
-                                @Html.ValidationMessageFor(model => model.Cpf, "", new { @class = "error-message" })
+                                <span asp-validation-for="Cpf" class="text-danger"></span>
                             </div>
                         </div>
                     </div>

@@ -14,7 +14,7 @@ namespace GeotecnologiaKNS.Models
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome propriedade")]
-        [StringLength(150, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 150 caracteres")]
+        [StringLength(150, MinimumLength = 2, ErrorMessage = "O nome deve ter no mínimo 2 e no máximo 150 caracteres")]
         public string NomePropriedade { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Tipo de propriedade")]
