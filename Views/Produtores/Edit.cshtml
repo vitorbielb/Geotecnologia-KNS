@@ -15,14 +15,14 @@
                             <div class="form-group">
                                 @Html.LabelFor(model => model.Nome)
                                 @Html.TextBoxFor(model => model.Nome, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(model => model.Nome, "", new { @class = "error-message" })
+                                <span asp-validation-for="Nome" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 @Html.LabelFor(model => model.Cpf)
                                 @Html.TextBoxFor(model => model.Cpf, new { @class = "form-control" })
-                                @Html.ValidationMessageFor(model => model.Cpf, "", new { @class = "error-message" })
+                                <span asp-validation-for="Cpf" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
@@ -31,7 +31,7 @@
                             <div class="form-group">
                                 <label asp-for="Industria" class="control-label"></label>
                                 <input class="form-control" value="@User.Identity.GetIndustria()" disabled />
-                                @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+                                <span asp-validation-for="Industria" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -50,7 +50,7 @@
                         <span asp-validation-for="Situacao" class="text-danger"></span>
                     </div>
                     <div style="margin-top: 20px">
-                        <a type="submit" class="btn btn-secondary" href="@Url.Action("IndexValidacaoProdutor", "ValidadesProdutor")">Voltar</a>
+                        <a type="submit" class="btn btn-secondary" href="@Url.Action("Index", "ValidadesProdutor")">Voltar</a>
 
                         <div style="float: right;">
                             <button type="submit" class="btn btn-primary gradient-button">

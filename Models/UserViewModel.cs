@@ -7,25 +7,25 @@ namespace GeotecnologiaKNS.Models
         [Key]
         public string Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Campo obrigatório")]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome")]
         public string UserName { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Celular")]
         public string PhoneNumber { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Campo obrigatório")]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Senha")]
         public string Password { get; set; }
-
+        [Required(ErrorMessage = "Campo obrigatório")]
         [DataType(DataType.Password)]
         [Display(Name = "Confirme senha")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
@@ -33,7 +33,7 @@ namespace GeotecnologiaKNS.Models
 
         public int TenantId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Função")]
         public string Role { get; set; }
     }

@@ -12,7 +12,7 @@
                         <div class="form-group">
                             <label asp-for="NomePropriedade" class="control-label"></label>
                             <input asp-for="NomePropriedade" class="form-control" />
-                            @Html.ValidationMessageFor(model => model.NomePropriedade, "", new { @class = "error-message" })
+                            <span asp-validation-for="NomePropriedade" class="text-danger"></span>
                         </div>
                         <div class="form-group select-with-icon">
                             <label asp-for="Bioma" class="control-label"></label>
@@ -27,21 +27,21 @@
                                     <option value="Pampas">Pampas</option>
                                 </select>
                             </div>
-                            @Html.ValidationMessageFor(model => model.Bioma, "", new { @class = "error-message" })
+                            <span asp-validation-for="Bioma" class="text-danger"></span>
                         </div>
                         <div class="form-group select-with-icon">
                             <label asp-for="UnidadeFederativa" class="control-label"></label>
                             <div class="select-wrapper">
                                 <select asp-for="UnidadeFederativa" class="form-control form-control-sm" asp-items="ViewBag.UnidadesFederativas" onchange="populateCities(this.value)"></select>
                             </div>
-                            @Html.ValidationMessageFor(model => model.UnidadeFederativa, "", new { @class = "error-message" })
+                            <span asp-validation-for="Municipio" class="error-message text-danger"></span>
                         </div>
                         <div class="form-group select-with-icon">
                             <label asp-for="Municipio" class="control-label"></label>
                             <div class="select-wrapper">
                                 <select asp-for="Municipio" class="form-control form-control-sm" id="citiesDropdown" disabled></select>
                             </div>
-                            @Html.ValidationMessageFor(model => model.Municipio, "", new { @class = "error-message" })
+                            <span asp-validation-for="Municipio" class="text-danger"></span>
                         </div>
                         <!-- Grupo 2 -->
                         <div class="form-group select-with-icon">
@@ -53,7 +53,7 @@
                                     <option value="PropriedadeRural">Propriedade Rural</option>
                                 </select>
                             </div>
-                            @Html.ValidationMessageFor(model => model.TipoPropriedade, "", new { @class = "error-message" })
+                            <span asp-validation-for="TipoPropriedade" class="text-danger"></span>
                         </div>
                         <div class="form-group select-with-icon">
                             <label asp-for="CicloProducao" class="control-label"></label>
@@ -69,40 +69,40 @@
                                     <option value="NAOINFORMADO">NÃO INFORMADO</option>
                                 </select>
                             </div>
-                            @Html.ValidationMessageFor(model => model.CicloProducao, "", new { @class = "error-message" })
+                            <span asp-validation-for="CicloProducao" class="text-danger"></span>
                         </div>
                         <div class="form-group">
                             <label asp-for="Industria" class="control-label"></label>
                             <input class="form-control" value="@User.Identity.GetIndustria()" disabled />
-                            @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
+                            <span asp-validation-for="Industria" class="text-danger"></span>
                         </div>
                         <!-- Grupo 3 -->
                         <div class="form-group">
                             <label asp-for="Latitude" class="control-label"></label>
                             <input asp-for="Latitude" class="form-control" />
-                            @Html.ValidationMessageFor(model => model.Latitude, "", new { @class = "error-message" })
+                            <span asp-validation-for="Latitude" class="text-danger"></span>
 
                         </div>
                         <div class="form-group">
                             <label asp-for="Area" class="control-label"></label>
                             <input asp-for="Area" class="form-control" />
-                            @Html.ValidationMessageFor(model => model.Area, "", new { @class = "error-message" })
+                            <span asp-validation-for="Area" class="text-danger"></span>
                         </div>
                         <div class="form-group">
                             <label asp-for="CadastroAmbientalRural" class="control-label"></label>
                             <input asp-for="CadastroAmbientalRural" class="form-control" />
-                            @Html.ValidationMessageFor(model => model.CadastroAmbientalRural, "", new { @class = "error-message" })
+                            <span asp-validation-for="CadastroAmbientalRural" class="text-danger"></span>
                         </div>
                         <!-- Grupo 4 -->
                         <div class="form-group">
                             <label asp-for="Longitude" class="control-label"></label>
                             <input asp-for="Longitude" class="form-control" />
-                            @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
+                            <span asp-validation-for="Longitude" class="text-danger"></span>
                         </div>
                         <div class="form-group">
                             <label asp-for="AreaUtil" class="control-label"></label>
                             <input asp-for="AreaUtil" class="form-control" />
-                            @Html.ValidationMessageFor(model => model.AreaUtil, "", new { @class = "error-message" })
+                            <span asp-validation-for="AreaUtil" class="text-danger"></span>
                         </div>
                         <div class="form-group select-with-icon">
                             <label asp-for="TipoCadastroRural" class="control-label"></label>
@@ -118,7 +118,7 @@
                                     <option value="DICOSE">DICOSE</option>
                                 </select>
                             </div>
-                            @Html.ValidationMessageFor(model => model.TipoCadastroRural, "", new { @class = "error-message" })
+                            <span asp-validation-for="TipoCadastroRural" class="text-danger"></span>
                         </div>
 
                         <div class="form-group select-with-icon">
@@ -127,7 +127,7 @@
                                 <select asp-for="ProdutorId" class="form-control form-control-sm" asp-items="ViewBag.Produtores">
                                 </select>
                             </div>
-                            <span asp-validation-for="ProdutorId" class="error-message"></span>
+                            <span asp-validation-for="ProdutorId" class="error-message text-danger"></span>
                         </div>
                     </div>
                     <h5>ATENÇÃO! O cadastro só será considerado válido após a análise de nossa equipe técnica. Até que a análise seja concluída, ele será considerado inválido.</h5>
