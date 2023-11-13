@@ -20,7 +20,6 @@ namespace GeotecnologiaKNS.Models
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "CPF/CNPJ")]
-        [StringLength(14, MinimumLength = 14, ErrorMessage = "Insira o CPF no seguinte modelo: 123.456.789-10")]
         public string Cpf { get; set; }
 
         [Required(ErrorMessage = "Campo obrigatório")]

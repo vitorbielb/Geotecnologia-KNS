@@ -91,13 +91,12 @@
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
-                                <a class="nav-link" href="@Url.Action("Index", "Analista")">
+                                <a class="nav-link" href="@Url.Action("Analise", "Solicitacoes")">
                                     <i class="mdi mdi-clipboard-text menu-icon"></i>
                                     Analistas
                                 </a>
                             </li>
                         </ul>
-
                     }
 
                 </div>
@@ -120,25 +119,23 @@
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
-                                <a class="nav-link" href="@Url.Action("Index", "ValidadesProdutor")">
+                                <a class="nav-link" href="@Url.Action("Analise", "Produtores")">
                                     <i class="menu-icon mdi mdi-checkbox-multiple-marked-circle-outline"></i>
                                     Produtores
                                 </a>
                             </li>
                         </ul>
-
                     }
                     @if (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read))
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
-                                <a class="nav-link" href="@Url.Action("Index", "ValidadesPropriedade")">
+                                <a class="nav-link" href="@Url.Action("Analise", "Propriedades")">
                                     <i class="menu-icon mdi mdi-checkbox-multiple-marked-circle"></i>
                                     Propriedades
                                 </a>
                             </li>
                         </ul>
-
                     }
                 </div>
             </li>

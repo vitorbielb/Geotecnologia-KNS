@@ -15,9 +15,11 @@
                             </div>
                             <div class="col-md-6" style="margin-top: 10px;">
                                 <label asp-for="Cpf" class="control-label"></label>
-                                <input asp-for="Cpf" class="form-control" />
+                                <input asp-for="Cpf" class="form-control" type="text" id="identification" />
                                 <span asp-validation-for="Cpf" class="text-danger"></span>
                             </div>
+
+
                         </div>
                     </div>
 
@@ -27,12 +29,11 @@
                         @Html.ValidationMessageFor(model => model.Industria, "", new { @class = "error-message" })
                     </div>
 
-                    <h5>ATENÇÃO! O cadastro só será considerado válido após a análise de nossa equipe técnica. Até que a análise seja concluída, ele será considerado inválido.</h5>
                     <div class="form-group" style="margin-top: 40px;">
-                        <a type="submit" href="/Produtores/Index" class="btn btn-secondary">Voltar</a>
+                        <a type="submit" href="/Propriedades/Index" class="btn btn-secondary">Voltar</a>
                     </div>
                     <div style="float: right; margin-top: -60px;">
-                        <button type="submit" class="btn btn-primary gradient-button">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmRegistrationModal">
                             <i class="bi bi-check-circle-fill"></i>
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
                                 <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
@@ -40,10 +41,49 @@
                             Cadastrar
                         </button>
                     </div>
+
+                    <div class="modal fade" id="confirmRegistrationModal" tabindex="-1" aria-labelledby="confirmRegistrationModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="confirmRegistrationModalLabel">Confirmar cadastro</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h5>ATENÇÃO! O cadastro só será considerado válido após a análise de nossa equipe técnica. Até que a análise seja concluída, ele será considerado inválido.</h5>
+                                    <p>A fim de agilizar o processo de análise, é imprescindível que todos os dados do produtor estejam corretos.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button style="float: left;" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <div>
+                                        <button type="submit" class="btn btn-primary gradient-button">
+                                            Confirmar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+    document.getElementById('identification').addEventListener('input', function (e) {
 
+        let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,3})(\d{0,3})(\d{0,4})(\d{0,2})/);
+        e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' : '') + x[3] + (x[4] ? '/' : x[4]) + x[4] + (x[5] ? '-' + x[5] : '');
+
+        if (e.target.value.length < 15) {
+            x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})/);
+            e.target.value = !x[2] ? x[1] : x[1] + '.' + x[2] + (x[3] ? '.' : '') + x[3] + (x[4] ? '-' + x[4] : '');
+        }
+
+        console.log('Com formatação: ' + e.target.value);
+
+        let valor = e.target.value.replace(/[^0-9]/g, '');
+        console.log('Sem formatação: ' + valor);
+    });
+</script>

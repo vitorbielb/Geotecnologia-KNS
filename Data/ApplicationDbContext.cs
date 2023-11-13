@@ -26,9 +26,6 @@ namespace GeotecnologiaKNS.Data
         public DbSet<PropriedadeArquivo> PropriedadesArquivos { get; set; }
         public DbSet<ProdutorArquivo> ProdutoresArquivos { get; set; }
         public DbSet<Solicitacao> Solicitacao { get; set; }
-        public DbSet<Analista> Analistas { get; set; }
-        public DbSet<ValidadeProdutor> Validade { get; set; }
-        public DbSet<ValidadePropriedade> validadePropriedades { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

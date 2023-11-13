@@ -25,6 +25,11 @@ namespace GeotecnologiaKNS.Controllers
             var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
             return View(model);
         }
+        public async Task<IActionResult> Analise()
+        {
+            var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
+            return View(model);
+        }
 
         // GET: Propriedades/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -132,7 +137,7 @@ namespace GeotecnologiaKNS.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("Index", "ValidadesPropriedade");
+                return RedirectToAction("Analise", "Propriedades");
             }
             return View(propriedade);
         }

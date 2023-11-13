@@ -4,30 +4,30 @@
 
 namespace GeotecnologiaKNS.Data.Migrations
 {
-    public partial class ObservacaoNull : Migration
+    public partial class RequiredCpfExcluido : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Observacao",
-                table: "Solicitacao",
+                name: "Cpf",
+                table: "Produtores",
                 type: "nvarchar(max)",
-                nullable: true,
+                nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "nvarchar(14)",
+                oldMaxLength: 14);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Observacao",
-                table: "Solicitacao",
-                type: "nvarchar(max)",
+                name: "Cpf",
+                table: "Produtores",
+                type: "nvarchar(14)",
+                maxLength: 14,
                 nullable: false,
-                defaultValue: "",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
+                oldType: "nvarchar(max)");
         }
     }
 }
