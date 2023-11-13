@@ -22,24 +22,6 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Analista", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int?>("SolicitacaoId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SolicitacaoId");
-
-                    b.ToTable("Analistas");
-                });
-
             modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationRole", b =>
                 {
                     b.Property<string>("Id")
@@ -190,8 +172,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.Property<string>("Cpf")
                         .IsRequired()
-                        .HasMaxLength(14)
-                        .HasColumnType("nvarchar(14)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -392,42 +373,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.ToTable("Solicitacao");
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.ValidadeProdutor", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
-                    b.Property<int?>("ProdutorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ProdutorId");
-
-                    b.ToTable("Validade");
-                });
-
-            modelBuilder.Entity("GeotecnologiaKNS.Models.ValidadePropriedade", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
-                    b.Property<int?>("PropriedadeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("PropriedadeId");
-
-                    b.ToTable("validadePropriedades");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -545,15 +490,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Analista", b =>
-                {
-                    b.HasOne("GeotecnologiaKNS.Models.Solicitacao", "Solicitacao")
-                        .WithMany()
-                        .HasForeignKey("SolicitacaoId");
-
-                    b.Navigation("Solicitacao");
-                });
-
             modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationUser", b =>
                 {
                     b.HasOne("GeotecnologiaKNS.Models.Industria", "Industria")
@@ -630,24 +566,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Industria");
-
-                    b.Navigation("Propriedade");
-                });
-
-            modelBuilder.Entity("GeotecnologiaKNS.Models.ValidadeProdutor", b =>
-                {
-                    b.HasOne("GeotecnologiaKNS.Models.Produtor", "Produtor")
-                        .WithMany()
-                        .HasForeignKey("ProdutorId");
-
-                    b.Navigation("Produtor");
-                });
-
-            modelBuilder.Entity("GeotecnologiaKNS.Models.ValidadePropriedade", b =>
-                {
-                    b.HasOne("GeotecnologiaKNS.Models.Propriedade", "Propriedade")
-                        .WithMany()
-                        .HasForeignKey("PropriedadeId");
 
                     b.Navigation("Propriedade");
                 });

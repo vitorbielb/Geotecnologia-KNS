@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeotecnologiaKNS.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230825174226_TenantIdRelationship")]
-    partial class TenantIdRelationship
+    [Migration("20231113123155_OtimizacaoDoCodigo")]
+    partial class OtimizacaoDoCodigo
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,9 +24,44 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Custom")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
             modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("AccessFailedCount")
@@ -127,16 +162,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.HasKey("TenantId");
 
                     b.ToTable("Industrias");
-
-                    b.HasData(
-                        new
-                        {
-                            TenantId = 1,
-                            Cnpj = "19.338.969/0001-03",
-                            Nome = "KNS Geotecnologia",
-                            NomeResumido = "KNS",
-                            RazaoSocial = "KNS RAZAO SOCIAL LTDA"
-                        });
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
@@ -157,10 +182,18 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("Situacao")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SolicitacoesId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SolicitacoesId");
 
                     b.HasIndex("TenantId");
 
@@ -176,15 +209,12 @@ namespace GeotecnologiaKNS.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ContentType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("Dados")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Descricao")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ProdutorId")
@@ -262,6 +292,9 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Property<int>("UnidadeFederativa")
                         .HasColumnType("int");
 
+                    b.Property<int>("Validacao")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProdutorId");
@@ -280,15 +313,12 @@ namespace GeotecnologiaKNS.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ContentType")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("Dados")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Descricao")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("PropriedadeId")
@@ -346,33 +376,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.ToTable("Solicitacao");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles", (string)null);
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
@@ -426,10 +429,12 @@ namespace GeotecnologiaKNS.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
@@ -450,9 +455,11 @@ namespace GeotecnologiaKNS.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("RoleId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("UserId", "RoleId");
@@ -465,13 +472,16 @@ namespace GeotecnologiaKNS.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.Property<string>("UserId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(128)
                         .HasColumnType("nvarchar(128)");
 
@@ -496,6 +506,10 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
                 {
+                    b.HasOne("GeotecnologiaKNS.Models.Solicitacao", "Solicitacoes")
+                        .WithMany()
+                        .HasForeignKey("SolicitacoesId");
+
                     b.HasOne("GeotecnologiaKNS.Models.Industria", "Industria")
                         .WithMany("Produtores")
                         .HasForeignKey("TenantId")
@@ -503,6 +517,8 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Industria");
+
+                    b.Navigation("Solicitacoes");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.ProdutorArquivo", b =>
@@ -559,20 +575,22 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
-                        .WithMany()
+                    b.HasOne("GeotecnologiaKNS.Models.ApplicationRole", null)
+                        .WithMany("Claims")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("RoleId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.HasOne("GeotecnologiaKNS.Models.ApplicationUser", null)
-                        .WithMany()
+                        .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .IsRequired()
+                        .HasConstraintName("UserId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
@@ -586,7 +604,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                    b.HasOne("GeotecnologiaKNS.Models.ApplicationRole", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -606,6 +624,16 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationRole", b =>
+                {
+                    b.Navigation("Claims");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Claims");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Industria", b =>

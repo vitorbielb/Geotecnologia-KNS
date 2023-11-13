@@ -19,7 +19,11 @@ public class ProdutoresController : Controller
         var produtores = await _context.Produtores.ToListAsync();
         return View(produtores);
     }
-
+    public async Task<ActionResult> AnaliseAsync()
+    {
+        var produtores = await _context.Produtores.ToListAsync();
+        return View(produtores);
+    }
     private ActionResult HttpNotFound()
     {
         return NotFound();
@@ -78,7 +82,7 @@ public class ProdutoresController : Controller
         {
             _context.Produtores.Update(produtor);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "ValidadesProdutor");
+            return RedirectToAction("Analise", "Produtores");
         }
 
         var persitedProdutor = await _context.Produtores

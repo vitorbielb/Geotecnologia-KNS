@@ -4,29 +4,39 @@
 
 namespace GeotecnologiaKNS.Data.Migrations
 {
-    public partial class Atualizado : Migration
+    public partial class OtimizacaoDoCodigo : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "Validacao",
-                table: "Propriedades",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.DropTable(
+                name: "Analistas");
 
-            migrationBuilder.AddColumn<int>(
-                name: "Situacao",
-                table: "Produtores",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.DropTable(
+                name: "Validade");
 
-            migrationBuilder.AddColumn<int>(
-                name: "SolicitacoesId",
-                table: "Produtores",
-                type: "int",
-                nullable: true);
+            migrationBuilder.DropTable(
+                name: "validadePropriedades");
+        }
+
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "Analistas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SolicitacaoId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Analistas", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Analistas_Solicitacao_SolicitacaoId",
+                        column: x => x.SolicitacaoId,
+                        principalTable: "Solicitacao",
+                        principalColumn: "Id");
+                });
 
             migrationBuilder.CreateTable(
                 name: "Validade",
@@ -65,9 +75,9 @@ namespace GeotecnologiaKNS.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Produtores_SolicitacoesId",
-                table: "Produtores",
-                column: "SolicitacoesId");
+                name: "IX_Analistas_SolicitacaoId",
+                table: "Analistas",
+                column: "SolicitacaoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Validade_ProdutorId",
@@ -78,42 +88,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                 name: "IX_validadePropriedades_PropriedadeId",
                 table: "validadePropriedades",
                 column: "PropriedadeId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Produtores_Solicitacao_SolicitacoesId",
-                table: "Produtores",
-                column: "SolicitacoesId",
-                principalTable: "Solicitacao",
-                principalColumn: "Id");
-        }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Produtores_Solicitacao_SolicitacoesId",
-                table: "Produtores");
-
-            migrationBuilder.DropTable(
-                name: "Validade");
-
-            migrationBuilder.DropTable(
-                name: "validadePropriedades");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Produtores_SolicitacoesId",
-                table: "Produtores");
-
-            migrationBuilder.DropColumn(
-                name: "Validacao",
-                table: "Propriedades");
-
-            migrationBuilder.DropColumn(
-                name: "Situacao",
-                table: "Produtores");
-
-            migrationBuilder.DropColumn(
-                name: "SolicitacoesId",
-                table: "Produtores");
         }
     }
 }
