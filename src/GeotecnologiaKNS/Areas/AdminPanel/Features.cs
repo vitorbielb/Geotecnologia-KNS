@@ -2,14 +2,20 @@
 
 public partial class Features
 {
+    public record List(
+          Tenant Tenant
+        , User User
+        , Produtor Produtor
+        , Propriedade Propriedade
+        , Solicitacao Solicitacao
+        , Role Role);
+
     public class Tenant : IFeature
     {
         public bool Create { get; set; }
         public bool Read { get; set; }
         public bool Update { get; set; }
         public bool Delete { get; set; }
-
-        public string FeatureName => nameof(Tenants);
     }
 
     public class User : IFeature
@@ -18,8 +24,6 @@ public partial class Features
         public bool Read { get; set; }
         public bool Update { get; set; }
         public bool Delete { get; set; }
-
-        public string FeatureName => nameof(Users);
     }
 
     public class Produtor : IFeature
@@ -28,8 +32,6 @@ public partial class Features
         public bool Read { get; set; }
         public bool Update { get; set; }
         public bool Delete { get; set; }
-
-        public string FeatureName => nameof(Produtores);
     }
 
     public class Propriedade : IFeature
@@ -38,8 +40,6 @@ public partial class Features
         public bool Read { get; set; }
         public bool Update { get; set; }
         public bool Delete { get; set; }
-
-        public string FeatureName => nameof(Propriedades);
     }
 
     public class Solicitacao : IFeature
@@ -48,8 +48,6 @@ public partial class Features
         public bool Read { get; set; }
         public bool Update { get; set; }
         public bool Delete { get; set; }
-
-        public string FeatureName => nameof(Solicitacoes);
     }
 
     public class Role : IFeature
@@ -58,14 +56,5 @@ public partial class Features
         public bool Read { get; set; }
         public bool Update { get; set; }
         public bool Delete { get; set; }
-
-        public string FeatureName => nameof(Roles);
     }
 }
-
-public interface IFeature
-{
-    public string FeatureName { get; }
-}
-
-public class NonFeatureAttribute : Attribute { }

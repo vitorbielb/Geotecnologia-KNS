@@ -3,7 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33815.320
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeotecnologiaKNS", "GeotecnologiaKNS.csproj", "{6B6F7C65-5F9F-4789-9B2B-EF14ACEB9068}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeotecnologiaKNS", "src\GeotecnologiaKNS\GeotecnologiaKNS.csproj", "{F2475152-166F-40D1-92E2-E7977DC747CD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{64D25901-5EA3-4B27-A844-E1BF8E916395}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C3D8AEF0-A5A0-4C5B-B315-9F36C2618928}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeotecnologiaKNS.UnitTests", "tests\GeotecnologiaKNS.UnitTests\GeotecnologiaKNS.UnitTests.csproj", "{8CC588B8-BC76-4533-B8C4-AE425FE9644B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeotecnologiaKNS.FuncionalTests", "tests\GeotecnologiaKNS.FuncionalTests\GeotecnologiaKNS.FuncionalTests.csproj", "{0574F8A7-39EB-4B7C-B59F-DBA1383B01BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,13 +19,26 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6B6F7C65-5F9F-4789-9B2B-EF14ACEB9068}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B6F7C65-5F9F-4789-9B2B-EF14ACEB9068}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B6F7C65-5F9F-4789-9B2B-EF14ACEB9068}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B6F7C65-5F9F-4789-9B2B-EF14ACEB9068}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2475152-166F-40D1-92E2-E7977DC747CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2475152-166F-40D1-92E2-E7977DC747CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2475152-166F-40D1-92E2-E7977DC747CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2475152-166F-40D1-92E2-E7977DC747CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CC588B8-BC76-4533-B8C4-AE425FE9644B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CC588B8-BC76-4533-B8C4-AE425FE9644B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CC588B8-BC76-4533-B8C4-AE425FE9644B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CC588B8-BC76-4533-B8C4-AE425FE9644B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0574F8A7-39EB-4B7C-B59F-DBA1383B01BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0574F8A7-39EB-4B7C-B59F-DBA1383B01BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0574F8A7-39EB-4B7C-B59F-DBA1383B01BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0574F8A7-39EB-4B7C-B59F-DBA1383B01BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F2475152-166F-40D1-92E2-E7977DC747CD} = {64D25901-5EA3-4B27-A844-E1BF8E916395}
+		{8CC588B8-BC76-4533-B8C4-AE425FE9644B} = {C3D8AEF0-A5A0-4C5B-B315-9F36C2618928}
+		{0574F8A7-39EB-4B7C-B59F-DBA1383B01BA} = {C3D8AEF0-A5A0-4C5B-B315-9F36C2618928}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9C04D87-FC57-46A9-A786-7882B28BB8CA}

@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
-		<Nullable>disable</Nullable>
+		<Nullable>enable</Nullable>
 		<LangVersion>preview</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UserSecretsId>aspnet-GeotecnologiaKNS-64077687-d5ac-45bf-ab1b-14650a22b07e</UserSecretsId>
