@@ -104,24 +104,3 @@ class ClaimEqualityComparer : IEqualityComparer<Claim>
         return hash;
     }
 }
-
-class OperationAcessor : ExpressionVisitor
-{
-    private string? _operationName;
-
-    public static string GetName(Expression operation)
-    {
-        return new OperationAcessor(operation)._operationName!;
-    }
-
-    private OperationAcessor(Expression operation)
-    {
-        Visit(operation);
-    }
-
-    protected override Expression VisitMember(MemberExpression node)
-    {
-        _operationName = node.Member.Name;
-        return node;
-    }
-}

@@ -35,7 +35,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-    options.AddPolicy("UserCanUpdateSolicitacoes", policy => policy.RequireClaim("Solicitacao.Update", Enabled));
+    options.AddPolicy("UserCanUpdateSolicitacoes", policy => policy.RequireOperation(x => x.Solicitacao.Update));
 });
 
 builder.Services.AddHttpContextAccessor();

@@ -43,9 +43,9 @@
             </div>
         </li>
         @if (User.Identity != null &&
-        (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read) ||
-        User.Identity.HasEnabled<Features.Role>(operation => operation.Read) ||
-        User.Identity.HasEnabled<Features.User>(operation => operation.Read)))
+        (User.Identity.HasEnabled(p => p.Tenant.Read) ||
+        User.Identity.HasEnabled(operation => operation.Role.Read) ||
+        User.Identity.HasEnabled(operation => operation.User.Read)))
         {
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
@@ -54,7 +54,7 @@
                     <i class="menu-arrow"></i>
                 </a>
                 <div class="collapse" id="ui-basic">
-                    @if (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read))
+                    @if (User.Identity.HasEnabled(operation => operation.Tenant.Read))
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-">
@@ -65,7 +65,7 @@
                             </li>
                         </ul>
                     }
-                    @if (User.Identity.HasEnabled<Features.Role>(operation => operation.Read))
+                    @if (User.Identity.HasEnabled(operation => operation.Role.Read))
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
@@ -76,7 +76,7 @@
                             </li>
                         </ul>
                     }
-                    @if (User.Identity.HasEnabled<Features.User>(operation => operation.Read))
+                    @if (User.Identity.HasEnabled(operation => operation.User.Read))
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
@@ -87,7 +87,7 @@
                             </li>
                         </ul>
                     }
-                    @if (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read))
+                    @if (User.Identity.HasEnabled(operation => operation.Tenant.Read))
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
@@ -104,9 +104,9 @@
             </li>
         }
         @if (User.Identity != null &&
-        (User.Identity.HasEnabled<Features.Tenant>(operation => operation.Read) ||
-        User.Identity.HasEnabled<Features.Role>(operation => operation.Read) ||
-        User.Identity.HasEnabled<Features.User>(operation => operation.Read)))
+        (User.Identity.HasEnabled(operation => operation.Tenant.Read) ||
+        User.Identity.HasEnabled(operation => operation.Role.Read) ||
+        User.Identity.HasEnabled(operation => operation.User.Read)))
         {
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#ui-validacao" aria-expanded="false" aria-controls="ui-validacao">
@@ -115,7 +115,7 @@
                     <i class="menu-arrow"></i>
                 </a>
                 <div class="collapse" id="ui-validacao">
-                    @if (User.Identity.HasEnabled<Features.User>(operation => operation.Read))
+                    @if (User.Identity.HasEnabled(operation => operation.User.Read))
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">
@@ -126,7 +126,7 @@
                             </li>
                         </ul>
                     }
-                    @if (User.Identity.HasEnabled<Features.User>(operation => operation.Read))
+                    @if (User.Identity.HasEnabled(operation => operation.User.Read))
                     {
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item">

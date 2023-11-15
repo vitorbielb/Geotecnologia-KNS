@@ -12,49 +12,49 @@ public partial class Features
 
     public class Tenant : IFeature
     {
-        public bool Create { get; set; }
-        public bool Read { get; set; }
-        public bool Update { get; set; }
-        public bool Delete { get; set; }
+        public IOperation Create { get; set; } = default!;
+        public IOperation Read { get; set; } = default!;
+        public IOperation Update { get; set; } = default!;
+        public IOperation Delete { get; set; } = default!;
     }
 
     public class User : IFeature
     {
-        public bool Create { get; set; }
-        public bool Read { get; set; }
-        public bool Update { get; set; }
-        public bool Delete { get; set; }
+        public IOperation Create { get; set; } = default!;
+        public IOperation Read { get; set; } = default!;
+        public IOperation Update { get; set; } = default!;
+        public IOperation Delete { get; set; } = default!;  
     }
 
     public class Produtor : IFeature
     {
-        public bool Create { get; set; }
-        public bool Read { get; set; }
-        public bool Update { get; set; }
-        public bool Delete { get; set; }
+        public IOperation Create { get; set; } = default!;
+        public IOperation Read { get; set; } = default!;
+        public IOperation Update { get; set; } = default!;
+        public IOperation Delete { get; set; } = default!;
     }
 
     public class Propriedade : IFeature
     {
-        public bool Create { get; set; }
-        public bool Read { get; set; }
-        public bool Update { get; set; }
-        public bool Delete { get; set; }
+        public IOperation Create { get; set; } = default!;
+        public IOperation Read { get; set; } = default!;
+        public IOperation Update { get; set; } = default!;
+        public IOperation Delete { get; set; } = default!;
     }
 
     public class Solicitacao : IFeature
     {
-        public bool Create { get; set; }
-        public bool Read { get; set; }
-        public bool Update { get; set; }
-        public bool Delete { get; set; }
+        public IOperation Create { get; set; } = default!;
+        public IOperation Read { get; set; } = default!;
+        public IOperation Update { get; set; } = default!;
+        public IOperation Delete { get; set; } = default!;
     }
 
     public class Role : IFeature
     {
-        public bool Create { get; set; }
-        public bool Read { get; set; }
-        public bool Update { get; set; }
-        public bool Delete { get; set; }
+        public IOperation Create { get; set; } = default!;
+        public IOperation Read { get; set; } = default!;    
+        public IOperation Update { get; set; } = default!;
+        public IOperation Delete { get; set; } = default!;
     }
 }

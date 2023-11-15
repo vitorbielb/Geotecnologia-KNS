@@ -56,22 +56,27 @@ public static class AppClaimsPrincipalExt
         return string.Empty;
     }
 
-    public static bool HasEnabled<T>(this IIdentity identity, Expression<Func<T, object>>? operation = null)
-        where T : IFeature, new()
+    public static bool HasEnabled(this IIdentity identity, Expression<Func<Features.List, IFeature>>? operation)
     {
-        if (operation is null)
-        {
-            return identity.ToClaimIdentity()
-                           .Claims
-                           .Where(c => c.Type.StartsWith(typeof(T).Name))
-                           .All(c => c.Value == Enabled);
-        }
+        var visitor = new FeaturesNamesExpressionVisitor();
+        var operationName = visitor.Visit(operation);
+        var operations = visitor.OperationNames;
+            
+        return identity.ToClaimIdentity()
+                       .Claims
+                       .Where(c => operations.Contains(c.Type))
+                       .All(c => c.Value == Enabled);
+    }
 
-        var operationName = OperationAcessor.GetName(operation);
+    public static bool HasEnabled(this IIdentity identity, Expression<Func<Features.List, IOperation>>? operation)
+    {
+        var visitor = new FeaturesNamesExpressionVisitor();
+        var operationName = visitor.Visit(operation);
+        var operations = visitor.OperationNames;
 
         return identity.ToClaimIdentity()
                        .Claims
-                       .Where(c => c.Type.StartsWith(typeof(T).Name) && c.Type.EndsWith(operationName))
+                       .Where(c => operations.Contains(c.Type))
                        .All(c => c.Value == Enabled);
     }
 
