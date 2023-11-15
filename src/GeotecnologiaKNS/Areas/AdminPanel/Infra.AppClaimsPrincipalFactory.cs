@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Security.Claims;
-using System.Security.Principal;
 
 namespace GeotecnologiaKNS.Infra;
 
@@ -40,8 +39,7 @@ public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationU
         }
 
         var logoPath = _imageLoader.LoadIndustryLogo(industria);
-
-        ClaimsIdentity claimsIdentity = principal.Identity.ToClaimIdentity();
+        var claimsIdentity = principal.Identity.ToClaimIdentity();
 
         claimsIdentity.AddClaims(new[]
         {
@@ -63,7 +61,7 @@ public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationU
     {
         await foreach (var claim in GetUserRoleClaims(user))
         {
-            if (claim == null)
+            if (claim is null)
             {
                 continue;
             }
@@ -85,91 +83,10 @@ public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationU
             .AsAsyncEnumerable();
     }
 
-    private static InvalidOperationException IndustriaNotFoundForUser(ApplicationUser user) => new InvalidOperationException(
-            string.Format("Um erro ocorreu ao tentar executar a busca pela a industria de um funcionario. usuario: {0} industria: {1}",
-            user.Email,
-            user.TenantId));
-}
-
-public static class AppClaimsPrincipalExt
-{
-    public static ClaimsIdentity ToClaimIdentity(this IIdentity? identity)
+    private static InvalidOperationException IndustriaNotFoundForUser(ApplicationUser user)
     {
-        return ((ClaimsIdentity)identity!);
-    }
-
-    public static string GetIndustria(this IIdentity identity)
-    {
-        var claim = identity.ToClaimIdentity().FindFirst("industria_nome");
-
-        if (claim != null)
-        {
-            return claim.Value;
-        }
-
-        return string.Empty;
-    }
-
-    public static bool IsApplicationAdmin(this IIdentity identity)
-    {
-        var claim = identity.ToClaimIdentity().FindFirst(ClaimTypes.Role);
-        return claim?.Value == nameof(Roles.ApplicationAdmin);
-    }
-
-
-    public static bool IsTenantAdmin(this IIdentity identity)
-    {
-        var claim = identity.ToClaimIdentity().FindFirst(ClaimTypes.Role);
-        return claim?.Value == nameof(Roles.TenantAdmin);
-    }
-
-
-    public static int? GetTenantId(this IIdentity identity)
-    {
-        var claim = identity.ToClaimIdentity().FindFirst("tenantId");
-        if (claim == null) return null;
-        return int.Parse(claim.Value);
-    }
-
-    public static string GetLogoPath(this IIdentity identity)
-    {
-        var claim = identity.ToClaimIdentity().FindFirst("industria_logo");
-
-        if (claim != null)
-        {
-            return claim.Value;
-        }
-
-        return string.Empty;
-    }
-
-    public static bool HasEnabled<T>(this IIdentity identity, Expression<Func<T, object>>? operation = null)
-        where T : IFeature, new()
-    {
-        if (operation == null)
-        {
-            return identity.ToClaimIdentity()
-                           .Claims
-                           .Where(c => c.Type.StartsWith(new T().FeatureName))
-                           .All(c => c.Value == Enabled);
-        }
-
-        var operationName = OperationAcessor.GetName(operation);
-
-        return identity.ToClaimIdentity()
-                       .Claims
-                       .Where(c => c.Type.StartsWith(new T().FeatureName) && c.Type.EndsWith(operationName))
-                       .All(c => c.Value == Enabled);
-    }
-
-    public static IList<Claim> GetFeatures(this IIdentity identity)
-    {
-        var avaliableFeatures = Features.GetAll(defaultValue: Enabled);
-
-        return identity.ToClaimIdentity()
-                       .Claims
-                       .Intersect(avaliableFeatures, new ClaimEqualityComparer())
-                       .ToList();
+        const string Format = "Um erro ocorreu ao tentar executar a busca pela a industria de um funcionario. usuario: {0} industria: {1}";
+        return new(string.Format(Format, user.Email, user.TenantId));
     }
 }
 
@@ -177,7 +94,7 @@ class ClaimEqualityComparer : IEqualityComparer<Claim>
 {
     public bool Equals(Claim? x, Claim? y)
     {
-        if (x == null || y == null)
+        if (x is null || y is null)
         {
             return false;
         }
