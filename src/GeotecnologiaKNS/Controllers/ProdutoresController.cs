@@ -41,8 +41,6 @@ public class ProdutoresController : Controller
     [TenantFilter]
     public async Task<ActionResult> CreateAsync(Produtor produtor)
     {
-        ModelState.Remove("Documentos");
-
         if (ModelState.IsValid)
         {
             await _context.Produtores.AddAsync(produtor);
