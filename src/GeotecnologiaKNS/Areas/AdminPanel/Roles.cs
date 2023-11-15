@@ -6,7 +6,9 @@ public static partial class Roles
         access: p => p.Everything());
 
     public static RoleClaims TenantAdmin => new(
-        access: p => p.EverythingExcept(p => p.Tenant));
+        access: p => p.EverythingExcept(
+            p => p.Tenant,
+            p => p.Solicitacao.Update));
 
     public static RoleClaims Requester => new(
         access: p => p.OnlyAccess(

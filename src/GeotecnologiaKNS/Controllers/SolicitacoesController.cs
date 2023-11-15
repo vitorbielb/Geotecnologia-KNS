@@ -129,6 +129,7 @@ namespace GeotecnologiaKNS.Controllers
 
 
         // GET: Solicitacoes/Edit/5
+        [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public async Task<IActionResult> Edit(int? id)
         {
             ViewBag.Status = ((Status[])Enum.GetValues(typeof(Status)))

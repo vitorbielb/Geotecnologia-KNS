@@ -3,9 +3,8 @@
 namespace GeotecnologiaKNS.Models
 {
     public class UserViewModel
-    {
-        [Key]
-        public string Id { get; set; }
+    {        
+        public string? Id { get; set; }
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [EmailAddress]

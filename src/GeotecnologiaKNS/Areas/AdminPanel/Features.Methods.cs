@@ -21,7 +21,7 @@ public partial class Features
 
     #region Display methods
     public bool Everything() => false;
-    public bool EverythingExcept<T>(params Expression<Func<Features.List, T>>[] _) => false;
-    public bool OnlyAccess<T>(params Expression<Func<Features.List, T>>[] _) => false;
+    public bool EverythingExcept(params Expression<Func<Features.List, object>>[] _) => false;
+    public bool OnlyAccess(params Expression<Func<Features.List, object>>[] _) => false;
     #endregion
 }

@@ -10,7 +10,7 @@ namespace GeotecnologiaKNS.Models
 
         [ForeignKey(nameof(Industria))]
         public int TenantId { get; set; }
-        public Industria Industria { get; }
+        public Industria? Industria { get; }
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome propriedade")]

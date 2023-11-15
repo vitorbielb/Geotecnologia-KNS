@@ -20,11 +20,6 @@ namespace GeotecnologiaKNS.Controllers
             return View(model);
 
         }
-        public async Task<IActionResult> IndexValidacao()
-        {
-            var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
-            return View(model);
-        }
         public async Task<IActionResult> Analise()
         {
             var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
@@ -37,7 +32,7 @@ namespace GeotecnologiaKNS.Controllers
             ViewBag.Validacao = ((Validacao[])Enum.GetValues(typeof(Situacao)))
               .ToSelectListItems(
                   x => x.ToString(),
-                  (Func<Validacao, object>)(x => (int)x),
+                 (x => (int)x),
                   options => options.Placeholder = "Selecione...");
             FillProdutoresUnidadesFederativasViewBag();
 
