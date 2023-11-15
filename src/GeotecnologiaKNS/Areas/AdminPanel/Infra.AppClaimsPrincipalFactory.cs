@@ -31,13 +31,7 @@ public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationU
     public async override Task<ClaimsPrincipal> CreateAsync(ApplicationUser user)
     {
         var principal = await base.CreateAsync(user);
-        var industria = await _context.Industrias.FindAsync(user.TenantId);
-
-        if (industria == null)
-        {
-            throw IndustriaNotFoundForUser(user);
-        }
-
+        var industria = await _context.Industrias.FindAsync(user.TenantId) ?? throw IndustriaNotFoundForUser(user);
         var logoPath = _imageLoader.LoadIndustryLogo(industria);
         var claimsIdentity = principal.Identity.ToClaimIdentity();
 

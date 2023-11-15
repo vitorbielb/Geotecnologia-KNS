@@ -2,7 +2,7 @@
     Layout = null;
 }
 
-@model List<IdentityRoleClaim<string>>
+@model ApplicationRole
 
 <div class="table-responsive pt-3">
     <table class="table table-bordered">
@@ -17,28 +17,40 @@
             </tr>
         </thead>
         <tbody>
-            @for (int i = 0; i < Model.Count; i++)
+            @for (int i = 0; i < Model.Claims.Count; i++)
             {
                 <tr>
                     <td>
-                        @Html.DisplayFor(model => Model[i].ClaimType)
+                        @Html.DisplayFor(model => Model.Claims[i].ClaimType)
                     </td>
                     <td>
                         <div class="form-check">
                             <label class="form-check-label">
-                                <input name="Claims[@i].Id" type="hidden" value="@Model[i].Id">
-                                <input name="Claims[@i].RoleId" type="hidden" value="@Model[i].RoleId">
-                                <input name="Claims[@i].ClaimType" type="hidden" value="@Model[i].ClaimType">
-                                <input name="Claims[@i].ClaimValue" type="hidden" value="@Model[i].ClaimValue">
-
-                                @if (Model[i].ClaimValue == Enabled)
+                                <input name="Claims[@i].Id" type="hidden" value="@Model.Claims[i].Id">
+                                <input name="Claims[@i].RoleId" type="hidden" value="@Model.Claims[i].RoleId">
+                                <input name="Claims[@i].ClaimType" type="hidden" value="@Model.Claims[i].ClaimType">
+                                <input name="Claims[@i].ClaimValue" type="hidden" value="@Model.Claims[i].ClaimValue">
+                                @if (Model.Custom)
                                 {
-                                    <input type="checkbox" class="form-check-input" checked onclick="switchCheckBoxValue($(this))">
+                                    @if (Model.Claims[i].ClaimValue == Enabled)
+                                    {
+                                        <input type="checkbox" class="form-check-input" checked onclick="switchCheckBoxValue($(this))">
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="form-check-input" onclick="switchCheckBoxValue($(this))">
+                                    }
                                 }
                                 else
                                 {
-                                    <input type="checkbox" class="form-check-input" onclick="switchCheckBoxValue($(this))">
-                                }
+                                    @if (Model.Claims[i].ClaimValue == Enabled)
+                                    {
+                                        <input type="checkbox" class="form-check-input" disabled checked onclick="switchCheckBoxValue($(this))">
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="form-check-input" disabled onclick="switchCheckBoxValue($(this))">
+                                    }                                }
 
                                 <i class="input-helper"></i>
                             </label>

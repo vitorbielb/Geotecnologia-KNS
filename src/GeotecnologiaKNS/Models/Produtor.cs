@@ -1,5 +1,4 @@
-﻿using GeotecnologiaKNS.Validators;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
@@ -11,26 +10,23 @@ namespace GeotecnologiaKNS.Models
 
         [ForeignKey(nameof(Industria))]
         public int TenantId { get; set; }
-        public Industria Industria { get; }
+        public Industria? Industria { get; } = default!;
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Produtor")]
         [StringLength(100, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 100 caracteres")]
-        public string Nome { get; set; }
+        public string Nome { get; set; } = default!;
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "CPF/CNPJ")]
-        public string Cpf { get; set; }
+        public string Cpf { get; set; } = default!;
 
-        [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Indústria")]
-        [StringLength(100, ErrorMessage = "O nome da indústria deve ter no máximo 100 caracteres")]
+        public List<ProdutorArquivo>? Documentos { get; set; }
 
-        public List<ProdutorArquivo> Documentos { get; set; }
+        public List<Propriedade>? Propriedades { get; set; }
 
-        public List<Propriedade> Propriedades { get; set; }
+        public Solicitacao? Solicitacoes { get; set; }
 
-        public Solicitacao Solicitacoes { get; set; }
         [Display(Name = "Situação")]
         public Situacao Situacao { get; set; } = Situacao.Inválido;
 

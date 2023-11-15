@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 
 namespace GeotecnologiaKNS.Utils;
 
@@ -19,23 +20,18 @@ public class ImageLoader
     /// <returns>O caminho relativo raiz para a logo.png ou null caso a empresa nao tenha cadastrado uma logo.</returns>
     public string? LoadIndustryLogo(Industria industria)
     {
-        var fileName = new StringBuilder()
-            .Append("logo_")
-            .Append("industria_")
-            .Append("tenant_")
-            .Append(industria.TenantId)
-            .Append(".png")
-            .ToString();
-
-        string imagePath = Path.Combine(
-            _environment.WebRootPath
-            , "images"
-            , "industrias"
-            , fileName);
+        var imageFolderPath = Path.Combine(_environment.WebRootPath, "images", "industrias");
+        var fileName = string.Format("logo_industria_tenant_{0}.png", industria.TenantId);
+        var imagePath = Path.Combine(imageFolderPath, fileName);
 
         if (File.Exists(imagePath))
         {
             return Path.GetRelativePath(_environment.WebRootPath, imagePath);
+        }
+
+        if (!Directory.Exists(imageFolderPath))
+        {
+            Directory.CreateDirectory(imageFolderPath);
         }
 
         var logo = industria.Imagem;
