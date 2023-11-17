@@ -25040,3 +25040,21 @@ dl {
 .form-group [data-target="#PropriedadeId"][data-mode="edit"] {
   pointer-events: none;
 }
+.message {
+    position: absolute;
+    top: 60%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+}
+.bi-lock-fill {
+    transform: translate(420%, 110%);
+}
+
+.message h1 {
+    margin-left: 50px;
+    font-size: 50px;
+}
+
+.message h5 {
+    font-size: 20px;
+}
