@@ -148,7 +148,7 @@ namespace GeotecnologiaKNS.Controllers
             {
                 return NotFound();
             }
-            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "NomePropriedade", solicitacao.PropriedadeId);
+            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades.Where(propriedades => propriedades.Validacao == Validacao.Validado), "Id", "NomePropriedade", solicitacao.PropriedadeId);
             return View(solicitacao);
         }
 
@@ -180,7 +180,7 @@ namespace GeotecnologiaKNS.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades, "Id", "NomePropriedade", solicitacao.PropriedadeId);
+            ViewData["PropriedadeId"] = new SelectList(_context.Propriedades.Where(propriedades => propriedades.Validacao == Validacao.Validado), "Id", "NomePropriedade", solicitacao.PropriedadeId);
             return View(solicitacao);
         }
     }
