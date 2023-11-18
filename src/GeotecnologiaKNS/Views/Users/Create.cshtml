@@ -1,7 +1,11 @@
 ﻿@model GeotecnologiaKNS.Models.UserViewModel
+@inject IIndustriaRepository industriaRepository;
 
 @{
     ViewData["Title"] = "Create";
+    var industrias = industriaRepository
+        .GetIndustrias()
+        .ToSelectListItems(x => x.Nome, x => x.TenantId, opt => opt.Placeholder = "Selecione...");
 }
 
 <div class="row">
@@ -57,7 +61,14 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="control-label">Industria</label>
-                                    <input type="text" class="form-control" value="@User.Identity.GetIndustria()" disabled />
+                                    @if (User.Identity.IsApplicationAdmin())
+                                    {
+                                        <select asp-for="TenantId" class="form-control form-control-sm" asp-items="industrias"></select>
+                                    }
+                                    else
+                                    {
+                                        <input type="text" class="form-control" value="@User.Identity.GetIndustria()" disabled />
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -87,21 +98,21 @@
     }
 
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $.ajax({
                 url: 'GetRoles',
                 method: 'GET',
                 dataType: 'json',
-                success: function(data) {
+                success: function (data) {
                     $('#role').empty();
-                    $.each(data, function(index, item) {
+                    $.each(data, function (index, item) {
                         $('#role').append($('<option>', {
                             value: item.value,
                             text: item.text
                         }));
                     });
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error:', error);
                 }
             });
