@@ -33,7 +33,7 @@ public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationU
         var principal = await base.CreateAsync(user);
         var industria = await _context.Industrias.FindAsync(user.TenantId) ?? throw IndustriaNotFoundForUser(user);
         var logoPath = _imageLoader.LoadIndustryLogo(industria);
-        var claimsIdentity = principal.Identity.ToClaimIdentity();
+        var claimsIdentity = principal.Identity.AsClaimIdentity();
 
         claimsIdentity.AddClaims(new[]
         {

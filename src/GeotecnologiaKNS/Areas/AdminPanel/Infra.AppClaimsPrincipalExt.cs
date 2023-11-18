@@ -6,14 +6,14 @@ namespace GeotecnologiaKNS.Infra;
 
 public static class AppClaimsPrincipalExt
 {
-    public static ClaimsIdentity ToClaimIdentity(this IIdentity? identity)
+    public static ClaimsIdentity AsClaimIdentity(this IIdentity? identity)
     {
         return (ClaimsIdentity)identity!;
     }
 
     public static string GetIndustria(this IIdentity identity)
     {
-        var claim = identity.ToClaimIdentity().FindFirst("industria_nome");
+        var claim = identity.AsClaimIdentity().FindFirst("industria_nome");
 
         if (claim is not null)
         {
@@ -25,28 +25,28 @@ public static class AppClaimsPrincipalExt
 
     public static bool IsApplicationAdmin(this IIdentity identity)
     {
-        var claim = identity.ToClaimIdentity().FindFirst(ClaimTypes.Role);
+        var claim = identity.AsClaimIdentity().FindFirst(ClaimTypes.Role);
         return claim?.Value == nameof(Roles.ApplicationAdmin);
     }
 
 
     public static bool IsTenantAdmin(this IIdentity identity)
     {
-        var claim = identity.ToClaimIdentity().FindFirst(ClaimTypes.Role);
+        var claim = identity.AsClaimIdentity().FindFirst(ClaimTypes.Role);
         return claim?.Value == nameof(Roles.TenantAdmin);
     }
 
 
     public static int? GetTenantId(this IIdentity identity)
     {
-        var claim = identity.ToClaimIdentity().FindFirst("tenantId");
+        var claim = identity.AsClaimIdentity().FindFirst("tenantId");
         if (claim is null) return null;
         return int.Parse(claim.Value);
     }
 
     public static string GetLogoPath(this IIdentity identity)
     {
-        var claim = identity.ToClaimIdentity().FindFirst("industria_logo");
+        var claim = identity.AsClaimIdentity().FindFirst("industria_logo");
 
         if (claim is not null)
         {
@@ -62,7 +62,7 @@ public static class AppClaimsPrincipalExt
         var operationName = visitor.Visit(operation);
         var operations = visitor.OperationNames;
             
-        return identity.ToClaimIdentity()
+        return identity.AsClaimIdentity()
                        .Claims
                        .Where(c => operations.Contains(c.Type))
                        .All(c => c.Value == Enabled);
@@ -74,7 +74,7 @@ public static class AppClaimsPrincipalExt
         var operationName = visitor.Visit(operation);
         var operations = visitor.OperationNames;
 
-        return identity.ToClaimIdentity()
+        return identity.AsClaimIdentity()
                        .Claims
                        .Where(c => operations.Contains(c.Type))
                        .All(c => c.Value == Enabled);
@@ -84,7 +84,7 @@ public static class AppClaimsPrincipalExt
     {
         var avaliableFeatures = Features.GetAll(defaultValue: Enabled);
 
-        return identity.ToClaimIdentity()
+        return identity.AsClaimIdentity()
                        .Claims
                        .Intersect(avaliableFeatures, new ClaimEqualityComparer())
                        .ToList();
