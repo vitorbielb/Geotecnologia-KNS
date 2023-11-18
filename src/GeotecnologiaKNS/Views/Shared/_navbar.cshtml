@@ -21,7 +21,7 @@
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" id="profileDropdown">
-                        <img src="@User.Identity!.GetLogoPath()" alt="profile" />
+                        <img src="@User.Identity!.GetLogoPath(this.Context.Request.Path)" alt="profile" />
                         <span class="nav-profile-name">@User.Identity!.Name</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="profileDropdown">
