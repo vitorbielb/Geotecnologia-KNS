@@ -62,6 +62,8 @@
 		<None Include="wwwroot\images\faces\face9.jpg" />
 		<None Include="wwwroot\images\logo-mini.svg" />
 		<None Include="wwwroot\images\logo.svg" />
+		<None Include="wwwroot\js\areas\identity\pages\account\login.js" />
+		<None Include="wwwroot\js\areas\identity\pages\account\login.min.js" />
 		<None Include="wwwroot\js\chart.js" />
 		<None Include="wwwroot\js\Chart.min.js" />
 		<None Include="wwwroot\js\dashboard.js" />
