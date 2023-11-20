@@ -30,11 +30,6 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            ViewBag.Validacao = ((Validacao[])Enum.GetValues(typeof(Situacao)))
-              .ToSelectListItems(
-                  x => x.ToString(),
-                 (x => (int)x),
-                  options => options.Placeholder = "Selecione...");
             FillProdutoresUnidadesFederativasViewBag();
 
             if (id == null || _context.Propriedades == null)
@@ -83,10 +78,10 @@ namespace GeotecnologiaKNS.Controllers
 
         public async Task<IActionResult> Edit(int? id)
         {
-            ViewBag.Validacao = ((Validacao[])Enum.GetValues(typeof(Situacao)))
+            ViewBag.Validacao = ((Validacao[])Enum.GetValues(typeof(Validacao)))
               .ToSelectListItems(
                   x => x.ToString(),
-                  (Func<Validacao, object>)(x => (int)x),
+                  x => (int)x,
                   options => options.Placeholder = "Selecione...");
             FillProdutoresUnidadesFederativasViewBag();
 
@@ -202,7 +197,7 @@ namespace GeotecnologiaKNS.Controllers
         private void FillProdutoresUnidadesFederativasViewBag()
         {
             ViewBag.UnidadesFederativas = UnidadesFederativasExtension.GetUnidadesFederativas();
-            ViewBag.Produtores = _context.Produtores.Where(produtores => produtores.Situacao == Situacao.Validado)
+            ViewBag.Produtores = _context.Produtores
                 .ToSelectListItems(
                     x => x.Nome,
                     x => x.Id,

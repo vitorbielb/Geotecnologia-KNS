@@ -1,6 +1,8 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +62,24 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+var defaultCultureInfo = new CultureInfo("pt-BR");
+defaultCultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+defaultCultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
+
+app.UseRequestLocalization(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture(defaultCultureInfo);
+
+    options.SupportedCultures = new []
+    {
+        defaultCultureInfo,
+    };
+
+    options.SupportedUICultures = new []
+    {
+        defaultCultureInfo,
+    };
+});
 
 await app.UpdateDatabaseAsync();
 await app.SeedRoleClaimsAsync();

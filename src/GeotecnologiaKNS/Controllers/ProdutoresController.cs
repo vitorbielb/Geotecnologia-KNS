@@ -52,11 +52,6 @@ public class ProdutoresController : Controller
     }
     public async Task<ActionResult> EditAsync(int id)
     {
-        ViewBag.Situacao = ((Situacao[])Enum.GetValues(typeof(Situacao)))
-               .ToSelectListItems(
-                   x => x.ToString(),
-                   x => (int)x,
-                   options => options.Placeholder = "Selecione...");
         var produtor = await _context.Produtores
                                      .Include(x => x.Propriedades)
                                      .Include(x => x.Documentos)

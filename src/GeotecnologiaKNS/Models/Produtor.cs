@@ -26,15 +26,6 @@ namespace GeotecnologiaKNS.Models
         public List<Propriedade>? Propriedades { get; set; }
 
         public Solicitacao? Solicitacoes { get; set; }
-
-        [Display(Name = "Situação")]
-        public Situacao Situacao { get; set; } = Situacao.Inválido;
-
     }
-    public enum Situacao
-    {
-        Inválido,
-        Validado,
 
-    }
 }
