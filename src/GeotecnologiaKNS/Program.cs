@@ -62,13 +62,12 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+var defaultCultureInfo = CultureInfo.GetCultureInfo("pt-BR");
+defaultCultureInfo.NumberFormat.NumberDecimalSeparator = ".";
+defaultCultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
 
 app.UseRequestLocalization(options =>
 {
-    var defaultCultureInfo = CultureInfo.GetCultureInfo("pt-BR");
-    defaultCultureInfo.NumberFormat.NumberDecimalSeparator = ".";
-    defaultCultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
-
     options.DefaultRequestCulture = new RequestCulture(defaultCultureInfo);
 
     options.SupportedCultures = new []
