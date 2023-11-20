@@ -62,7 +62,7 @@ else
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-var defaultCultureInfo = CultureInfo.GetCultureInfo("pt-BR");
+var defaultCultureInfo = new CultureInfo("pt-BR");
 defaultCultureInfo.NumberFormat.NumberDecimalSeparator = ".";
 defaultCultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
 
