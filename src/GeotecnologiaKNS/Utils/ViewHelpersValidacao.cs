@@ -25,7 +25,7 @@ namespace GeotecnologiaKNS.Views
         static Dictionary<Validacao, string> _validacaoDict = new()
         {
             { Validacao.Validado, "success" },
-            { Validacao.Inválido, "danger" }
+            { Validacao.Pendente, "secondary" }
         };
 
         class ValidacaoGetter : ExpressionVisitor

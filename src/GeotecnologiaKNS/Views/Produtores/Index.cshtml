@@ -25,9 +25,6 @@
                                 <th>
                                     @Html.DisplayNameFor(model => model.Industria)
                                 </th>
-                                <th>
-                                    @Html.DisplayNameFor(model => model.Situacao)
-                                </th>
                             </tr>
                         </thead>
                         @foreach (var produtor in Model)
@@ -37,9 +34,6 @@
                                 <td>@Html.DisplayFor(x => produtor.Nome)</td>
                                 <td>@Html.DisplayFor(x => produtor.Cpf)</td>
                                 <td>@User.Identity.GetIndustria()</td>
-                                <td>
-                                    @Html.DisplaySituacaoFor(x => produtor.Situacao)
-                                </td>
                             </tr>
                         }
                     </table>
