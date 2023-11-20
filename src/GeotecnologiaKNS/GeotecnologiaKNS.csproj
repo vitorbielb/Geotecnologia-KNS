@@ -9,6 +9,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="wwwroot\js\views\propriedades\create - Copy.min.js" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Include="wwwroot\css\style.css" />
 		<None Include="wwwroot\fonts\Roboto\Roboto-Black.eot" />
 		<None Include="wwwroot\fonts\Roboto\Roboto-Black.ttf" />
@@ -78,6 +82,8 @@
 		<None Include="wwwroot\js\off-canvas.js" />
 		<None Include="wwwroot\js\tabs.js" />
 		<None Include="wwwroot\js\template.js" />
+		<None Include="wwwroot\js\views\propriedades\create.js" />
+		<None Include="wwwroot\js\views\propriedades\create.min.js" />
 		<None Include="wwwroot\scss\components\plugin-overrides\_data-tables.scss" />
 		<None Include="wwwroot\scss\components\_badges.scss" />
 		<None Include="wwwroot\scss\components\_bootstrap-progress.scss" />
@@ -139,7 +145,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Data\Migrations\" />
 	  <Folder Include="wwwroot\images\industrias\" />
 	</ItemGroup>
 

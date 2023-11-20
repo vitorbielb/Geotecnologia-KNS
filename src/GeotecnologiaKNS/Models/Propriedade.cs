@@ -30,10 +30,10 @@ namespace GeotecnologiaKNS.Models
         public string AreaUtil { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Latitude (UTM)")]
-        public string Latitude { get; set; }
+        public double Latitude { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Longitude (UTM)")]
-        public string Longitude { get; set; }
+        public double Longitude { get; set; }
         [Display(Name = "Origem coordenadas")]
         public string? OrigemCoordenadas { get; set; }
         [Required(ErrorMessage = "Campo obrigatório")]
@@ -58,6 +58,7 @@ namespace GeotecnologiaKNS.Models
         public Produtor? Produtor { get; set; }
         public List<PropriedadeArquivo>? Documentos { get; set; }
         public Validacao Validacao { get; set; } = Validacao.Inválido;
+        public Geozone? Geozone { get; set; }
     }
     public enum Validacao
     {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using GeotecnologiaKNS.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GeotecnologiaKNS.Controllers
@@ -42,7 +43,8 @@ namespace GeotecnologiaKNS.Controllers
             }
 
             var propriedade = await _context.Propriedades
-                .Include(p => p.Documentos) // Incluindo a lista de arquivos associados à propriedade
+                .Include(p => p.Documentos)
+                .Include(p => p.Geozone)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (propriedade == null)
@@ -178,6 +180,11 @@ namespace GeotecnologiaKNS.Controllers
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult GeozoneMap(GeozoneViewModel model)
+        {
+            return View(model);
         }
 
         public ActionResult GetCitiesByUF(Estados uf)

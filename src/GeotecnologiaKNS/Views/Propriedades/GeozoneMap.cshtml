@@ -1,0 +1,73 @@
+﻿@model GeotecnologiaKNS.Models.GeozoneViewModel
+@using NuGet.Protocol;
+@using System.Web;
+
+@{
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col-md-12 stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <div id="map" style="height: 380px;"></div>
+                <input asp-for="UtmAsJson" type="hidden" />
+                <input id="geozoneValue" name="Geozone.UtmAsJson" type="hidden" />
+                <input id="geozoneTenantId" name="Geozone.TenantId" type="hidden" value="@User.Identity?.GetTenantId()" />
+                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDwvxpRK9Uqeb0w9zG5N8aBeYkLkFQQfBI&callback=initMap&libraries=drawing&v=weekly" defer></script>
+
+                <script type="text/javascript">
+                    function initMap() {
+                        const map = new google.maps.Map(document.getElementById("map"), {
+                            zoom: 12,
+                            center: { lat: @Model.CenterLat, lng: @Model.CenterLong },
+                            disableDefaultUI: true,
+                            mapTypeId: "terrain",
+                        });
+
+                        const coordinates = JSON.parse($('#UtmAsJson').val());
+
+                        if (coordinates.length > 0) {
+                            const polygon = new google.maps.Polygon({
+                                paths: coordinates,
+                                strokeColor: "#FF0000",
+                                strokeOpacity: 0.8,
+                                strokeWeight: 2,
+                                fillColor: "#FF0000",
+                                fillOpacity: 0.35,
+                            });
+
+                            polygon.setMap(map);
+                        }
+                        else {
+                            const drawingManager = new google.maps.drawing.DrawingManager({
+                                drawingMode: google.maps.drawing.OverlayType.POLYGON,
+                                drawingControl: true,
+                                drawingControlOptions: {
+                                    position: google.maps.ControlPosition.TOP_CENTER,
+                                    drawingModes: [
+                                        google.maps.drawing.OverlayType.POLYGON,
+                                    ],
+                                },
+                                //https://developers.google.com/maps/documentation/javascript/reference/polygon#PolygonOptions.editable
+                            });
+
+                            drawingManager.setMap(map);
+
+                            google.maps.event.addListener(drawingManager, 'overlaycomplete', function (event) {
+                                if (event.type == google.maps.drawing.OverlayType.POLYGON) {
+                                    // If the selected overlay is a polygon, extract the array of LatLng vertices
+                                    const vertices = event.overlay.getPath().getArray();
+                                    // Log each vertex to the console
+                                    $('#geozoneValue').val(JSON.stringify(vertices))
+                                }
+                            });
+                        }
+                    }
+
+                    window.initMap = initMap;
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
