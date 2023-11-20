@@ -57,13 +57,12 @@ namespace GeotecnologiaKNS.Models
         public int ProdutorId { get; set; }
         public Produtor? Produtor { get; set; }
         public List<PropriedadeArquivo>? Documentos { get; set; }
-        public Validacao Validacao { get; set; } = Validacao.Inválido;
+        public Validacao Validacao { get; set; } = Validacao.Pendente;
         public Geozone? Geozone { get; set; }
     }
     public enum Validacao
     {
-        Inválido,
+        Pendente,
         Validado,
-
     }
 }
