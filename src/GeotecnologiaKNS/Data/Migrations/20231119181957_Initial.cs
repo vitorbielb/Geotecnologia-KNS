@@ -26,6 +26,20 @@ namespace GeotecnologiaKNS.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Geozones",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TenantId = table.Column<int>(type: "int", nullable: false),
+                    Utm = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Geozones", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Industrias",
                 columns: table => new
                 {
@@ -210,9 +224,9 @@ namespace GeotecnologiaKNS.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProdutorId = table.Column<int>(type: "int", nullable: true),
-                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Dados = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Dados = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -245,11 +259,17 @@ namespace GeotecnologiaKNS.Data.Migrations
                     TipoCadastroRural = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CadastroAmbientalRural = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ProdutorId = table.Column<int>(type: "int", nullable: false),
-                    Validacao = table.Column<int>(type: "int", nullable: false)
+                    Validacao = table.Column<int>(type: "int", nullable: false),
+                    GeozoneId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Propriedades", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Propriedades_Geozones_GeozoneId",
+                        column: x => x.GeozoneId,
+                        principalTable: "Geozones",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Propriedades_Industrias_TenantId",
                         column: x => x.TenantId,
@@ -271,9 +291,9 @@ namespace GeotecnologiaKNS.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PropriedadeId = table.Column<int>(type: "int", nullable: true),
-                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Dados = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
-                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Descricao = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Dados = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -378,6 +398,11 @@ namespace GeotecnologiaKNS.Data.Migrations
                 column: "ProdutorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Propriedades_GeozoneId",
+                table: "Propriedades",
+                column: "GeozoneId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Propriedades_ProdutorId",
                 table: "Propriedades",
                 column: "ProdutorId");
@@ -463,6 +488,9 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Propriedades");
+
+            migrationBuilder.DropTable(
+                name: "Geozones");
 
             migrationBuilder.DropTable(
                 name: "Produtores");

@@ -77,11 +77,21 @@
                             <span asp-validation-for="Industria" class="text-danger"></span>
                         </div>
                         <!-- Grupo 3 -->
+                        <div class="row">
+                            <div class="form-group col-6">
+                                <label asp-for="Latitude" class="control-label"></label>
+                                <input asp-for="Latitude" class="form-control" onchange="geozoneMapSet()" />
+                                <span asp-validation-for="Latitude" class="text-danger"></span>
+                            </div>
+                            <div class="form-group col-6">
+                                <label asp-for="Longitude" class="control-label"></label>
+                                <input asp-for="Longitude" class="form-control" onchange="geozoneMapSet()" />
+                                <span asp-validation-for="Longitude" class="text-danger"></span>
+                            </div>
+                        </div>
                         <div class="form-group">
-                            <label asp-for="Latitude" class="control-label"></label>
-                            <input asp-for="Latitude" class="form-control" />
-                            <span asp-validation-for="Latitude" class="text-danger"></span>
-
+                            <div id="geozone-map">
+                            </div>
                         </div>
                         <div class="form-group">
                             <label asp-for="Area" class="control-label"></label>
@@ -94,11 +104,6 @@
                             <span asp-validation-for="CadastroAmbientalRural" class="text-danger"></span>
                         </div>
                         <!-- Grupo 4 -->
-                        <div class="form-group">
-                            <label asp-for="Longitude" class="control-label"></label>
-                            <input asp-for="Longitude" class="form-control" />
-                            <span asp-validation-for="Longitude" class="text-danger"></span>
-                        </div>
                         <div class="form-group">
                             <label asp-for="AreaUtil" class="control-label"></label>
                             <input asp-for="AreaUtil" class="form-control" />
@@ -166,8 +171,6 @@
                             </div>
                         </div>
                     </div>
-
-
                 </form>
             </div>
         </div>
@@ -178,25 +181,6 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script>
-        function populateCities(uf) {
-            $.ajax({
-                url: "/Propriedades/GetCitiesByUF",
-                type: "GET",
-                data: { uf: uf },
-                dataType: "json",
 
-                success: function (data) {
-
-                    var dropdown = $("#citiesDropdown");
-                    dropdown.empty();
-                    dropdown.removeAttr('disabled');
-                    dropdown.append($('<option></option>').val(null).text('Selecione...'));
-                    for (var i = 0; i < data.length; i++) {
-                        dropdown.append($('<option></option>').val(data[i].value).text(data[i].text));
-                    }
-                }
-            });
-        }
-    </script>
+    <script src="~/js/views/propriedades/create.js"></script>
 }

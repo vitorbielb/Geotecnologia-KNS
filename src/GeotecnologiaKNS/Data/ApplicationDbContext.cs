@@ -26,21 +26,17 @@ namespace GeotecnologiaKNS.Data
         public DbSet<PropriedadeArquivo> PropriedadesArquivos { get; set; }
         public DbSet<ProdutorArquivo> ProdutoresArquivos { get; set; }
         public DbSet<Solicitacao> Solicitacao { get; set; }
+        public DbSet<Geozone> Geozones { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-            base.OnModelCreating(modelBuilder);
-            var keysProperties = modelBuilder.Model.GetEntityTypes().Select(x => x.FindPrimaryKey()).SelectMany(x => x.Properties);
-            foreach (var property in keysProperties)
-            {
-                property.ValueGenerated = ValueGenerated.OnAdd;
-            }
-
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Propriedade>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            modelBuilder.Entity<Propriedade>()
+                .HasOne(x => x.Geozone);
 
             modelBuilder.Entity<Propriedade>()
                 .HasMany(x => x.Documentos);
