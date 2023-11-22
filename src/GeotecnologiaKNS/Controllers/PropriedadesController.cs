@@ -26,7 +26,10 @@ namespace GeotecnologiaKNS.Controllers
             var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
             return View(model);
         }
-
+        private ActionResult HttpNotFound()
+        {
+            return NotFound();
+        }
         // GET: Propriedades/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -135,46 +138,32 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Propriedades/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public ActionResult Delete(int id)
         {
+            var propriedades = _context.Propriedades.Find(id);
 
-            if (id == null || _context.Propriedades == null)
-
+            if (propriedades == null)
             {
-                return NotFound();
+                return HttpNotFound();
             }
 
-
-            var propriedade = await _context.Propriedades
-
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (propriedade == null)
-            {
-                return NotFound();
-            }
-
-            return View(propriedade);
+            return View(propriedades);
         }
 
-        // POST: Propriedades/Delete/5
+        // POST: Produtores/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<ActionResult> DeleteConfirmedAsync(int id)
         {
+            var propriedades = _context.Propriedades.Find(id);
 
-            if (_context.Propriedades == null)
+            if (propriedades != null)
             {
-                return Problem("Entity set 'ApplicationDbContext.Propriedade'  is null.");
-            }
-            var propriedade = await _context.Propriedades.FindAsync(id);
-            if (propriedade != null)
-            {
-                _context.Propriedades.Remove(propriedade);
-
+                _context.Propriedades.Remove(propriedades);
+                await _context.SaveChangesAsync();
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
         public IActionResult GeozoneMap(GeozoneViewModel model)
