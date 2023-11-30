@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{C3D8AEF0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeotecnologiaKNS.UnitTests", "tests\GeotecnologiaKNS.UnitTests\GeotecnologiaKNS.UnitTests.csproj", "{8CC588B8-BC76-4533-B8C4-AE425FE9644B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeotecnologiaKNS.FuncionalTests", "tests\GeotecnologiaKNS.FuncionalTests\GeotecnologiaKNS.FuncionalTests.csproj", "{0574F8A7-39EB-4B7C-B59F-DBA1383B01BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeotecnologiaKNS.FuncionalTests", "tests\GeotecnologiaKNS.FuncionalTests\GeotecnologiaKNS.FuncionalTests.csproj", "{0574F8A7-39EB-4B7C-B59F-DBA1383B01BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

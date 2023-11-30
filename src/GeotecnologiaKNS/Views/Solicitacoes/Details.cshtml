@@ -180,7 +180,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label asp-for="Propriedade.NomePropriedade" class="control-label"></label>
-                            <input asp-for="Propriedade.NomePropriedade" class="form-control form-control-sm" disabled />
+                            <input asp-for="Propriedade.NomePropriedade" class="form-control" disabled />
                         </div>
                     </div>
                     <div class="col-md-4">
@@ -315,6 +315,9 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="doc-tab" data-bs-toggle="tab" data-bs-target="#doc" type="button" role="tab" aria-controls="doc" aria-selected="false">Documentos do produtor</button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analise-tab" data-bs-toggle="tab" data-bs-target="#analise" type="button" role="tab" aria-controls="analise" aria-selected="false">Documentos da análise</button>
+                    </li>
                 </ul>
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -331,6 +334,9 @@
                     </div>
                     <div class="tab-pane fade" id="doc" role="tabpanel" aria-labelledby="doc-tab">
                         <partial name="_file-listP" model="Model.Propriedade.Produtor"></partial>
+                    </div>
+                    <div class="tab-pane fade" id="analise" role="tabpanel" aria-labelledby="analise-tab">
+                        <partial name="_file-list-ADM" model="Model"></partial>
                     </div>
                 </div>
             </div>

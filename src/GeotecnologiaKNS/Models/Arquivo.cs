@@ -22,4 +22,8 @@ namespace GeotecnologiaKNS.Models
     {
         [ForeignKey("Propriedade")] public override int VinculoId { get; set; }
     }
+    public class AnaliseArquivo : Arquivo
+    {
+        [ForeignKey("Propriedade")] public override int VinculoId { get; set; }
+    }
 }

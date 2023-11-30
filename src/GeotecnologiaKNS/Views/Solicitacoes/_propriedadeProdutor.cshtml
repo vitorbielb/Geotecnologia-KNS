@@ -33,7 +33,9 @@
                         <tr class="table-row-link" @*data-url="@Url.Action("Edit", "Produtores", new { id = produtor.Id })*@">
                             <td>@Html.DisplayFor(x => Model.Nome)</td>
                             <td>@Html.DisplayFor(x => Model.Cpf)</td>
-                            <td>@Html.DisplayFor(x => Model.Industria)</td>
+                            <td>
+                                @User.Identity.GetIndustria()
+                            </td>
                         </tr>
                     </table>
                 </div>

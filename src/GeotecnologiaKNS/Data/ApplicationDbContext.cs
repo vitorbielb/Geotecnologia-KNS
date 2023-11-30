@@ -25,6 +25,7 @@ namespace GeotecnologiaKNS.Data
         public DbSet<Produtor> Produtores { get; set; }
         public DbSet<PropriedadeArquivo> PropriedadesArquivos { get; set; }
         public DbSet<ProdutorArquivo> ProdutoresArquivos { get; set; }
+        public DbSet<AnaliseArquivo> AnalisesArquivos { get; set; }
         public DbSet<Solicitacao> Solicitacao { get; set; }
         public DbSet<Geozone> Geozones { get; set; }
 

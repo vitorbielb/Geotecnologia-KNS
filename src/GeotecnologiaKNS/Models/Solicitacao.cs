@@ -37,10 +37,9 @@ namespace GeotecnologiaKNS.Models
 
         [Display(Name = "Parecer")]
         public string? Parecer { get; set; }
-
+        public List<AnaliseArquivo>? Documentos { get; set; }
         public Status Status { get; set; } = Status.Solicitado;
     }
-
     public enum Status
     {
         Solicitado,
