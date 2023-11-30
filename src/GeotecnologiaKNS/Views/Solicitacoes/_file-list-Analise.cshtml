@@ -2,11 +2,12 @@
     Layout = null;
 }
 
-@model Propriedade
+@model Solicitacao
 
 <div id="file-upload-content">
     <div class="card">
         <div class="card-body">
+            <partial name="_file-upload-Analise" model="new AnaliseArquivo { VinculoId = Model.Id }"></partial>
 
             <div class="modal fade" id="deletefileModal" tabindex="-1" aria-labelledby="deletefileModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">

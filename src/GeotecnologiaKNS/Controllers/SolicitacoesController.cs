@@ -35,6 +35,7 @@ namespace GeotecnologiaKNS.Controllers
                 .Include(s => s.Propriedade)
                 .Include(p => p.Propriedade.Documentos)
                 .Include(y => y.Propriedade.Produtor.Documentos)
+                .Include(z => z.Documentos)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (solicitacao == null)
             {
@@ -143,7 +144,9 @@ namespace GeotecnologiaKNS.Controllers
                 return NotFound();
             }
 
-            var solicitacao = await _context.Solicitacao.FindAsync(id);
+            var solicitacao = await _context.Solicitacao
+                .Include(p => p.Documentos) // Incluindo a lista de arquivos associados à propriedade
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (solicitacao == null)
             {
                 return NotFound();
@@ -182,6 +185,60 @@ namespace GeotecnologiaKNS.Controllers
             }
             ViewData["PropriedadeId"] = new SelectList(_context.Propriedades.Where(propriedades => propriedades.Validacao == Validacao.Validado), "Id", "NomePropriedade", solicitacao.PropriedadeId);
             return View(solicitacao);
+        }
+        [HttpPost, ActionName("Upload")]
+        public async Task<ActionResult> UploadAsync(AnaliseArquivoViewModel arquivo)
+        {
+            if (!ModelState.IsValid)
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            var solicitacao = await _context.Solicitacao
+                                            .Include(x => x.Documentos)
+                                            .FirstAsync(x => x.Id == arquivo.VinculoId);
+
+            solicitacao.Documentos ??= new List<AnaliseArquivo>();
+
+            solicitacao.Documentos.Add(arquivo.Model);
+            _context.Solicitacao.Update(solicitacao);
+
+            await _context.SaveChangesAsync();
+
+            return View("_file-list-Analise", solicitacao);
+        }
+
+        [HttpPost, ActionName("DeleteFile")]
+        public async Task<ActionResult> DeleteFileAsync(int id)
+        {
+            var arquivo = await _context.AnalisesArquivos.FindAsync(id);
+
+            if (arquivo == null)
+            {
+                return Problem();
+            }
+
+            var solicitacao = await _context.Solicitacao
+                                         .Include(x => x.Documentos)
+                                         .FirstAsync(x => x.Documentos!.Contains(arquivo));
+
+            _context.AnalisesArquivos.Remove(arquivo);
+            await _context.SaveChangesAsync();
+
+            return View("_file-list-Analise", solicitacao);
+        }
+
+        [HttpGet("Solicitacoes/ViewFile/{id}")]
+        public async Task<ActionResult> ViewFileAsync(int id)
+        {
+            var arquivo = await _context.AnalisesArquivos.FindAsync(id);
+
+            if (arquivo == null)
+            {
+                return Problem();
+            }
+
+            return File(arquivo.Dados, arquivo.ContentType);
         }
     }
 }
