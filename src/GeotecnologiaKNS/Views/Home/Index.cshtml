@@ -67,7 +67,7 @@
                                     <tbody>
                                         @foreach (var item in _solicitacoesRecentes)
                                         {
-                                            <tr role="row" class="odd">
+                                            <tr class="table-row-link" data-url="@Url.Action("Details", "Solicitacoes", new { id = item.Id })">
                                                 <td>@Html.DisplayFor(x => item.Propriedade.NomePropriedade)</td>
                                                 <td>@Html.DisplayFor(x => item.DataSolicitacao)</td>
                                                 <td>@Html.DisplayFor(x => item.DataAnalise)</td>
@@ -136,6 +136,14 @@
             type: 'bar',
             data: data,
             options: options
+        });
+        // Adiciona um evento de clique em todas as linhas da tabela com a classe "table-row-link"
+        const rows = document.querySelectorAll('.table-row-link');
+        rows.forEach(row => {
+            row.addEventListener('click', function () {
+                const url = this.dataset.url;
+                window.location.href = url; // Redireciona para a URL da página de edição
+            });
         });
     </script>
 }

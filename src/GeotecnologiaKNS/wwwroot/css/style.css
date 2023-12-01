@@ -25034,18 +25034,22 @@ dl {
     background-color: darkgrey;
     outline: 1px solid slategrey;
 }
+
 .status-btn {
     width: 150px; /* Defina a largura desejada para os botões de status */
 }
+
 .form-group [data-target="#PropriedadeId"][data-mode="edit"] {
-  pointer-events: none;
+    pointer-events: none;
 }
+
 .message {
     position: absolute;
     top: 60%;
     left: 60%;
     transform: translate(-50%, -50%);
 }
+
 .bii-lock-fill {
     transform: translate(420%, 110%);
 }
@@ -25057,4 +25061,10 @@ dl {
 
 .message h5 {
     font-size: 20px;
+}
+
+.table-row-link:hover {
+    background-color: #dcdcdc;
+    transition: background-color 1.0s ease;
+    cursor: pointer;
 }
