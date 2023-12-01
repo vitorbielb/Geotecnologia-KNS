@@ -25058,3 +25058,8 @@ dl {
 .message h5 {
     font-size: 20px;
 }
+.table-row-link:hover {
+    background-color: #dcdcdc;
+    transition: background-color 1.0s ease;
+    cursor: pointer;
+}
