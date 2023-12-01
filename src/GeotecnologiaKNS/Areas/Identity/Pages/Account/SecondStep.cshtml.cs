@@ -102,7 +102,7 @@ namespace GeotecnologiaKNS.Areas.Identity.Pages.Account
 
             _context.SaveChanges();
 
-            await _userManager.AddToRoleAsync(user, nameof(Roles.ApplicationAdmin));
+            await _userManager.AddToRoleAsync(user, nameof(Roles.Administrador));
 
             return RedirectToPage("./Login");
         }

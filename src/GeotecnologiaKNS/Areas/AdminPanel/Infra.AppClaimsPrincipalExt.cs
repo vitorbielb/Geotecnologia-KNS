@@ -27,14 +27,14 @@ public static class AppClaimsPrincipalExt
     public static bool IsApplicationAdmin(this IIdentity identity)
     {
         var claim = identity.AsClaimIdentity().FindFirst(ClaimTypes.Role);
-        return claim?.Value == nameof(Roles.ApplicationAdmin);
+        return claim?.Value == nameof(Roles.Administrador);
     }
 
 
     public static bool IsTenantAdmin(this IIdentity identity)
     {
         var claim = identity.AsClaimIdentity().FindFirst(ClaimTypes.Role);
-        return claim?.Value == nameof(Roles.TenantAdmin);
+        return claim?.Value == nameof(Roles.ClienteAdmin);
     }
 
 

@@ -2,15 +2,15 @@
 
 public static partial class Roles
 {
-    public static RoleClaims ApplicationAdmin => new(
+    public static RoleClaims Administrador => new(
         access: p => p.Everything());
 
-    public static RoleClaims TenantAdmin => new(
+    public static RoleClaims ClienteAdmin => new(
         access: p => p.EverythingExcept(
             p => p.Tenant,
             p => p.Solicitacao.Update));
 
-    public static RoleClaims Requester => new(
+    public static RoleClaims Solicitante => new(
         access: p => p.OnlyAccess(
             p => p.Produtor.Read,
             p => p.Produtor.Create,
@@ -26,7 +26,7 @@ public static partial class Roles
             p => p.Solicitacao.Create,
             p => p.Solicitacao.Delete));
 
-    public static RoleClaims Processor => new(
+    public static RoleClaims Analista => new(
         access: p => p.OnlyAccess(
             p => p.Produtor.Read,
             p => p.Propriedade.Read,

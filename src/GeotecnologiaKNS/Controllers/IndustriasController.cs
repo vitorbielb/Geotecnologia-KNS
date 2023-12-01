@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GeotecnologiaKNS.Controllers
 {
-    [Authorize(Roles = nameof(Roles.ApplicationAdmin))]
+    [Authorize(Roles = nameof(Roles.Administrador))]
     public class IndustriasController : Controller
     {
         private readonly ApplicationDbContext _context;

@@ -32,6 +32,13 @@ namespace GeotecnologiaKNS.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            var keysProperties = modelBuilder.Model.GetEntityTypes().Select(x => x.FindPrimaryKey()).SelectMany(x => x.Properties);
+            foreach (var property in keysProperties)
+            {
+                property.ValueGenerated = ValueGenerated.OnAdd;
+            }
+       
+            base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Propriedade>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
@@ -81,7 +88,7 @@ namespace GeotecnologiaKNS.Data
             modelBuilder.Entity<ApplicationRole>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue ||
                                      _userContext.IsApplicationAdmin.GetValueOrDefault() ||
-                                     (x.Name != nameof(Infra.Roles.ApplicationAdmin) && _userContext.IsTenantAdmin.GetValueOrDefault() && x.TenantId == _userContext.TenantId));
+                                     (x.Name != nameof(Infra.Roles.Administrador) && _userContext.IsTenantAdmin.GetValueOrDefault() && x.TenantId == _userContext.TenantId));
 
             modelBuilder.Entity<ApplicationRole>()
                 .HasMany(x => x.Claims)
