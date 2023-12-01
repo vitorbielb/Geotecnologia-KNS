@@ -25063,3 +25063,6 @@ dl {
     transition: background-color 1.0s ease;
     cursor: pointer;
 }
+.table-row:hover {
+    cursor: pointer;
+}

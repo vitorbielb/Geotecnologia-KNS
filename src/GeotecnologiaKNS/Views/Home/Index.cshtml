@@ -67,7 +67,7 @@
                                     <tbody>
                                         @foreach (var item in _solicitacoesRecentes)
                                         {
-                                            <tr class="table-row-link" data-url="@Url.Action("Details", "Solicitacoes", new { id = item.Id })">
+                                            <tr class="table-row" data-url="@Url.Action("Details", "Solicitacoes", new { id = item.Id })">
                                                 <td>@Html.DisplayFor(x => item.Propriedade.NomePropriedade)</td>
                                                 <td>@Html.DisplayFor(x => item.DataSolicitacao)</td>
                                                 <td>@Html.DisplayFor(x => item.DataAnalise)</td>
@@ -138,7 +138,7 @@
             options: options
         });
             // Adiciona um evento de clique em todas as linhas da tabela com a classe "table-row-link"
-            const rows = document.querySelectorAll('.table-row-link');
+            const rows = document.querySelectorAll('.table-row');
         rows.forEach(row => {
             row.addEventListener('click', function () {
                 const url = this.dataset.url;
