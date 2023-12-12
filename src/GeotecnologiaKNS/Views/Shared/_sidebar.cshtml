@@ -3,7 +3,7 @@
         <li class="nav-item">
             <a class="nav-link" href="/">
                 <i class="mdi mdi-home menu-icon"></i>
-                <span class="menu-title">Dashboard</span>
+                <span class="menu-title">Início</span>
             </a>
         </li>
         <li class="nav-item">
@@ -87,18 +87,6 @@
                             </li>
                         </ul>
                     }
-                    @if (User.Identity.HasEnabled(operation => operation.Tenant.Read))
-                    {
-                        <ul class="nav flex-column sub-menu">
-                            <li class="nav-item">
-                                <a class="nav-link" href="/solicitacoes/analise">
-                                    <i class="mdi mdi-clipboard-text menu-icon"></i>
-                                    Analistas
-                                </a>
-                            </li>
-                        </ul>
-                    }
-
                 </div>
 
             </li>
@@ -111,7 +99,7 @@
             <li class="nav-item">
                 <a class="nav-link" data-bs-toggle="collapse" href="#ui-validacao" aria-expanded="false" aria-controls="ui-validacao">
                     <i class="menu-icon mdi mdi-checkbox-multiple-marked"></i>
-                    <span class="menu-title">Validações</span>
+                    <span class="menu-title">Painel de Validações</span>
                     <i class="menu-arrow"></i>
                 </a>
                 <div class="collapse" id="ui-validacao">
@@ -140,5 +128,31 @@
                 </div>
             </li>
         }
-    </ul>
-</nav>
+        @if (User.Identity != null &&
+        (User.Identity.HasEnabled(operation => operation.Tenant.Read) ||
+        User.Identity.HasEnabled(operation => operation.Role.Read) ||
+        User.Identity.HasEnabled(operation => operation.User.Read)))
+        {
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="collapse" href="#ui-analise" aria-expanded="false" aria-controls="ui-analise">
+                    <i class="menu-icon mdi mdi-access-point-network"></i>
+                    <span class="menu-title">Painel de Análises</span>
+                    <i class="menu-arrow"></i>
+                </a>
+                <div class="collapse" id="ui-analise">
+                    @if (User.Identity.HasEnabled(operation => operation.Tenant.Read))
+                    {
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/solicitacoes/analise">
+                                    <i class="mdi mdi-clipboard-text menu-icon"></i>
+                                    Análises
+                                </a>
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </li>
+        }
+        </ul>
+    </nav>
