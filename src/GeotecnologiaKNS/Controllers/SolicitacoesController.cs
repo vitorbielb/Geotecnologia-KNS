@@ -62,6 +62,7 @@ namespace GeotecnologiaKNS.Controllers
         {
             if (ModelState.IsValid)
             {
+                solicitacao.DataSolicitacao = DateTime.Now;
                 _context.Add(solicitacao);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
