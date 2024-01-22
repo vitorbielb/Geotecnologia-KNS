@@ -24,6 +24,12 @@ namespace GeotecnologiaKNS.Models
     }
     public class AnaliseArquivo : Arquivo
     {
-        [ForeignKey("Propriedade")] public override int VinculoId { get; set; }
+        [ForeignKey("Analise")] public override int VinculoId { get; set; }
+        public DateTime? DataAnalise { get; set; } = DateTime.Now;
+    }
+    public class CartografiaArquivo : Arquivo
+    {
+        [ForeignKey("Cartografia")] public override int VinculoId { get; set; }
+        public DateTime? DataCartografia { get; set; } = DateTime.Now;
     }
 }

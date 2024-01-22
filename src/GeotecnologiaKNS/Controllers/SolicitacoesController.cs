@@ -36,12 +36,21 @@ namespace GeotecnologiaKNS.Controllers
                 .Include(p => p.Propriedade.Documentos)
                 .Include(y => y.Propriedade.Produtor.Documentos)
                 .Include(z => z.Documentos)
+                .Include(q => q.Propriedade.Cartografia.Documentos)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (solicitacao == null)
             {
                 return NotFound();
             }
-
+            if (solicitacao.Propriedade.Cartografia == null)
+            {
+                solicitacao.Propriedade.Cartografia = new Cartografia
+                {
+                    Documentos = new List<CartografiaArquivo>() // Inicializa uma lista vazia
+                };
+            }
+            solicitacao.Cartografia ??= new Cartografia();
+           
             return View(solicitacao);
         }
 
@@ -127,8 +136,6 @@ namespace GeotecnologiaKNS.Controllers
                                                    .Include(s => s.Propriedade.Produtor);
             return View(await solicitacoes.ToListAsync());
         }
-
-
 
         // GET: Solicitacoes/Edit/5
         [Authorize(Policy = "UserCanUpdateSolicitacoes")]

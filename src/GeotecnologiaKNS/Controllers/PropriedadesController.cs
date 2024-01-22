@@ -43,6 +43,7 @@ namespace GeotecnologiaKNS.Controllers
             var propriedade = await _context.Propriedades
                 .Include(p => p.Documentos)
                 .Include(p => p.Geozone)
+                .Include (d => d.Cartografia)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (propriedade == null)

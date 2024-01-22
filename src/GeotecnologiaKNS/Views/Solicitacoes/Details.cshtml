@@ -286,13 +286,9 @@
                     </div>
                 </div>
             </div>
-            
         </div>
     </div>
 </div>
-
-
-
 
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">
@@ -309,14 +305,16 @@
                         <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Propriedade vinculada</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Documentos da propriedade</button>
-                    </li>
-
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="doc-tab" data-bs-toggle="tab" data-bs-target="#doc" type="button" role="tab" aria-controls="doc" aria-selected="false">Documentos do produtor</button>
+                        <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Doc. Propriedade</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="analise-tab" data-bs-toggle="tab" data-bs-target="#analise" type="button" role="tab" aria-controls="analise" aria-selected="false">Documentos da análise</button>
+                        <button class="nav-link" id="doc-tab" data-bs-toggle="tab" data-bs-target="#doc" type="button" role="tab" aria-controls="doc" aria-selected="false">Doc. Produtor</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analise-tab" data-bs-toggle="tab" data-bs-target="#analise" type="button" role="tab" aria-controls="analise" aria-selected="false">Doc. Análise</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cartog-tab" data-bs-toggle="tab" data-bs-target="#cartog" type="button" role="tab" aria-controls="cart" aria-selected="false">Arq. Cartográfico</button>
                     </li>
                 </ul>
                 <div class="tab-content" id="myTabContent">
@@ -337,6 +335,9 @@
                     </div>
                     <div class="tab-pane fade" id="analise" role="tabpanel" aria-labelledby="analise-tab">
                         <partial name="_file-list-ADM" model="Model"></partial>
+                    </div>
+                    <div class="tab-pane fade" id="cartog" role="tabpanel" aria-labelledby="cartog-tab">
+                        <partial name="_file-listCart" model="Model.Propriedade.Cartografia"></partial>
                     </div>
                 </div>
             </div>

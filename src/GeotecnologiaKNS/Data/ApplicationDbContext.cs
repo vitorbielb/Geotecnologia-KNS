@@ -28,7 +28,8 @@ namespace GeotecnologiaKNS.Data
         public DbSet<AnaliseArquivo> AnalisesArquivos { get; set; }
         public DbSet<Solicitacao> Solicitacao { get; set; }
         public DbSet<Geozone> Geozones { get; set; }
-
+        public DbSet<CartografiaArquivo> CartografiasArquivos { get; set; }
+        public DbSet<Cartografia> Cartografias { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -75,6 +76,18 @@ namespace GeotecnologiaKNS.Data
                 .WithMany(c => c.Solicitacoes)
                 .HasForeignKey(e => e.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Cartografia>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            modelBuilder.Entity<Cartografia>()
+                .HasOne(e => e.Industria)
+                .WithMany(c => c.Cartografias)
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Cartografia>()
+                .HasMany(x => x.Documentos);
 
             modelBuilder.Entity<ApplicationUser>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);

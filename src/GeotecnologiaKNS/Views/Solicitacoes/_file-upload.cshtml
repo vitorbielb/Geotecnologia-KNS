@@ -1,0 +1,18 @@
+﻿@model CartografiaArquivo
+
+<h4 class="card-title">Envio de arquivo</h4>
+<div class="form-group">
+    <span class="text-danger field-validation-error" data-valmsg-for="file-upload" data-valmsg-replace="true">
+        <span id="file-upload-error"></span>
+    </span>
+    <input type="file" class="file-upload-default" onchange="setfilename($(this))">
+    <div class="input-group col-xs-12">
+        <input type="text" class="file-upload-browse form-control file-upload-info" placeholder="Selecione seu arquivo..." onclick="selectfile($(this))">
+        <span class="input-group-append">
+            <button class="btn btn-danger" type="submit" onclick="uploadfile(@Model.VinculoId);">
+                <i class="mdi mdi-upload btn-icon-prepend"></i>
+                Upload
+            </button>
+        </span>
+    </div>
+</div>

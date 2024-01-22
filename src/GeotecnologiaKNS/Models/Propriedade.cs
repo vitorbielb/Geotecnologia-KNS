@@ -59,6 +59,7 @@ namespace GeotecnologiaKNS.Models
         public List<PropriedadeArquivo>? Documentos { get; set; }
         public Validacao Validacao { get; set; } = Validacao.Pendente;
         public Geozone? Geozone { get; set; }
+        public Cartografia? Cartografia { get; set; }
     }
     public enum Validacao
     {

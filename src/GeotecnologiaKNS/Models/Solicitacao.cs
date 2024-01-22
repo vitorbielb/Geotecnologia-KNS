@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Solicitacao : IIndustriaInfo, IPrimaryKeyInfo<int>
+    public class Solicitacao : IIndustriaInfo, IPropriedadeInfo, ICartografiasInfo, IPrimaryKeyInfo<int>
     {
         public int Id { get; set; }
 
@@ -29,8 +29,7 @@ namespace GeotecnologiaKNS.Models
 
         [Display(Name = "Data da análise")]
         public DateTime? DataAnalise { get; set; }
-
-        
+        public Cartografia? Cartografia { get; set; }
         [Display(Name = "Observação")]
         public string? Observacao { get; set; }
 

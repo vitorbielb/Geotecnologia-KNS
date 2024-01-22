@@ -29,9 +29,7 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Confirme senha")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
-
         public int TenantId { get; set; }
-
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Função")]
         public string Role { get; set; }

@@ -45,6 +45,7 @@ builder.Services.AddScoped<IIndustriaRepository, IndustriaRepository>();
 builder.Services.AddScoped<ISolicitacaoRepository, SolicitacaoRepository>();
 builder.Services.AddScoped<IProdutorRepository, ProdutorRepository>();
 builder.Services.AddScoped<IPropriedadeRepository, PropriedadeRepository>();
+builder.Services.AddScoped<ICartografiaRepository, CartografiaRepository>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));

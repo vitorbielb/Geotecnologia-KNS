@@ -151,6 +151,17 @@
                             </li>
                         </ul>
                     }
+                    @if (User.Identity.HasEnabled(operation => operation.Tenant.Read))
+                    {
+                        <ul class="nav flex-column sub-menu">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/cartografias/index">
+                                    <i class="mdi mdi-book-open-variant menu-icon"></i>
+                                    Cartografias
+                                </a>
+                            </li>
+                        </ul>
+                    }
                 </div>
             </li>
         }

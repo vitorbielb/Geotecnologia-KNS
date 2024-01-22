@@ -4,6 +4,7 @@ using GeotecnologiaKNS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeotecnologiaKNS.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240109203332_Code")]
+    partial class Code
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,9 +39,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Property<byte[]>("Dados")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTime?>("DataAnalise")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
@@ -168,6 +167,9 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<DateTime?>("DataCartografia")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("PropriedadeId")
                         .HasColumnType("int");
 
@@ -180,8 +182,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PropriedadeId")
-                        .IsUnique();
+                    b.HasIndex("PropriedadeId");
 
                     b.HasIndex("TenantId");
 
@@ -206,9 +207,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Property<byte[]>("Dados")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTime?>("DataCartografia")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
@@ -460,9 +458,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Property<string>("Analista")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("CartografiaId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("DataAnalise")
                         .HasColumnType("datetime2");
 
@@ -489,8 +484,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CartografiaId");
 
                     b.HasIndex("PropriedadeId");
 
@@ -637,8 +630,8 @@ namespace GeotecnologiaKNS.Data.Migrations
             modelBuilder.Entity("GeotecnologiaKNS.Models.Cartografia", b =>
                 {
                     b.HasOne("GeotecnologiaKNS.Models.Propriedade", "Propriedade")
-                        .WithOne("Cartografia")
-                        .HasForeignKey("GeotecnologiaKNS.Models.Cartografia", "PropriedadeId")
+                        .WithMany()
+                        .HasForeignKey("PropriedadeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -718,10 +711,6 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Solicitacao", b =>
                 {
-                    b.HasOne("GeotecnologiaKNS.Models.Cartografia", "Cartografia")
-                        .WithMany()
-                        .HasForeignKey("CartografiaId");
-
                     b.HasOne("GeotecnologiaKNS.Models.Propriedade", "Propriedade")
                         .WithMany()
                         .HasForeignKey("PropriedadeId")
@@ -733,8 +722,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Cartografia");
 
                     b.Navigation("Industria");
 
@@ -831,8 +818,6 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Propriedade", b =>
                 {
-                    b.Navigation("Cartografia");
-
                     b.Navigation("Documentos");
                 });
 

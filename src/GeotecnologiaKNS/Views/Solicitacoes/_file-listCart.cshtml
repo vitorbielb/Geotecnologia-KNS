@@ -1,0 +1,65 @@
+﻿@{
+    Layout = null;
+}
+
+@model Cartografia
+
+<div id="file-upload-content">
+    <div class="card">
+        <div class="card-body">
+
+            @if (Model.Documentos?.Any() ?? false)
+            {
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr style="background-color: #FFF; color: #258cfb;">
+                                <th>@Html.DisplayNameFor(model => model.Documentos![0].Descricao)</th>
+
+                                <th>Tipo</th>
+
+                                <th>Data</th>
+
+                                <th>Arquivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Documentos)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(model => item.Descricao)
+                                        <input type="hidden" class="hidden" value="@item.Id">
+                                    </td>
+                                    <td>
+                                        @TipoCartografico.GetDescricao(Model.Tipo)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(model => item.DataCartografia)
+                                    </td>
+                                    <td>
+                                        Cartográfico
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <a class="btn btn-primary gradient-button" target="_blank" href="@Url.Action("ViewFile", "Cartografias", values: new { item.Id })">
+                                            <i class="bi bi-eye-fill"></i>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">
+                                                <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z" />
+                                                <path d="M0 8s3-5.5 8-5.5S16 8 16 8s-3 5.5-8 5.5S0 8 0 8zm8 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
+                                            </svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p>Nenhum documento</p>
+            }
+        </div>
+
+    </div>
+</div>
