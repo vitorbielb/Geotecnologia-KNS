@@ -69,7 +69,7 @@ namespace GeotecnologiaKNS.Controllers
         {
             if (_context.Cartografias == null)
             {
-                return Problem("Entity set 'ApplicationDbContext.Solicitacao'  is null.");
+                return Problem("Entity set 'ApplicationDbContext.Cartografias'  is null.");
             }
             var solicitacao = await _context.Cartografias.FindAsync(id);
             if (solicitacao != null)
@@ -107,7 +107,6 @@ namespace GeotecnologiaKNS.Controllers
             });
         }
 
-
         [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -117,7 +116,7 @@ namespace GeotecnologiaKNS.Controllers
             }
 
             var solicitacao = await _context.Cartografias
-                .Include(p => p.Documentos)
+                .Include(p => p.Arquivos)
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (solicitacao == null)
             {
@@ -130,7 +129,7 @@ namespace GeotecnologiaKNS.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [TenantFilter]
-        public async Task<IActionResult> Edit([Bind("Id,PropriedadeId,Solicitacao,Tipo,DataCartografia")] Cartografia cartografia)
+        public async Task<IActionResult> Edit([Bind("Id,PropriedadeId,Solicitacao,DataCartografia")] Cartografia cartografia)
         {
             ModelState.Remove("Documentos");
 
@@ -142,28 +141,29 @@ namespace GeotecnologiaKNS.Controllers
             }
 
             var persitedProdutor = await _context.Cartografias
-                                         .Include(x => x.Documentos)
+                                         .Include(x => x.Arquivos)
                                          .FirstAsync(x => x.Id == cartografia.Id);
 
-            cartografia.Documentos = persitedProdutor.Documentos;
+            cartografia.Arquivos = persitedProdutor.Arquivos;
             ViewData["PropriedadeId"] = new SelectList(_context.Propriedades.Where(propriedades => propriedades.Validacao == Validacao.Validado), "Id", "NomePropriedade", cartografia.PropriedadeId);
             return View(cartografia);
         }
         [HttpPost, ActionName("Upload")]
         public async Task<ActionResult> UploadAsync(CartografiaArquivoViewModel arquivo)
         {
+
             if (!ModelState.IsValid)
             {
                 return ValidationProblem(ModelState);
             }
-
+          
             var solicitacao = await _context.Cartografias
-                                            .Include(x => x.Documentos)
+                                            .Include(x => x.Arquivos)
                                             .FirstAsync(x => x.Id == arquivo.VinculoId);
 
-            solicitacao.Documentos ??= new List<CartografiaArquivo>();
+            solicitacao.Arquivos ??= new List<CartografiaArquivo>();
 
-            solicitacao.Documentos.Add(arquivo.Model);
+            solicitacao.Arquivos.Add(arquivo.Model);
             _context.Cartografias.Update(solicitacao);
 
             await _context.SaveChangesAsync();
@@ -174,13 +174,18 @@ namespace GeotecnologiaKNS.Controllers
         [HttpPost, ActionName("DeleteFile")]
         public async Task<ActionResult> DeleteFileAsync(int id)
         {
-            var arquivo = await _context.CartografiasArquivos.FindAsync(id);
+            var cartografia = await _context.CartografiasArquivos.FindAsync(id);
+
+            if (cartografia == null)
+            {
+                return Problem();
+            }
 
             var solicitacao = await _context.Cartografias
-                                         .Include(x => x.Documentos)
-                                         .FirstAsync(x => x.Documentos!.Contains(arquivo));
+                                         .Include(x => x.Arquivos)
+                                         .FirstAsync(x => x.Arquivos!.Contains(cartografia));
 
-            _context.CartografiasArquivos.Remove(arquivo);
+            _context.CartografiasArquivos.Remove(cartografia);
             await _context.SaveChangesAsync();
 
             return View("_file-listCart", solicitacao);

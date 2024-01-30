@@ -36,7 +36,7 @@ namespace GeotecnologiaKNS.Controllers
                 .Include(p => p.Propriedade.Documentos)
                 .Include(y => y.Propriedade.Produtor.Documentos)
                 .Include(z => z.Documentos)
-                .Include(q => q.Propriedade.Cartografia.Documentos)
+                .Include(q => q.Propriedade.Cartografia.Arquivos)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (solicitacao == null)
             {
@@ -46,11 +46,11 @@ namespace GeotecnologiaKNS.Controllers
             {
                 solicitacao.Propriedade.Cartografia = new Cartografia
                 {
-                    Documentos = new List<CartografiaArquivo>() // Inicializa uma lista vazia
+                    Arquivos = new List<CartografiaArquivo>() // Inicializa uma lista vazia
                 };
             }
             solicitacao.Cartografia ??= new Cartografia();
-           
+
             return View(solicitacao);
         }
 

@@ -16,12 +16,9 @@ namespace GeotecnologiaKNS.Models
         [ForeignKey(nameof(Propriedade))]
         public int PropriedadeId { get; set; }
         public Propriedade? Propriedade { get; set; }
-
-        [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Tipo")]
-        public string? Tipo { get; set; }
+        public CartografiaArquivo? CartografiaArquivo { get; set; }
 
         [Display(Name = "Data da solicitação")]
-        public List<CartografiaArquivo>? Documentos { get; set; }
+        public List<CartografiaArquivo>? Arquivos { get; set; }
     }
 }

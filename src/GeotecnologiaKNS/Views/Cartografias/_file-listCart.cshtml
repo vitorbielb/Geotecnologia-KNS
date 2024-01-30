@@ -7,7 +7,7 @@
 <div id="file-upload-content">
     <div class="card">
         <div class="card-body">
-
+            
             <partial name="_file-upload" model="new CartografiaArquivo { VinculoId = Model.Id }"></partial>
 
             <div class="modal fade" id="deletefileModal" tabindex="-1" aria-labelledby="deletefileModalLabel" aria-hidden="true">
@@ -27,36 +27,39 @@
                 </div>
             </div>
 
-            @if (Model.Documentos?.Any() ?? false)
+            @if (Model.Arquivos?.Any() ?? false)
             {
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr style="background-color: #FFF; color: #258cfb;">
-                                <th>@Html.DisplayNameFor(model => model.Documentos![0].Descricao)</th>
-                   
+                                <th>@Html.DisplayNameFor(model => model.Arquivos![0].Descricao)</th>
                                 <th>Tipo</th>
-
                                 <th>Data</th>
-
                                 <th>Arquivo</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Model.Documentos)
+                            @foreach (var item in Model.Arquivos)
                             {
                                 <tr>
                                     <td>
                                         @Html.DisplayFor(model => item.Descricao)
+                                        <input type="hidden" class="hidden" value="@item.Id">
                                     </td>
                                     <td>
-                                        @TipoCartografico.GetDescricao(Model.Tipo)
+                                        @TipoCartografico.GetDescricao(item.Tipo)
+                                        <input type="hidden" class="hidden" value="@item.Id">
                                     </td>
                                     <td>
-                                        @Html.DisplayFor(model => item.DataCartografia)    
+                                        @Html.DisplayFor(model => item.DataCartografia)
+                                        <input type="hidden" class="hidden" value="@item.Id">
                                     </td>
-                                    <th>Cartográfico</th>
-                                    <td style="right: 30px">
+                                    <td>
+                                        <strong>Cartográfico</strong>
+                                        <input type="hidden" class="hidden" value="@item.Id">
+                                    </td>
+                                    <td style="text-align: right;">
                                         <a class="btn btn-primary gradient-button" target="_blank" href="@Url.Action("ViewFile", "Cartografias", values: new { item.Id })">
                                             <i class="bi bi-eye-fill"></i>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eye-fill" viewBox="0 0 16 16">

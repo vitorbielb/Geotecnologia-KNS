@@ -87,7 +87,7 @@ namespace GeotecnologiaKNS.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Cartografia>()
-                .HasMany(x => x.Documentos);
+                .HasMany(x => x.Arquivos);
 
             modelBuilder.Entity<ApplicationUser>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);

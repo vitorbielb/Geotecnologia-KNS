@@ -19,6 +19,22 @@ namespace GeotecnologiaKNS.Utils
         }
     }
 
+    internal class CartografiaArquivoEntityBinder : IModelBinder
+    {
+        public async Task BindModelAsync(ModelBindingContext bindingContext)
+        {
+            var form = await bindingContext.HttpContext.Request.ReadFormAsync();
+            bindingContext.Result = ModelBindingResult.Success(new CartografiaArquivoViewModel
+            {
+                Tipo = form["Tipo"], 
+                VinculoId = int.Parse(form["vinculoId"]),
+                Descricao = form["Descricao"],
+                ContentType = form["ContentType"],
+                Dados = form["Dados"].FirstOrDefault()?.ToByteArray(),
+            });
+        }
+    }
+
     static class ByteArrayExt
     {
         public static byte[] ToByteArray(this string byteString)

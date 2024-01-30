@@ -37,6 +37,37 @@ function uploadfile(vinculoId) {
         });
     });
 }
+function uploadCartografiafile(vinculoId, tipo) {
+    const file = $('.file-upload-default')[0].files[0];
+    readFileAsByteArray(file).then(byteArray => {
+        var formData = new FormData();
+        formData.append('vinculoId', vinculoId);
+        formData.append('Descricao', file.name);
+        formData.append('ContentType', file.type);
+        formData.append('Dados', byteArray);
+        formData.append('Tipo', tipo)
+        $.ajax({
+            type: 'POST',
+            url: '../Upload',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+                $('#file-upload-content').html(response);
+            },
+            error: function (response) {
+                let errors = response.responseJSON.errors;
+
+                Object.keys(errors).forEach(function (field) {
+                    let errorMessages = errors[field];
+                    errorMessages.forEach(function (errorMessage) {
+                        $('#file-upload-error').html(errorMessage);
+                    });
+                });
+            }
+        });
+    });
+}
 
 function readFileAsByteArray(file) {
     return new Promise((resolve, reject) => {

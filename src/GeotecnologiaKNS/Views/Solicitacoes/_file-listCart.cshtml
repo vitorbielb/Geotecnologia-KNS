@@ -6,25 +6,21 @@
 
 <div id="file-upload-content">
     <div class="card">
-        <div class="card-body">
 
-            @if (Model.Documentos?.Any() ?? false)
+            @if (Model.Arquivos?.Any() ?? false)
             {
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
                             <tr style="background-color: #FFF; color: #258cfb;">
-                                <th>@Html.DisplayNameFor(model => model.Documentos![0].Descricao)</th>
-
+                                <th>@Html.DisplayNameFor(model => model.Arquivos![0].Descricao)</th>
                                 <th>Tipo</th>
-
                                 <th>Data</th>
-
                                 <th>Arquivo</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Model.Documentos)
+                            @foreach (var item in Model.Arquivos)
                             {
                                 <tr>
                                     <td>
@@ -32,13 +28,16 @@
                                         <input type="hidden" class="hidden" value="@item.Id">
                                     </td>
                                     <td>
-                                        @TipoCartografico.GetDescricao(Model.Tipo)
+                                    @TipoCartografico.GetDescricao(item.Tipo)
+                                        <input type="hidden" class="hidden" value="@item.Id">
                                     </td>
                                     <td>
                                         @Html.DisplayFor(model => item.DataCartografia)
+                                        <input type="hidden" class="hidden" value="@item.Id">
                                     </td>
                                     <td>
-                                        Cartográfico
+                                        <strong>Cartográfico</strong>
+                                        <input type="hidden" class="hidden" value="@item.Id">
                                     </td>
                                     <td style="text-align: right;">
                                         <a class="btn btn-primary gradient-button" target="_blank" href="@Url.Action("ViewFile", "Cartografias", values: new { item.Id })">

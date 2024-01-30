@@ -1,5 +1,43 @@
 ﻿@model CartografiaArquivo
 
+<div class="form-group select-with-icon">
+    <h4 class="card-title">Tipo Cartográfico</h4>
+    <div class="select-wrapper">
+        <select asp-for="Tipo" class="form-control form-control-sm">
+            <option value="">Selecione...</option>
+            <option value="SUC">Sobrep. Unidade de Conservação</option>
+            <option value="STI">Sobrep. Terra Indígena</option>
+            <option value="SQ">Sobrep. Quilombolas</option>
+            <option value="SOP">Sobrep. Outros Perímetos</option>
+            <option value="SEI">Sobrep. Embargo IBAMA</option>
+            <option value="DAEI">Distância Área Embargada IBAMA</option>
+            <option value="DETER">DETER</option>
+            <option value="IP">Incapacidade Produtiva</option>
+            <option value="LB">Localização Bioma</option>
+            <option value="UPC">Unidade Produtiva Contínua</option>
+            <option value="PA">Perímetro Adulterado</option>
+            <option value="OE">Outras Evidências</option>
+            <option value="IP7">Imagem PRODES 2007</option>
+            <option value="IP8">Imagem PRODES 2008</option>
+            <option value="IP9">Imagem PRODES 2009</option>
+            <option value="IP10">Imagem PRODES 2010</option>
+            <option value="IP11">Imagem PRODES 2011</option>
+            <option value="IP12">Imagem PRODES 2012</option>
+            <option value="IP13">Imagem PRODES 2013</option>
+            <option value="IP14">Imagem PRODES 2014</option>
+            <option value="IP15">Imagem PRODES 2015</option>
+            <option value="IP16">Imagem PRODES 2016</option>
+            <option value="IP17">Imagem PRODES 2017</option>
+            <option value="IP18">Imagem PRODES 2018</option>
+            <option value="IP19">Imagem PRODES 2019</option>
+            <option value="IP20">Imagem PRODES 2020</option>
+            <option value="ZI">Zona de influência</option>
+            <option value="MF">Mapa fundiário</option>
+            <option value="UC">Uso do solo e Cobertura</option>
+        </select>
+    </div>
+    <span asp-validation-for="Tipo" class="text-danger"></span>
+</div>
 <h4 class="card-title">Envio de arquivo</h4>
 <div class="form-group">
     <span class="text-danger field-validation-error" data-valmsg-for="file-upload" data-valmsg-replace="true">
@@ -9,7 +47,7 @@
     <div class="input-group col-xs-12">
         <input type="text" class="file-upload-browse form-control file-upload-info" placeholder="Selecione seu arquivo..." onclick="selectfile($(this))">
         <span class="input-group-append">
-            <button class="btn btn-danger" type="submit" onclick="uploadfile(@Model.VinculoId);">
+            <button class="btn btn-danger" type="submit" onclick="uploadCartografiafile(@Model.VinculoId,$('#Tipo').val())">
                 <i class="mdi mdi-upload btn-icon-prepend"></i>
                 Upload
             </button>

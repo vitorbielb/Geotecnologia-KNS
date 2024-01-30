@@ -31,5 +31,6 @@ namespace GeotecnologiaKNS.Models
     {
         [ForeignKey("Cartografia")] public override int VinculoId { get; set; }
         public DateTime? DataCartografia { get; set; } = DateTime.Now;
+        public string Tipo { get; set; }
     }
 }

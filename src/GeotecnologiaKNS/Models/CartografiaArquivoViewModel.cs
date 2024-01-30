@@ -2,9 +2,10 @@
 
 namespace GeotecnologiaKNS.Models
 {
-    [ModelBinder(BinderType = typeof(ArquivoEntityBinder<CartografiaArquivoViewModel, CartografiaArquivo>))]
+    [ModelBinder(BinderType = typeof(CartografiaArquivoEntityBinder))]
     public class CartografiaArquivoViewModel : ArquivoViewModel<CartografiaArquivo>
     {
+        public string Tipo { get; set; }
         public override CartografiaArquivo Model => new()
         {
             VinculoId = VinculoId,
@@ -12,6 +13,7 @@ namespace GeotecnologiaKNS.Models
             Dados = Dados,
             Descricao = Descricao,
             Id = Id,
+            Tipo = Tipo
         };
     }
 }

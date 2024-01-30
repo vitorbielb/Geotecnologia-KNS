@@ -8,52 +8,14 @@
     <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title">Solicitação</h4>
+                <h4 class="card-title">Cartografias</h4>
                 <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <input type="hidden" asp-for="Id" />
                     <div class="form-group">
                         <label asp-for="PropriedadeId" class="control-label"></label>
-                        <select asp-for="PropriedadeId" class="form-control form-control-sm" asp-items="ViewBag.Propriedades" data-target="#Propriedades" data-mode="edit"></select>
+                        <select asp-for="PropriedadeId" class="form-control form-control-sm" asp-items="ViewBag.Propriedades" data-target="#Propriedades" data-mode="edit" disabled></select>
                         <span asp-validation-for="Propriedade" class="text-danger"></span>
-                    </div>
-                    <div class="form-group select-with-icon">
-                        <label asp-for="Tipo" class="control-label"></label>
-                        <div class="select-wrapper">
-                            <select asp-for="Tipo" class="form-control form-control-sm">
-                                <option value="">Selecione...</option>
-                                <option value="SUC">Sobrep. Unidade de Conservação</option>
-                                <option value="STI">Sobrep. Terra Indígena</option>
-                                <option value="SQ">Sobrep. Quilombolas</option>
-                                <option value="SOP">Sobrep. Outros Perímetos</option>
-                                <option value="SEI">Sobrep. Embargo IBAMA</option>
-                                <option value="DAEI">Distância Área Embargada IBAMA</option>
-                                <option value="DETER">DETER</option>
-                                <option value="IP">Incapacidade Produtiva</option>
-                                <option value="LB">Localização Bioma</option>
-                                <option value="UPC">Unidade Produtiva Contínua</option>
-                                <option value="PA">Perímetro Adulterado</option>
-                                <option value="OE">Outras Evidências</option>
-                                <option value="IP7">Imagem PRODES 2007</option>
-                                <option value="IP8">Imagem PRODES 2008</option>
-                                <option value="IP9">Imagem PRODES 2009</option>
-                                <option value="IP10">Imagem PRODES 2010</option>
-                                <option value="IP11">Imagem PRODES 2011</option>
-                                <option value="IP12">Imagem PRODES 2012</option>
-                                <option value="IP13">Imagem PRODES 2013</option>
-                                <option value="IP14">Imagem PRODES 2014</option>
-                                <option value="IP15">Imagem PRODES 2015</option>
-                                <option value="IP16">Imagem PRODES 2016</option>
-                                <option value="IP17">Imagem PRODES 2017</option>
-                                <option value="IP18">Imagem PRODES 2018</option>
-                                <option value="IP19">Imagem PRODES 2019</option>
-                                <option value="IP20">Imagem PRODES 2020</option>
-                                <option value="ZI">Zona de influência</option>
-                                <option value="MF">Mapa fundiário</option>
-                                <option value="UC">Uso do solo e Cobertura</option>
-                            </select>
-                        </div>
-                        <span asp-validation-for="Tipo" class="text-danger"></span>
                     </div>
                     <div class="form-group" style="margin-top: 40px;">
                         <a asp-action="Index" class="btn btn-secondary">Voltar</a>
@@ -65,7 +27,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
                                 <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
                             </svg>
-                            Confirmar análise
+                            Salvar
                         </button>
                     </div>
                 </form>
@@ -80,7 +42,7 @@
             <div class="card-body">
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="analise-tab" data-bs-toggle="tab" data-bs-target="#analise" type="button" role="tab" aria-controls="analise" aria-selected="false">Inserir documentos da análise</button>
+                        <button class="nav-link active" id="analise-tab" data-bs-toggle="tab" data-bs-target="#analise" type="button" role="tab" aria-controls="analise" aria-selected="false">Inserir arquivos cartográficos</button>
                     </li>
                 </ul>
                 <div class="tab-content" id="myTabContent">
