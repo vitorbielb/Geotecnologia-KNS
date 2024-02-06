@@ -14,6 +14,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias
+        [Authorize(Policy = "UserCanTenantCreate")]
         public async Task<IActionResult> Index()
         {
               return _context.Industrias != null ? 
@@ -22,6 +23,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias/Details/5
+        [Authorize(Policy = "UserCanTenantCreate")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Industrias == null)
@@ -40,6 +42,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias/Create
+        [Authorize(Policy = "UserCanTenantCreate")]
         public IActionResult Create()
         {
             return View();
@@ -62,6 +65,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias/Edit/5
+        [Authorize(Policy = "UserCanTenantCreate")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.Industrias == null)
@@ -113,6 +117,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Industrias/Delete/5
+        [Authorize(Policy = "UserCanTenantCreate")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Industrias == null)

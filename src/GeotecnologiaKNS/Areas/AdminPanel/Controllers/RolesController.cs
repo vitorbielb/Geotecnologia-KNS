@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GeotecnologiaKNS.Controllers
 {
@@ -10,13 +11,14 @@ namespace GeotecnologiaKNS.Controllers
         {
             _context = context;
         }
-
+        [Authorize(Policy = "UserCanTenantCreate")]
         public IActionResult Index()
         {
             return View(_context.Roles);
         }
 
         // GET: Roles/Create
+        [Authorize(Policy = "UserCanTenantCreate")]
         public ActionResult Create()
         {
             if (User.Identity == null)
@@ -52,6 +54,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Roles/Edit/5
+        [Authorize(Policy = "UserCanTenantCreate")]
         public async Task<ActionResult> EditAsync(string id)
         {
             var role = await _context.Roles
@@ -83,6 +86,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Roles/Delete/5
+        [Authorize(Policy = "UserCanTenantCreate")]
         public ActionResult Delete(string id)
         {
             var model = _context.Roles.Find(id);

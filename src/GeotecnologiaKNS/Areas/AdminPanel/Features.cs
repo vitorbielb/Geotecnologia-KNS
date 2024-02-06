@@ -8,6 +8,7 @@ public partial class Features
         , Produtor Produtor
         , Propriedade Propriedade
         , Solicitacao Solicitacao
+        , Cartografia Cartografia
         , Role Role);
 
     public class Tenant : IFeature
@@ -43,6 +44,14 @@ public partial class Features
     }
 
     public class Solicitacao : IFeature
+    {
+        public IOperation Create { get; set; } = default!;
+        public IOperation Read { get; set; } = default!;
+        public IOperation Update { get; set; } = default!;
+        public IOperation Delete { get; set; } = default!;
+    }
+
+    public class Cartografia : IFeature
     {
         public IOperation Create { get; set; } = default!;
         public IOperation Read { get; set; } = default!;

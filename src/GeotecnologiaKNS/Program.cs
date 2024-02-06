@@ -38,6 +38,9 @@ builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
     options.AddPolicy("UserCanUpdateSolicitacoes", policy => policy.RequireOperation(x => x.Solicitacao.Update));
+    options.AddPolicy("UserCanUpdateCartografias", policy => policy.RequireOperation(x => x.Cartografia.Update));
+    options.AddPolicy("UserCanTenantCreate", policy => policy.RequireOperation(x => x.Tenant.Create));
+    options.AddPolicy("UserCanUserCreate", policy => policy.RequireOperation(x => x.User.Create));
 });
 
 builder.Services.AddHttpContextAccessor();

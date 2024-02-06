@@ -21,6 +21,7 @@ namespace GeotecnologiaKNS.Controllers
             return View(model);
 
         }
+        [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public async Task<IActionResult> Analise()
         {
             var model = await _context.Propriedades.Include(x => x.Produtor).ToListAsync();
@@ -78,8 +79,7 @@ namespace GeotecnologiaKNS.Controllers
             FillProdutoresUnidadesFederativasViewBag();
             return View(propriedade);
         }
-
-
+        [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public async Task<IActionResult> Edit(int? id)
         {
             ViewBag.Validacao = ((Validacao[])Enum.GetValues(typeof(Validacao)))

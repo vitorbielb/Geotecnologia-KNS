@@ -8,7 +8,10 @@ public static partial class Roles
     public static RoleClaims ClienteAdmin => new(
         access: p => p.EverythingExcept(
             p => p.Tenant,
-            p => p.Solicitacao.Update));
+            p => p.Solicitacao.Update,
+            p => p.Produtor.Read,
+            p => p.Propriedade.Read,
+            p => p.Solicitacao.Read));
 
     public static RoleClaims Solicitante => new(
         access: p => p.OnlyAccess(
@@ -29,7 +32,12 @@ public static partial class Roles
     public static RoleClaims Analista => new(
         access: p => p.OnlyAccess(
             p => p.Produtor.Read,
+
             p => p.Propriedade.Read,
+
             p => p.Solicitacao.Read,
-            p => p.Solicitacao.Update));
+            p => p.Solicitacao.Update,
+            
+            p => p.Cartografia.Create,
+            p => p.Cartografia.Update));
 }

@@ -19,6 +19,7 @@ public class ProdutoresController : Controller
         var produtores = await _context.Produtores.ToListAsync();
         return View(produtores);
     }
+    [Authorize(Policy = "UserCanUpdateSolicitacoes")]
     public async Task<ActionResult> AnaliseAsync()
     {
         var produtores = await _context.Produtores.ToListAsync();
@@ -50,6 +51,7 @@ public class ProdutoresController : Controller
 
         return View(produtor);
     }
+    [Authorize(Policy = "UserCanUpdateSolicitacoes")]
     public async Task<ActionResult> EditAsync(int id)
     {
         var produtor = await _context.Produtores

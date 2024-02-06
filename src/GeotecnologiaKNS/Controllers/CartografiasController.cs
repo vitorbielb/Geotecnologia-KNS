@@ -15,6 +15,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Solicitacoes
+        [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public async Task<IActionResult> Index()
         {
             var solicitacoes = _context.Cartografias.Include(s => s.Propriedade);
@@ -22,6 +23,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         // GET: Solicitacoes/Create
+        [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public IActionResult Create()
         {
             FillPropriedadesViewBag();
@@ -41,44 +43,6 @@ namespace GeotecnologiaKNS.Controllers
             }
             FillPropriedadesViewBag();
             return View(solicitacao);
-        }
-
-        // GET: Solicitacoes/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Cartografias == null)
-            {
-                return NotFound();
-            }
-
-            var solicitacao = await _context.Cartografias
-                .Include(s => s.Propriedade)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (solicitacao == null)
-            {
-                return NotFound();
-            }
-
-            return View(solicitacao);
-        }
-
-        // POST: Solicitacoes/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Cartografias == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Cartografias'  is null.");
-            }
-            var solicitacao = await _context.Cartografias.FindAsync(id);
-            if (solicitacao != null)
-            {
-                _context.Cartografias.Remove(solicitacao);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         private bool SolicitacaoExists(int id)

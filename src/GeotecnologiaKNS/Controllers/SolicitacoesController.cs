@@ -130,6 +130,7 @@ namespace GeotecnologiaKNS.Controllers
                     x => x.Id,
                     options => options.Placeholder = "Selecione...");
         }
+        [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public async Task<IActionResult> Analise()
         {
             var solicitacoes = _context.Solicitacao.Include(s => s.Propriedade)
