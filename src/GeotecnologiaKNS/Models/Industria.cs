@@ -14,17 +14,17 @@ namespace GeotecnologiaKNS.Models
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 100 caracteres")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "O nome deve ter no mínimo 2 e no máximo 100 caracteres")]
         public string Nome { get; set; } = default!;
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Nome resumido")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "O nome deve ter no mínimo 3 e no máximo 100 caracteres")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "O nome deve ter no mínimo 2 e no máximo 100 caracteres")]
         public string NomeResumido { get; set; } = default!;
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Razão social")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 100 caracteres")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "O nome deve ter no mínimo 2 e no máximo 100 caracteres")]
         public string RazaoSocial { get; set; } = default!;
 
         [Required(ErrorMessage = "Campo obrigatório")]
