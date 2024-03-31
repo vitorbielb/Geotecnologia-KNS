@@ -14,11 +14,12 @@ namespace GeotecnologiaKNS.Models
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "Produtor Rural")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 4 e no máximo 99 caracteres")]
+        [StringLength(18, MinimumLength = 14, ErrorMessage = "O nome deve ter no mínimo 4 e no máximo 99 caracteres")]
         public string Nome { get; set; } = default!;
 
         [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "CPF/CNPJ")]
+        [StringLength(18, MinimumLength = 14, ErrorMessage = "O nome deve ter no mínimo 14 e no máximo 18 caracteres")]
         public string Cpf { get; set; } = default!;
 
         public List<ProdutorArquivo>? Documentos { get; set; }
