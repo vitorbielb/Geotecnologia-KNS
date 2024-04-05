@@ -7,37 +7,42 @@ namespace GeotecnologiaKNS.Models
     {
         public int Id { get; set; }
 
-
         [ForeignKey(nameof(Industria))]
         public int TenantId { get; set; }
         public Industria? Industria { get; }
 
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Propriedade")]
+        [Display(Name = "Imóvel Rural")]
         public int PropriedadeId { get; set; }
         public Propriedade? Propriedade { get; set; }
 
-        [Display(Name = "Analista")]
+        [Display(Name = "Responsável pela Análise")]
         public string? Analista { get; set; }
 
         [Required(ErrorMessage = "Campo obrigatório")]
-        [Display(Name = "Solicitante")]
+        [Display(Name = "Responsável pela Solicitação")]
         public string Solicitante { get; set; }
 
-        [Display(Name = "Data da solicitação")]
+        [Display(Name = "Data de Abertura")]
         public DateTime? DataSolicitacao { get; set; }
 
-        [Display(Name = "Data da análise")]
+        [Display(Name = "Data da Avaliação")]
         public DateTime? DataAnalise { get; set; }
+
         public Cartografia? Cartografia { get; set; }
-        [Display(Name = "Observação")]
+
+        [Display(Name = "Observações")]
         public string? Observacao { get; set; }
 
-        [Display(Name = "Parecer")]
+        [Display(Name = "Resultado da Análise")]
         public string? Parecer { get; set; }
+
         public List<AnaliseArquivo>? Documentos { get; set; }
+
+        [Display(Name = "Situação da Solicitação")]
         public Status Status { get; set; } = Status.Solicitado;
     }
+
     public enum Status
     {
         Solicitado,
