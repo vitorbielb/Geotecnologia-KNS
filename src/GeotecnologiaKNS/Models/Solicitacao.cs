@@ -5,23 +5,27 @@ namespace GeotecnologiaKNS.Models
 {
     public class Solicitacao : IIndustriaInfo, IPropriedadeInfo, ICartografiasInfo, IPrimaryKeyInfo<int>
     {
+        private const string RequiredMessage = "Campo obrigatório";
+
         public int Id { get; set; }
 
         [ForeignKey(nameof(Industria))]
         public int TenantId { get; set; }
+
         public Industria? Industria { get; }
 
-        [Required(ErrorMessage = "Campo obrigatório")]
+        [Required(ErrorMessage = RequiredMessage)]
         [Display(Name = "Imóvel Rural")]
         public int PropriedadeId { get; set; }
+
         public Propriedade? Propriedade { get; set; }
 
         [Display(Name = "Responsável pela Análise")]
         public string? Analista { get; set; }
 
-        [Required(ErrorMessage = "Campo obrigatório")]
+        [Required(ErrorMessage = RequiredMessage)]
         [Display(Name = "Responsável pela Solicitação")]
-        public string Solicitante { get; set; }
+        public string Solicitante { get; set; } = string.Empty;
 
         [Display(Name = "Data de Abertura")]
         public DateTime? DataSolicitacao { get; set; }
@@ -37,7 +41,7 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Resultado da Análise")]
         public string? Parecer { get; set; }
 
-        public List<AnaliseArquivo>? Documentos { get; set; }
+        public List<AnaliseArquivo> Documentos { get; set; } = new();
 
         [Display(Name = "Situação da Solicitação")]
         public Status Status { get; set; } = Status.Solicitado;
@@ -45,9 +49,9 @@ namespace GeotecnologiaKNS.Models
 
     public enum Status
     {
-        Solicitado,
-        Liberado,
-        Alerta,
-        Bloqueado
+        Solicitado = 0,
+        Liberado = 1,
+        Alerta = 2,
+        Bloqueado = 3
     }
 }
