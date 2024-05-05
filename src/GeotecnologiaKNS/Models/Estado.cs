@@ -7,10 +7,9 @@ namespace GeotecnologiaKNS.Models
     using static Propriedade;
 
     public enum Estados
-
     {
         [Display(Name = "Acre")]
-        AC,
+        AC = 1,
 
         [Display(Name = "Alagoas")]
         AL,
@@ -88,40 +87,44 @@ namespace GeotecnologiaKNS.Models
         SE,
 
         [Display(Name = "Tocantins")]
-        TO,
+        TO
     }
 
     public static class UnidadesFederativasExtension
     {
+        private const string SelecioneTexto = "Selecione...";
+
         public static IEnumerable<SelectListItem> GetUnidadesFederativas()
         {
-            List<SelectListItem> selectListItems = new List<SelectListItem> { new SelectListItem("Selecione...", null, true) };
+            var items = Enum.GetValues(typeof(Estados))
+                .Cast<Estados>()
+                .Select(estado => new SelectListItem(
+                    text: estado.GetDisplayName(),
+                    value: estado.ToString()))
+                .ToList();
 
-            selectListItems
-                .AddRange(typeof(Estados)
-                .GetFields()
-                .Select(GetUnidadeFederativaSelectListItem)
-                .Where(x => !string.IsNullOrWhiteSpace(x.Text) && !string.IsNullOrWhiteSpace(x.Value)));
+            items.Insert(0, new SelectListItem(SelecioneTexto, string.Empty, true));
 
-            return selectListItems;
+            return items;
         }
 
-        public static IEnumerable<SelectListItem> GetCities(this Estados unidadesFederativa)
+        public static IEnumerable<SelectListItem> GetCities(this Estados unidadeFederativa)
         {
-            return Regionalizacao.Municipios[unidadesFederativa]
-                .Select(GetMunicipioSelectListItem)
-                .Append(new SelectListItem("Selecione...", null, true));
+            var items = Regionalizacao.Municipios[unidadeFederativa]
+                .Select(municipio => new SelectListItem(
+                    text: municipio,
+                    value: municipio))
+                .ToList();
+
+            items.Insert(0, new SelectListItem(SelecioneTexto, string.Empty, true));
+
+            return items;
         }
 
-        private static SelectListItem GetUnidadeFederativaSelectListItem(FieldInfo field)
+        public static string GetDisplayName(this Estados estado)
         {
-            return new SelectListItem(field.GetCustomAttribute<DisplayAttribute>()?.Name, field.Name);
-        }
-
-        private static SelectListItem GetMunicipioSelectListItem(string municipio)
-        {
-            return new SelectListItem(municipio, municipio);
+            var memberInfo = typeof(Estados).GetMember(estado.ToString()).FirstOrDefault();
+            return memberInfo?.GetCustomAttribute<DisplayAttribute>()?.Name ?? estado.ToString();
         }
     }
-
 }
