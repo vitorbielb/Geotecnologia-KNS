@@ -5,30 +5,27 @@ namespace GeotecnologiaKNS.Models
 {
     public class Produtor : IIndustriaInfo, IPrimaryKeyInfo<int>
     {
-        private const string RequiredMessage = "Campo obrigatório";
-
         [Key]
         public int Id { get; set; }
 
         [ForeignKey(nameof(Industria))]
         public int TenantId { get; set; }
+        public Industria? Industria { get; } = default!;
 
-        public Industria? Industria { get; set; }
+        [Required(ErrorMessage = "Campo obrigatório")]
+        [Display(Name = "Produtor")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "O nome deve ter no mínimo 6 e no máximo 100 caracteres")]
+        public string Nome { get; set; } = default!;
 
-        [Required(ErrorMessage = RequiredMessage)]
-        [Display(Name = "Produtor Rural")]
-        [StringLength(100, MinimumLength = 4, ErrorMessage = "O nome deve ter no mínimo 4 e no máximo 100 caracteres")]
-        public string Nome { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = RequiredMessage)]
+        [Required(ErrorMessage = "Campo obrigatório")]
         [Display(Name = "CPF/CNPJ")]
-        [StringLength(18, MinimumLength = 11, ErrorMessage = "O CPF/CNPJ deve ter entre 11 e 18 caracteres")]
-        public string Cpf { get; set; } = string.Empty;
+        public string Cpf { get; set; } = default!;
 
-        public List<ProdutorArquivo> Documentos { get; set; } = new();
+        public List<ProdutorArquivo>? Documentos { get; set; }
 
-        public List<Propriedade> Propriedades { get; set; } = new();
+        public List<Propriedade>? Propriedades { get; set; }
 
-        public List<Solicitacao> Solicitacoes { get; set; } = new();
+        public Solicitacao? Solicitacoes { get; set; }
     }
+
 }
