@@ -1,22 +1,25 @@
-﻿namespace GeotecnologiaKNS.Repositories
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace GeotecnologiaKNS.Repositories
 {
     public class IndustriaRepository : IIndustriaRepository
     {
-        private readonly ApplicationDbContext context;
-
+        private readonly ApplicationDbContext _context;
         public IndustriaRepository(ApplicationDbContext context)
         {
-            this.context = context;
+            _context = context;
         }
-
         public IEnumerable<Industria> GetIndustrias()
         {
-            return this.context.Industrias.AsEnumerable();
+            return _context.Industrias
+                .AsNoTracking()
+                .ToList();
         }
-
         public IAsyncEnumerable<Industria> GetIndustriasAsync()
         {
-            return this.context.Industrias.AsAsyncEnumerable();
+            return _context.Industrias
+                .AsNoTracking()
+                .AsAsyncEnumerable();
         }
     }
 }
