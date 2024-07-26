@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using GeotecnologiaKNS.Data;
+﻿using GeotecnologiaKNS.Data;
 using GeotecnologiaKNS.Models;
 using GeotecnologiaKNS.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace GeotecnologiaKNS.Repositories
 {
@@ -15,41 +14,45 @@ namespace GeotecnologiaKNS.Repositories
             _context = context;
         }
 
-        public IEnumerable<Models.Propriedade> ObterTodasPropriedades()
+        public IEnumerable<Propriedade> ObterTodasPropriedades()
         {
-            return _context.Propriedades.ToList();
+            return _context.Propriedades
+                .AsNoTracking()
+                .ToList();
         }
 
-        public Models.Propriedade ObterPropriedadePorId(int id)
+        public Propriedade? ObterPropriedadePorId(int id)
         {
-            return _context.Propriedades.FirstOrDefault(p => p.Id == id);
+            return _context.Propriedades
+                .AsNoTracking()
+                .FirstOrDefault(p => p.Id == id);
         }
 
-        public void CadastrarPropriedade(Models.Propriedade propriedade)
+        public void CadastrarPropriedade(Propriedade propriedade)
         {
             _context.Propriedades.Add(propriedade);
             _context.SaveChanges();
         }
 
-        public void AtualizarPropriedade(Models.Propriedade propriedade)
+        public void AtualizarPropriedade(Propriedade propriedade)
         {
             _context.Propriedades.Update(propriedade);
             _context.SaveChanges();
         }
 
-        public void RemoverPropriedade(Models.Propriedade propriedade)
+        public void RemoverPropriedade(Propriedade propriedade)
         {
             _context.Propriedades.Remove(propriedade);
             _context.SaveChanges();
         }
-        public void Save(Models.Propriedade propriedade)
+
+        public void Save(Propriedade propriedade)
         {
-            if (propriedade != null)
-            {
-                _context.Propriedades.Add(propriedade);
-                _context.SaveChanges();
-            }
+            if (propriedade is null)
+                return;
+
+            _context.Propriedades.Add(propriedade);
+            _context.SaveChanges();
         }
     }
 }
-
