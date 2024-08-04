@@ -8,14 +8,26 @@ namespace GeotecnologiaKNS.Utils
     {
         public async Task BindModelAsync(ModelBindingContext bindingContext)
         {
+            ArgumentNullException.ThrowIfNull(bindingContext);
+
             var form = await bindingContext.HttpContext.Request.ReadFormAsync();
-            bindingContext.Result = ModelBindingResult.Success(new TViewModel
+
+            if (!int.TryParse(form["vinculoId"], out var vinculoId))
             {
-                VinculoId = int.Parse(form["vinculoId"]),
-                Descricao = form["Descricao"],
-                ContentType = form["ContentType"],
-                Dados = form["Dados"].FirstOrDefault()?.ToByteArray(),
-            });
+                bindingContext.ModelState.AddModelError("vinculoId", "Vínculo inválido.");
+                bindingContext.Result = ModelBindingResult.Failed();
+                return;
+            }
+
+            var model = new TViewModel
+            {
+                VinculoId = vinculoId,
+                Descricao = form["Descricao"].ToString(),
+                ContentType = form["ContentType"].ToString(),
+                Dados = ByteArrayExt.ToByteArrayOrEmpty(form["Dados"].FirstOrDefault())
+            };
+
+            bindingContext.Result = ModelBindingResult.Success(model);
         }
     }
 
@@ -23,28 +35,46 @@ namespace GeotecnologiaKNS.Utils
     {
         public async Task BindModelAsync(ModelBindingContext bindingContext)
         {
+            ArgumentNullException.ThrowIfNull(bindingContext);
+
             var form = await bindingContext.HttpContext.Request.ReadFormAsync();
-            bindingContext.Result = ModelBindingResult.Success(new CartografiaArquivoViewModel
+
+            if (!int.TryParse(form["vinculoId"], out var vinculoId))
             {
-                Tipo = form["Tipo"], 
-                VinculoId = int.Parse(form["vinculoId"]),
-                Descricao = form["Descricao"],
-                ContentType = form["ContentType"],
-                Dados = form["Dados"].FirstOrDefault()?.ToByteArray(),
-            });
+                bindingContext.ModelState.AddModelError("vinculoId", "Vínculo inválido.");
+                bindingContext.Result = ModelBindingResult.Failed();
+                return;
+            }
+
+            var model = new CartografiaArquivoViewModel
+            {
+                Tipo = form["Tipo"].ToString(),
+                VinculoId = vinculoId,
+                Descricao = form["Descricao"].ToString(),
+                ContentType = form["ContentType"].ToString(),
+                Dados = ByteArrayExt.ToByteArrayOrEmpty(form["Dados"].FirstOrDefault())
+            };
+
+            bindingContext.Result = ModelBindingResult.Success(model);
         }
     }
 
-    static class ByteArrayExt
+    internal static class ByteArrayExt
     {
-        public static byte[] ToByteArray(this string byteString)
+        public static byte[] ToByteArrayOrEmpty(string? byteString)
         {
-            string[] byteValues = byteString.Split(',');
-            byte[] byteArray = new byte[byteValues.Length];
+            if (string.IsNullOrWhiteSpace(byteString))
+                return Array.Empty<byte>();
 
-            for (int i = 0; i < byteValues.Length; i++)
+            var byteValues = byteString.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var byteArray = new byte[byteValues.Length];
+
+            for (var i = 0; i < byteValues.Length; i++)
             {
-                byteArray[i] = Convert.ToByte(byteValues[i]);
+                if (!byte.TryParse(byteValues[i].Trim(), out var parsedByte))
+                    return Array.Empty<byte>();
+
+                byteArray[i] = parsedByte;
             }
 
             return byteArray;
