@@ -5,33 +5,34 @@ namespace GeotecnologiaKNS.Utils
     public static class CollectionExtensions
     {
         public static IEnumerable<SelectListItem> ToSelectListItems<T>(
-           this IEnumerable<T> values,
-           Func<T, object> text,
-           Func<T, object> value,
-           Action<SelectListItemsOptions>? options = default)
+            this IEnumerable<T> values,
+            Func<T, object?> text,
+            Func<T, object?> value,
+            Action<SelectListItemsOptions>? options = null)
         {
-            SelectListItemsOptions selectListItemsOptions = new();
-            options?.Invoke(selectListItemsOptions);
+            ArgumentNullException.ThrowIfNull(values);
+            ArgumentNullException.ThrowIfNull(text);
+            ArgumentNullException.ThrowIfNull(value);
 
-            if (selectListItemsOptions.Placeholder != null)
+            var selectListOptions = new SelectListItemsOptions();
+            options?.Invoke(selectListOptions);
+
+            var items = values.Select(x => new SelectListItem(
+                text: text(x)?.ToString() ?? string.Empty,
+                value: value(x)?.ToString() ?? string.Empty,
+                selected: selectListOptions.Selected,
+                disabled: selectListOptions.Disabled))
+                .ToList();
+
+            if (!string.IsNullOrWhiteSpace(selectListOptions.Placeholder))
             {
-                var source = new List<SelectListItem> { new SelectListItem(selectListItemsOptions.Placeholder, "") };
-                source.AddRange(values.Select(x => new SelectListItem(
-                                     text(x).ToString(),
-                                     value(x).ToString(),
-                                     selectListItemsOptions.Selected,
-                                     selectListItemsOptions.Disabled)));
-                return source;
+                items.Insert(0, new SelectListItem(selectListOptions.Placeholder, string.Empty));
             }
 
-            return values.Select(x => new SelectListItem(
-                text(x).ToString(),
-                value(x).ToString(),
-                selectListItemsOptions.Selected,
-                selectListItemsOptions.Disabled));
+            return items;
         }
 
-        public class SelectListItemsOptions
+        public sealed class SelectListItemsOptions
         {
             public bool Selected { get; set; }
             public bool Disabled { get; set; }
