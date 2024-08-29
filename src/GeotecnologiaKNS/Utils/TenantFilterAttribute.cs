@@ -4,44 +4,34 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace GeotecnologiaKNS.Utils;
 
 /// <summary>
-/// An <see cref="ActionFilterAttribute"/> that sets the TenantId property on the model passed to the action method. 
-/// It gets the tenantId from <see cref="IUserContext"/> service and checks if it's less or equal than zero,
-/// it returns a 403 Forbidden status code. 
-/// Otherwise, it gets the first argument passed to the action method, 
-/// to set the value of the TenantId property to the tenantId obtained from <see cref="IUserContext"/> service
-/// and update the action arguments with the updated model object.
+/// Filtro que define o TenantId no modelo enviado para a action.
+/// O valor é obtido a partir de <see cref="IUserContext"/>.
+/// Caso o TenantId seja inválido, retorna 403 Forbidden.
 /// </summary>
 /// <remarks>
-/// This filter should not be used on actions with multiple parameter arguments.
+/// Este filtro deve ser usado em actions com um único parâmetro de modelo
+/// que implemente <see cref="ITenantInfo"/>.
 /// </remarks>
-public class TenantFilterAttribute : ActionFilterAttribute
+public sealed class TenantFilterAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {
-        int? tenantId = context.HttpContext
-                               .RequestServices
-                               .GetRequiredService<IUserContext>()
-                               .TenantId;
+        ArgumentNullException.ThrowIfNull(context);
 
-        if (tenantId <= 0)
+        var userContext = context.HttpContext.RequestServices.GetRequiredService<IUserContext>();
+        var tenantId = userContext.TenantId;
+
+        if (!tenantId.HasValue || tenantId <= 0)
         {
             context.Result = new ForbidResult();
             return;
         }
 
-        var argumentName = context.ActionArguments.Keys.FirstOrDefault();
+        var actionArgument = context.ActionArguments.Values.FirstOrDefault();
 
-        if (argumentName == null)
-        {
+        if (actionArgument is not ITenantInfo tenantModel)
             return;
-        }
 
-        var model = context.ActionArguments[argumentName];
-
-        var type = model?.GetType();
-        var TenantIdProperty = type?.GetProperty(nameof(ITenantInfo.TenantId));
-        TenantIdProperty?.SetValue(model, tenantId);
-
-        context.ActionArguments[argumentName] = model;
+        tenantModel.TenantId = tenantId.Value;
     }
 }
