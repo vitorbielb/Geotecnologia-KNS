@@ -1,18 +1,31 @@
-﻿namespace GeotecnologiaKNS.Utils
+﻿using System.Security.Claims;
+using System.Security.Principal;
+
+namespace GeotecnologiaKNS.Utils
 {
     public interface IUserContext
     {
         int? TenantId { get; }
-        bool? IsApplicationAdmin { get; }
-        bool? IsTenantAdmin { get; }
+        bool IsApplicationAdmin { get; }
+        bool IsTenantAdmin { get; }
     }
 
-    public class UserContext : IUserContext
+    public sealed class UserContext : IUserContext
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public UserContext(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
-        public int? TenantId => _httpContextAccessor.HttpContext?.User?.Identity?.GetTenantId();
-        public bool? IsApplicationAdmin => _httpContextAccessor.HttpContext?.User?.Identity?.IsApplicationAdmin();
-        public bool? IsTenantAdmin => _httpContextAccessor.HttpContext?.User?.Identity?.IsTenantAdmin();
+
+        public UserContext(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private ClaimsPrincipal? User => _httpContextAccessor.HttpContext?.User;
+        private IIdentity? Identity => User?.Identity;
+
+        public int? TenantId => Identity?.GetTenantId();
+
+        public bool IsApplicationAdmin => Identity?.IsApplicationAdmin() ?? false;
+
+        public bool IsTenantAdmin => Identity?.IsTenantAdmin() ?? false;
     }
 }
