@@ -1,0 +1,3 @@
+﻿Commit número 20 - Data: 05/12/2024 08:38:28
+
+Este é o commit número 20 do projeto.

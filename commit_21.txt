@@ -1,0 +1,3 @@
+﻿Commit número 21 - Data: 04/11/2024 10:53:15
+
+Este é o commit número 21 do projeto.
