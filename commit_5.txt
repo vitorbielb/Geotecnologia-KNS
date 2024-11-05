@@ -1,0 +1,3 @@
+﻿Commit número 5 - Data: 19/12/2024 16:29:23
+
+Este é o commit número 5 do projeto.

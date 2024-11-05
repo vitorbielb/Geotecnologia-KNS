@@ -1,0 +1,3 @@
+﻿Commit número 17 - Data: 05/11/2024 08:13:16
+
+Este é o commit número 17 do projeto.

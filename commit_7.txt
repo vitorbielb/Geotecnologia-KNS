@@ -1,0 +1,3 @@
+﻿Commit número 7 - Data: 27/12/2024 08:50:48
+
+Este é o commit número 7 do projeto.
