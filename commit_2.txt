@@ -1,0 +1,3 @@
+﻿Commit número 2 - Data: 08/11/2024 15:44:05
+
+Este é o commit número 2 do projeto.

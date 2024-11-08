@@ -1,0 +1,3 @@
+﻿Commit número 1 - Data: 13/12/2024 13:55:22
+
+Este é o commit número 1 do projeto.
