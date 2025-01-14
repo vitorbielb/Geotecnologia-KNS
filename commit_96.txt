@@ -1,0 +1,4 @@
+﻿Commit número 96
+Data: 14/01/2025 14:40:35
+
+Este é o commit número 96 do projeto Geotecnologia-KNS para 2025.
