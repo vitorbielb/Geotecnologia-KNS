@@ -1,0 +1,4 @@
+﻿Commit número 600
+Data: 16/01/2025 13:21:45
+
+Este é o commit número 600 do projeto Geotecnologia-KNS para 2025.
