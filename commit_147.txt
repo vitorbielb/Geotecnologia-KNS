@@ -1,0 +1,4 @@
+﻿Commit número 147
+Data: 17/01/2025 16:18:26
+
+Este é o commit número 147 do projeto Geotecnologia-KNS para 2025.
