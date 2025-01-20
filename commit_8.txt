@@ -1,3 +1,4 @@
-﻿Commit número 8 - Data: 11/12/2024 10:22:10
+﻿Commit número 8
+Data: 20/01/2025 13:40:56
 
-Este é o commit número 8 do projeto.
+Este é o commit número 8 do projeto Geotecnologia-KNS para 2025.
