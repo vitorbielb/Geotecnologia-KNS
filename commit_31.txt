@@ -1,0 +1,4 @@
+﻿Commit número 31
+Data: 22/01/2025 16:43:59
+
+Este é o commit número 31 do projeto Geotecnologia-KNS para 2025.
