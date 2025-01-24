@@ -1,0 +1,4 @@
+﻿Commit número 297
+Data: 29/04/2025 15:11:03
+
+Este é o commit número 297 do projeto Geotecnologia-KNS para 2025.

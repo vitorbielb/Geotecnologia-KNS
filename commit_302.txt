@@ -1,0 +1,4 @@
+﻿Commit número 302
+Data: 26/08/2025 15:51:12
+
+Este é o commit número 302 do projeto Geotecnologia-KNS para 2025.
