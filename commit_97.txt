@@ -1,0 +1,4 @@
+﻿Commit número 97
+Data: 06/03/2025 17:11:33
+
+Este é o commit número 97 do projeto Geotecnologia-KNS para 2025.
