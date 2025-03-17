@@ -1,0 +1,4 @@
+﻿Commit número 114
+Data: 20/10/2025 14:11:06
+
+Este é o commit número 114 do projeto Geotecnologia-KNS para 2025.
