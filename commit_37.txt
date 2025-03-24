@@ -1,0 +1,4 @@
+﻿Commit número 37
+Data: 24/03/2025 17:19:13
+
+Este é o commit número 37 do projeto Geotecnologia-KNS para 2025.
