@@ -1,0 +1,4 @@
+﻿Commit número 30
+Data: 04/06/2025 10:56:06
+
+Este é o commit número 30 do projeto Geotecnologia-KNS para 2025.
