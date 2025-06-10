@@ -1,0 +1,4 @@
+﻿Commit número 101
+Data: 10/06/2025 10:24:29
+
+Este é o commit número 101 do projeto Geotecnologia-KNS para 2025.
