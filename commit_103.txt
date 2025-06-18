@@ -1,0 +1,4 @@
+﻿Commit número 103
+Data: 18/06/2025 09:09:15
+
+Este é o commit número 103 do projeto Geotecnologia-KNS para 2025.
