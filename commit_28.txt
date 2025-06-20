@@ -1,0 +1,4 @@
+﻿Commit número 28
+Data: 12/09/2025 12:31:25
+
+Este é o commit número 28 do projeto Geotecnologia-KNS para 2025.

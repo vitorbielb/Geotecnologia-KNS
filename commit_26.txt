@@ -1,0 +1,4 @@
+﻿Commit número 26
+Data: 29/08/2025 11:40:45
+
+Este é o commit número 26 do projeto Geotecnologia-KNS para 2025.
