@@ -1,0 +1,4 @@
+﻿Commit número 364
+Data: 27/02/2025 15:45:00
+
+Este é o commit número 364 do projeto Geotecnologia-KNS para 2025.
