@@ -1,0 +1,4 @@
+﻿Commit número 99
+Data: 21/07/2025 09:05:39
+
+Este é o commit número 99 do projeto Geotecnologia-KNS para 2025.
