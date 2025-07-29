@@ -1,0 +1,4 @@
+﻿Commit número 560
+Data: 29/07/2025 11:27:34
+
+Este é o commit número 560 do projeto Geotecnologia-KNS para 2025.
