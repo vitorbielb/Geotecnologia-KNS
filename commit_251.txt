@@ -1,0 +1,4 @@
+﻿Commit número 251
+Data: 12/02/2025 13:05:02
+
+Este é o commit número 251 do projeto Geotecnologia-KNS para 2025.
