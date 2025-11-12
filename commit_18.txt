@@ -1,3 +1,4 @@
-﻿Commit número 18 - Data: 12/12/2024 09:08:09
+﻿Commit número 18
+Data: 17/12/2025 11:18:57
 
-Este é o commit número 18 do projeto.
+Este é o commit número 18 do projeto Geotecnologia-KNS para 2025.

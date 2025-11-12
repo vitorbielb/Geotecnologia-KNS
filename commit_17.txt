@@ -1,3 +1,4 @@
-﻿Commit número 17 - Data: 05/11/2024 08:13:16
+﻿Commit número 17
+Data: 13/05/2025 15:24:42
 
-Este é o commit número 17 do projeto.
+Este é o commit número 17 do projeto Geotecnologia-KNS para 2025.
