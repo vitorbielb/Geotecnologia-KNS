@@ -1,0 +1,4 @@
+﻿Commit número 313
+Data: 17/04/2025 15:18:09
+
+Este é o commit número 313 do projeto Geotecnologia-KNS para 2025.
