@@ -1,3 +1,4 @@
-﻿Commit número 14 - Data: 27/12/2024 10:29:07
+﻿Commit número 14
+Data: 27/11/2025 10:52:50
 
-Este é o commit número 14 do projeto.
+Este é o commit número 14 do projeto Geotecnologia-KNS para 2025.
