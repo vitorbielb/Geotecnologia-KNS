@@ -1,0 +1,4 @@
+﻿Commit número 93
+Data: 28/11/2025 09:43:40
+
+Este é o commit número 93 do projeto Geotecnologia-KNS para 2025.
