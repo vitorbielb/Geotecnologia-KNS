@@ -1,4 +1,0 @@
-﻿Commit número 225
-Data: 03/12/2025 13:00:42
-
-Este é o commit número 225 do projeto Geotecnologia-KNS para 2025.

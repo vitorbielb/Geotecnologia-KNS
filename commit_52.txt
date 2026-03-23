@@ -1,4 +1,0 @@
-﻿Commit número 52
-Data: 28/10/2025 12:05:10
-
-Este é o commit número 52 do projeto Geotecnologia-KNS para 2025.

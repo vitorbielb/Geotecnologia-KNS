@@ -1,4 +1,0 @@
-﻿Commit número 235
-Data: 25/02/2025 13:00:51
-
-Este é o commit número 235 do projeto Geotecnologia-KNS para 2025.

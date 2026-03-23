@@ -1,4 +1,0 @@
-﻿Commit número 360
-Data: 13/02/2025 14:13:15
-
-Este é o commit número 360 do projeto Geotecnologia-KNS para 2025.

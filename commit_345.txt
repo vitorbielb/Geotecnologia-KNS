@@ -1,4 +1,0 @@
-﻿Commit número 345
-Data: 04/08/2025 12:26:31
-
-Este é o commit número 345 do projeto Geotecnologia-KNS para 2025.

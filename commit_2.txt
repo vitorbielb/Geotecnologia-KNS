@@ -1,4 +1,0 @@
-﻿Commit número 2
-Data: 29/10/2025 08:22:55
-
-Este é o commit número 2 do projeto Geotecnologia-KNS para 2025.

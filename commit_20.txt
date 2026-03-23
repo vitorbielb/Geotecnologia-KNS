@@ -1,4 +1,0 @@
-﻿Commit número 20
-Data: 15/10/2025 11:59:10
-
-Este é o commit número 20 do projeto Geotecnologia-KNS para 2025.

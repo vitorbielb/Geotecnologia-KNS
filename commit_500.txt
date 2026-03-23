@@ -1,4 +1,0 @@
-﻿Commit número 500
-Data: 25/09/2025 08:35:46
-
-Este é o commit número 500 do projeto Geotecnologia-KNS para 2025.

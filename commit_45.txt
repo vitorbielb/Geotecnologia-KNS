@@ -1,4 +1,0 @@
-﻿Commit número 45
-Data: 02/01/2025 15:00:46
-
-Este é o commit número 45 do projeto Geotecnologia-KNS para 2025.

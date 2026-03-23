@@ -1,4 +1,0 @@
-﻿Commit número 85
-Data: 17/02/2025 13:13:27
-
-Este é o commit número 85 do projeto Geotecnologia-KNS para 2025.

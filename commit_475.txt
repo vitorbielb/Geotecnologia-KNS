@@ -1,4 +1,0 @@
-﻿Commit número 475
-Data: 25/03/2025 15:35:49
-
-Este é o commit número 475 do projeto Geotecnologia-KNS para 2025.

@@ -1,4 +1,0 @@
-﻿Commit número 3
-Data: 07/11/2025 08:18:37
-
-Este é o commit número 3 do projeto Geotecnologia-KNS para 2025.

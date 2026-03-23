@@ -1,4 +1,0 @@
-﻿Commit número 1
-Data: 16/03/2026 13:36:38
-
-Este é o commit número 1 do período de janeiro a março de 2026.

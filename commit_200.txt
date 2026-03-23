@@ -1,4 +1,0 @@
-﻿Commit número 200
-Data: 20/08/2025 09:39:43
-
-Este é o commit número 200 do projeto Geotecnologia-KNS para 2025.

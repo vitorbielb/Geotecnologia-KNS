@@ -1,4 +1,0 @@
-﻿Commit número 150
-Data: 06/02/2025 08:32:52
-
-Este é o commit número 150 do projeto Geotecnologia-KNS para 2025.

@@ -1,4 +1,0 @@
-﻿Commit número 135
-Data: 24/11/2025 15:01:12
-
-Este é o commit número 135 do projeto Geotecnologia-KNS para 2025.

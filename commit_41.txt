@@ -1,4 +1,0 @@
-﻿Commit número 41
-Data: 01/10/2025 13:30:23
-
-Este é o commit número 41 do projeto Geotecnologia-KNS para 2025.

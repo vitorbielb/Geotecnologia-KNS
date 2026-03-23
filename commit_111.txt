@@ -1,4 +1,0 @@
-﻿Commit número 111
-Data: 02/12/2025 17:08:52
-
-Este é o commit número 111 do projeto Geotecnologia-KNS para 2025.

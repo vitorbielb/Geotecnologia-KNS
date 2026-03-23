@@ -1,4 +1,0 @@
-﻿Commit número 7
-Data: 19/02/2025 13:03:55
-
-Este é o commit número 7 do projeto Geotecnologia-KNS para 2025.

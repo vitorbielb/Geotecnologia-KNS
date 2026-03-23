@@ -1,4 +1,0 @@
-﻿Commit número 11
-Data: 27/03/2025 15:30:55
-
-Este é o commit número 11 do projeto Geotecnologia-KNS para 2025.

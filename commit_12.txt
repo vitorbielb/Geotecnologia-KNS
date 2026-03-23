@@ -1,4 +1,0 @@
-﻿Commit número 12
-Data: 04/09/2025 08:39:53
-
-Este é o commit número 12 do projeto Geotecnologia-KNS para 2025.

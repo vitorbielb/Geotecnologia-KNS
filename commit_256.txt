@@ -1,4 +1,0 @@
-﻿Commit número 256
-Data: 15/10/2025 16:02:58
-
-Este é o commit número 256 do projeto Geotecnologia-KNS para 2025.

@@ -1,4 +1,0 @@
-﻿Commit número 65
-Data: 15/07/2025 14:53:01
-
-Este é o commit número 65 do projeto Geotecnologia-KNS para 2025.

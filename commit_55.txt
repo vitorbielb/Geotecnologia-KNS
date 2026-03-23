@@ -1,4 +1,0 @@
-﻿Commit número 55
-Data: 24/09/2025 12:01:38
-
-Este é o commit número 55 do projeto Geotecnologia-KNS para 2025.
