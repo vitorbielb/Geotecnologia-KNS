@@ -1,4 +1,0 @@
-﻿Commit número 1
-Data: 24/11/2025 10:58:44
-
-Este é o commit número 1 do projeto Geotecnologia-KNS para 2025.
