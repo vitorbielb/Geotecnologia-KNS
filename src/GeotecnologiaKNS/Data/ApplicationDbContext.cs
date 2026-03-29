@@ -100,8 +100,8 @@ namespace GeotecnologiaKNS.Data
 
             modelBuilder.Entity<ApplicationRole>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue ||
-                                     _userContext.IsApplicationAdmin.GetValueOrDefault() ||
-                                     (x.Name != nameof(Infra.Roles.Administrador) && _userContext.IsTenantAdmin.GetValueOrDefault() && x.TenantId == _userContext.TenantId));
+                                     _userContext.IsApplicationAdmin ||
+                                     (x.Name != nameof(Infra.Roles.Administrador) && _userContext.IsTenantAdmin && x.TenantId == _userContext.TenantId));
 
             modelBuilder.Entity<ApplicationRole>()
                 .HasMany(x => x.Claims)
