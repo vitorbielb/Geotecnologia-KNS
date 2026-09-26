@@ -8,10 +8,12 @@ namespace GeotecnologiaKNS.Controllers
     public class PropriedadesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPropriedadeCarService _carService;
 
-        public PropriedadesController(ApplicationDbContext context)
+        public PropriedadesController(ApplicationDbContext context, IPropriedadeCarService carService)
         {
             _context = context;
+            _carService = carService;
         }
 
         // GET: Propriedades
@@ -34,7 +36,7 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            FillProdutoresUnidadesFederativasViewBag();
+            FillProdutoresViewBag();
 
             if (id == null || _context.Propriedades == null)
             {
@@ -43,7 +45,6 @@ namespace GeotecnologiaKNS.Controllers
 
             var propriedade = await _context.Propriedades
                 .Include(p => p.Documentos)
-                .Include(p => p.Geozone)
                 .Include (d => d.Cartografia)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -58,33 +59,111 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades/Create
         public IActionResult Create()
         {
-            FillProdutoresUnidadesFederativasViewBag();
+            FillProdutoresViewBag();
             return View();
+        }
+
+        /// <summary>
+        /// Consulta o CAR na base pública e devolve o que será gravado, para que
+        /// o usuário confira antes de salvar.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ConsultarCar(string? codigoCar, CancellationToken cancellationToken)
+        {
+            var consulta = await _carService.ConsultarAsync(codigoCar, cancellationToken);
+
+            if (!consulta.Sucesso)
+            {
+                return Ok(new { sucesso = false, mensagem = consulta.Mensagem });
+            }
+
+            var imovel = consulta.Imovel!;
+
+            return Ok(new
+            {
+                sucesso = true,
+                mensagem = consulta.Mensagem,
+                codigoCar = imovel.CodigoCar,
+                municipio = imovel.Municipio,
+                uf = imovel.Uf,
+                situacao = imovel.Situacao,
+                areaHa = imovel.AreaHa,
+                areaCalculadaHa = imovel.AreaCalculadaHa,
+                centroLat = imovel.CentroLat,
+                centroLng = imovel.CentroLng,
+                origem = imovel.Origem,
+                baseCarregadaEm = imovel.BaseCarregadaEm,
+                perimetro = imovel.PerimetroGeoJson
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [TenantFilter]
-        public async Task<IActionResult> Create(Propriedade propriedade)
+        public async Task<IActionResult> Create(Propriedade propriedade, CancellationToken cancellationToken)
         {
-            // A navegação é resolvida pelo EF a partir de ProdutorId; validamos apenas
-            // se o produtor existe dentro do tenant atual (garantido pelo query filter).
+            // Campos derivados não vêm do formulário; não podem bloquear a validação.
             ModelState.Remove(nameof(Propriedade.Produtor));
+            ModelState.Remove(nameof(Propriedade.Municipio));
+            ModelState.Remove(nameof(Propriedade.Area));
 
-            if (!await _context.Produtores.AnyAsync(x => x.Id == propriedade.ProdutorId))
+            if (!await _context.Produtores.AnyAsync(x => x.Id == propriedade.ProdutorId, cancellationToken))
             {
                 ModelState.AddModelError(nameof(Propriedade.ProdutorId), "Produtor não encontrado.");
             }
 
-            if (ModelState.IsValid)
+            var consulta = await _carService.ConsultarAsync(propriedade.CodigoCar, cancellationToken);
+
+            if (!consulta.Sucesso)
             {
-                _context.Add(propriedade);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError(nameof(Propriedade.CodigoCar), consulta.Mensagem);
+            }
+            else if (await _context.Propriedades.AnyAsync(x => x.CodigoCar == consulta.Imovel!.CodigoCar, cancellationToken))
+            {
+                ModelState.AddModelError(nameof(Propriedade.CodigoCar), "Este CAR já está cadastrado.");
             }
 
-            FillProdutoresUnidadesFederativasViewBag();
-            return View(propriedade);
+            if (!ModelState.IsValid)
+            {
+                FillProdutoresViewBag();
+                return View(propriedade);
+            }
+
+            _carService.Aplicar(propriedade, consulta.Imovel!);
+
+            _context.Add(propriedade);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        /// <summary>
+        /// Recarrega os dados do imóvel a partir da versão corrente da base do CAR.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AtualizarPeloCar(int id, CancellationToken cancellationToken)
+        {
+            var propriedade = await _context.Propriedades.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (propriedade is null)
+            {
+                return NotFound();
+            }
+
+            var consulta = await _carService.ConsultarAsync(propriedade.CodigoCar, cancellationToken);
+
+            if (!consulta.Sucesso)
+            {
+                TempData["Erro"] = consulta.Mensagem;
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            _carService.Aplicar(propriedade, consulta.Imovel!);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            TempData["Sucesso"] = "Dados atualizados a partir da base do CAR.";
+            return RedirectToAction(nameof(Details), new { id });
         }
         [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public async Task<IActionResult> Edit(int? id)
@@ -94,7 +173,7 @@ namespace GeotecnologiaKNS.Controllers
                   x => x.ToString(),
                   x => (int)x,
                   options => options.Placeholder = "Selecione...");
-            FillProdutoresUnidadesFederativasViewBag();
+            FillProdutoresViewBag();
 
             if (id == null || _context.Propriedades == null)
             {
@@ -115,34 +194,44 @@ namespace GeotecnologiaKNS.Controllers
 
 
         // POST: Propriedades/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [TenantFilter]
-        public async Task<IActionResult> Edit([Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,ProdutorId,Validacao,Outros")] Models.Propriedade propriedade)
+        public async Task<IActionResult> Edit(Propriedade propriedade, CancellationToken cancellationToken)
         {
-            if (ModelState.IsValid)
+            ModelState.Remove(nameof(Propriedade.Produtor));
+            ModelState.Remove(nameof(Propriedade.Municipio));
+            ModelState.Remove(nameof(Propriedade.Area));
+            ModelState.Remove(nameof(Propriedade.CodigoCar));
+
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(propriedade);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PropriedadeExists(propriedade.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction("Analise", "Propriedades");
+                FillProdutoresViewBag();
+                return View(propriedade);
             }
-            return View(propriedade);
+
+            // Carrega e atualiza campo a campo. Um _context.Update com a entidade
+            // vinda do formulário apagaria o perímetro e a procedência do CAR,
+            // que não trafegam pelo form.
+            var persistida = await _context.Propriedades
+                .FirstOrDefaultAsync(x => x.Id == propriedade.Id, cancellationToken);
+
+            if (persistida is null)
+            {
+                return NotFound();
+            }
+
+            persistida.NomePropriedade = propriedade.NomePropriedade;
+            persistida.ProdutorId = propriedade.ProdutorId;
+            persistida.TipoPropriedade = propriedade.TipoPropriedade;
+            persistida.CicloProducao = propriedade.CicloProducao;
+            persistida.AreaUtil = propriedade.AreaUtil;
+            persistida.TipoCadastroRural = propriedade.TipoCadastroRural;
+            persistida.Validacao = propriedade.Validacao;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return RedirectToAction("Analise", "Propriedades");
         }
 
         // GET: Propriedades/Delete/5
@@ -174,26 +263,11 @@ namespace GeotecnologiaKNS.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult GeozoneMap(GeozoneViewModel model)
+        // GeozoneMap e GetCitiesByUF foram removidos: o perímetro e o município
+        // passaram a vir da base do CAR, e o desenho manual foi descontinuado.
+
+        private void FillProdutoresViewBag()
         {
-            return View(model);
-        }
-
-        public ActionResult GetCitiesByUF(Estados uf)
-        {
-            return Json(UnidadesFederativasExtension.GetCities(uf));
-        }
-
-        private bool PropriedadeExists(int id)
-        {
-
-            return (_context.Propriedades?.Any(e => e.Id == id)).GetValueOrDefault();
-
-        }
-
-        private void FillProdutoresUnidadesFederativasViewBag()
-        {
-            ViewBag.UnidadesFederativas = UnidadesFederativasExtension.GetUnidadesFederativas();
             ViewBag.Produtores = _context.Produtores
                 .ToSelectListItems(
                     x => x.Nome,

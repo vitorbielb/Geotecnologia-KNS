@@ -44,11 +44,19 @@ namespace GeotecnologiaKNS.Data
             modelBuilder.Entity<Propriedade>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
 
+            // Mapeamento mantido só para preservar os polígonos desenhados à mão
+            // até a limpeza de schema. O perímetro corrente vem da base do CAR.
+#pragma warning disable CS0618
             modelBuilder.Entity<Propriedade>()
                 .HasOne(x => x.Geozone);
+#pragma warning restore CS0618
 
             modelBuilder.Entity<Propriedade>()
                 .HasMany(x => x.Documentos);
+
+            // Busca por CAR é o caminho quente do cadastro e da reanálise.
+            modelBuilder.Entity<Propriedade>()
+                .HasIndex(x => x.CodigoCar);
 
             modelBuilder.Entity<Propriedade>()
                 .HasOne(e => e.Industria)

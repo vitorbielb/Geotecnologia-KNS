@@ -13,9 +13,7 @@
             municipio = p.Municipio,
             lat = p.Latitude,
             lng = p.Longitude,
-            poligono = (p.Geozone?.Utm ?? Array.Empty<Vertice>())
-                .Select(v => new { lat = v.Lat, lng = v.Lng })
-                .ToArray()
+            perimetro = p.PerimetroGeoJson
         })
         .ToList();
 
@@ -52,18 +50,17 @@
 
                 const infoWindow = new google.maps.InfoWindow();
 
-                propriedadesMonitoradas.forEach(function (propriedade) {
-                    if (propriedade.poligono && propriedade.poligono.length > 0) {
-                        const poligono = new google.maps.Polygon({
-                            paths: propriedade.poligono,
-                            strokeColor: "#00b347",
-                            strokeOpacity: 0.8,
-                            strokeWeight: 2,
-                            fillColor: "#00b347",
-                            fillOpacity: 0.35,
-                        });
+                map.data.setStyle({
+                    strokeColor: "#00b347",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#00b347",
+                    fillOpacity: 0.35,
+                });
 
-                        poligono.setMap(map);
+                propriedadesMonitoradas.forEach(function (propriedade) {
+                    if (propriedade.perimetro) {
+                        map.data.addGeoJson(JSON.parse(propriedade.perimetro));
                         return;
                     }
 

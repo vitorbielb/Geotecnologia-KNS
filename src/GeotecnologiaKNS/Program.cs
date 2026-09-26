@@ -71,6 +71,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
 builder.Services.AddAdminPanel();
 builder.Services.AddScoped<ImageLoader>();
+builder.Services.AddScoped<IPropriedadeCarService, PropriedadeCarService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 var app = builder.Build();
 

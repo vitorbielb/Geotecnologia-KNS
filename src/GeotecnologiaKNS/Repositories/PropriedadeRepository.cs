@@ -25,7 +25,6 @@ namespace GeotecnologiaKNS.Repositories
         {
             return _context.Propriedades
                 .AsNoTracking()
-                .Include(p => p.Geozone)
                 .ToList();
         }
 

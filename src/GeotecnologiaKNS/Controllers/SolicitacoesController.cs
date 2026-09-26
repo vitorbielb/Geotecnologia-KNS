@@ -37,7 +37,6 @@ namespace GeotecnologiaKNS.Controllers
                 .Include(y => y.Propriedade.Produtor.Documentos)
                 .Include(z => z.Documentos)
                 .Include(q => q.Propriedade.Cartografia.Arquivos)
-                .Include(g => g.Propriedade.Geozone)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (solicitacao == null)
             {

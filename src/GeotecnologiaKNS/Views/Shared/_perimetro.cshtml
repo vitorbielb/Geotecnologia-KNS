@@ -1,0 +1,88 @@
+﻿@using Microsoft.Extensions.Options
+@model GeotecnologiaKNS.Models.PerimetroMapaViewModel
+@inject IOptions<GoogleMapsOptions> googleMaps
+
+@{
+    var maps = googleMaps.Value;
+    var temCoordenadas = Model.CentroLat != 0 || Model.CentroLng != 0;
+    var centroLat = temCoordenadas ? Model.CentroLat : maps.DefaultLat;
+    var centroLng = temCoordenadas ? Model.CentroLng : maps.DefaultLng;
+
+    // Nome de função e do callback precisam ser únicos: a mesma página pode
+    // conter mais de um mapa (dashboard, detalhes da solicitação).
+    var sufixo = new string(Model.ElementoId.Where(char.IsLetterOrDigit).ToArray());
+    var callback = $"initMap_{sufixo}";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+}
+
+@if (string.IsNullOrWhiteSpace(maps.ApiKey))
+{
+    <div class="alert alert-warning mb-0">
+        Mapa indisponível: a chave da API do Google Maps não está configurada
+        (<code>GoogleMaps:ApiKey</code>).
+    </div>
+}
+else
+{
+    <div id="@Model.ElementoId" style="height: @(Model.AlturaEmPixels)px;"></div>
+
+    <script type="text/javascript">
+        (function () {
+            var geoJson = @Json.Serialize(Model.GeoJson);
+            var centro = { lat: @centroLat.ToString(inv), lng: @centroLng.ToString(inv) };
+            var titulo = @Json.Serialize(Model.Titulo ?? string.Empty);
+            var temCoordenadas = @(temCoordenadas ? "true" : "false");
+
+            window.@(callback) = function () {
+                var map = new google.maps.Map(document.getElementById('@Model.ElementoId'), {
+                    zoom: geoJson || temCoordenadas ? 13 : 4,
+                    center: centro,
+                    disableDefaultUI: true,
+                    mapTypeId: 'terrain'
+                });
+
+                if (geoJson) {
+                    map.data.addGeoJson(JSON.parse(geoJson));
+                    map.data.setStyle({
+                        strokeColor: '#00b347',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#00b347',
+                        fillOpacity: 0.35
+                    });
+                    return;
+                }
+
+                if (temCoordenadas) {
+                    new google.maps.Marker({ position: centro, map: map, title: titulo });
+                }
+            };
+
+            if (window.google && window.google.maps) {
+                window.@(callback)();
+                return;
+            }
+
+            // Uma página pode ter vários mapas, mas o script do Google carrega uma
+            // única vez; os callbacks pendentes são disparados quando ele chega.
+            window.mapasPendentes = window.mapasPendentes || [];
+            window.mapasPendentes.push(window.@(callback));
+
+            if (document.getElementById('google-maps-script')) {
+                return;
+            }
+
+            window.initMapsPendentes = function () {
+                window.mapasPendentes.forEach(function (fn) { fn(); });
+                window.mapasPendentes = [];
+            };
+
+            var script = document.createElement('script');
+            script.id = 'google-maps-script';
+            script.src = 'https://maps.googleapis.com/maps/api/js?key=' +
+                encodeURIComponent(@Json.Serialize(maps.ApiKey)) + '&callback=initMapsPendentes&v=weekly';
+            script.defer = true;
+            document.head.appendChild(script);
+        })();
+    </script>
+}

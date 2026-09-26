@@ -88,9 +88,7 @@
                             @Html.ValidationMessageFor(model => model.Longitude, "", new { @class = "error-message" })
                         </div>
                         <div class="form-group">
-                            <div id="geozone-map">
-                                <partial name="GeozoneMap" model="new GeozoneViewModel { CenterLat = Model.Latitude, CenterLong = Model.Longitude, Utm = Model.Geozone.Utm }" />
-                            </div>
+                            <partial name="_perimetro" model="PerimetroMapaViewModel.DaPropriedade(Model)" />
                         </div>
                         <div class="form-group">
                             <label asp-for="Area" class="control-label"></label><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill custom-icon" viewBox="0 0 16 16">
