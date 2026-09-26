@@ -9,35 +9,92 @@
 <div class="kns-auth">
 
     <aside class="kns-auth__institucional">
-        <div class="kns-auth__marca">
-            <img src="~/images/logo.png" alt="KNS Ambiental — Geotecnologia" />
-        </div>
 
-        <div>
-            <h1 class="kns-auth__titulo">Conformidade socioambiental da sua cadeia de fornecimento.</h1>
+        @* Ilustração do que o sistema faz: um perímetro de imóvel com seus
+           vértices e uma área de sobreposição destacada. Vale mais que um
+           ornamento genérico — quem abre a tela entende o produto antes de ler. *@
+        <svg class="kns-auth__cena" viewBox="0 0 520 440" aria-hidden="true" focusable="false">
+            <defs>
+                <linearGradient id="cena-perimetro" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5FD8FF"/>
+                    <stop offset="100%" stop-color="#1E86D8"/>
+                </linearGradient>
+                <linearGradient id="cena-sobreposicao" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#FF8A6B" stop-opacity=".55"/>
+                    <stop offset="100%" stop-color="#FF6B4A" stop-opacity=".18"/>
+                </linearGradient>
+                <pattern id="cena-hachura" width="9" height="9" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+                    <line x1="0" y1="0" x2="0" y2="9" stroke="#FF9E85" stroke-width="1.6" stroke-opacity=".55"/>
+                </pattern>
+            </defs>
+
+            <!-- perímetro do imóvel -->
+            <path d="M150 86 L372 58 L446 214 L392 372 L196 392 L104 250 Z"
+                  fill="rgba(95,216,255,.07)"
+                  stroke="url(#cena-perimetro)" stroke-width="2.4" stroke-linejoin="round"/>
+
+            <!-- área sobreposta a uma camada restritiva -->
+            <path d="M372 58 L446 214 L392 372 L300 330 L322 150 Z"
+                  fill="url(#cena-sobreposicao)"/>
+            <path d="M372 58 L446 214 L392 372 L300 330 L322 150 Z"
+                  fill="url(#cena-hachura)" stroke="#FF9E85" stroke-width="1.4"
+                  stroke-opacity=".7" stroke-dasharray="6 5"/>
+
+            <!-- vértices -->
+            <g class="kns-auth__vertices">
+                <circle cx="150" cy="86"  r="5.5"/>
+                <circle cx="372" cy="58"  r="5.5"/>
+                <circle cx="446" cy="214" r="5.5"/>
+                <circle cx="392" cy="372" r="5.5"/>
+                <circle cx="196" cy="392" r="5.5"/>
+                <circle cx="104" cy="250" r="5.5"/>
+            </g>
+
+            <!-- varredura de análise -->
+            <line class="kns-auth__varredura" x1="60" y1="0" x2="490" y2="0"/>
+        </svg>
+
+        <div class="kns-auth__conteudo">
+            <span class="kns-auth__etiqueta">
+                <i class="mdi mdi-shield-check-outline"></i>
+                Conformidade socioambiental
+            </span>
+
+            <h1 class="kns-auth__titulo">
+                Cada imóvel verificado <em>antes</em> da compra.
+            </h1>
+
             <p class="kns-auth__texto">
-                Cada imóvel rural é cruzado com as bases públicas de embargos, terras
-                indígenas, unidades de conservação e desmatamento — com laudo auditável
-                e rastreável até a versão da base consultada.
+                O perímetro vem do CAR e é cruzado com as bases oficiais de embargos,
+                terras indígenas, unidades de conservação e desmatamento. O resultado
+                é um laudo rastreável até a versão da base consultada.
             </p>
 
-            <div class="kns-auth__pilares">
-                <span class="kns-auth__pilar">
-                    <i class="mdi mdi-map-marker-radius"></i> Perímetro pelo CAR
-                </span>
-                <span class="kns-auth__pilar">
-                    <i class="mdi mdi-leaf"></i> Bases oficiais
-                </span>
-                <span class="kns-auth__pilar">
-                    <i class="mdi mdi-shield-check"></i> Análise automática
-                </span>
-                <span class="kns-auth__pilar">
-                    <i class="mdi mdi-file-document-outline"></i> Laudo auditável
-                </span>
+            <div class="kns-auth__cartoes">
+                <div class="kns-auth__cartao">
+                    <i class="mdi mdi-map-marker-radius-outline"></i>
+                    <strong>Perímetro pelo CAR</strong>
+                    <span>Sem digitação de coordenadas</span>
+                </div>
+                <div class="kns-auth__cartao">
+                    <i class="mdi mdi-layers-triple-outline"></i>
+                    <strong>Bases oficiais</strong>
+                    <span>IBAMA, FUNAI, ICMBio, INPE</span>
+                </div>
+                <div class="kns-auth__cartao">
+                    <i class="mdi mdi-flash-outline"></i>
+                    <strong>Análise automática</strong>
+                    <span>Regras por indústria</span>
+                </div>
+                <div class="kns-auth__cartao">
+                    <i class="mdi mdi-file-certificate-outline"></i>
+                    <strong>Laudo auditável</strong>
+                    <span>Versão da base registrada</span>
+                </div>
             </div>
         </div>
 
-        <p class="kns-auth__rodape">KNS Ambiental · Geotecnologia aplicada à originação responsável</p>
+        <p class="kns-auth__rodape">Geotecnologia aplicada à originação responsável</p>
     </aside>
 
     <main class="kns-auth__formulario">

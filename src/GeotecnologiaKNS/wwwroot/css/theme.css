@@ -750,99 +750,202 @@ textarea.form-control {
     background: var(--kns-superficie);
 }
 
-/* Painel institucional: malha de coordenadas sobre azul profundo.
-   Substitui a fotografia — carrega em qualquer conexão e não envelhece. */
+/* --------------------------------------------------------------------------
+   Painel institucional
+   Sem logo e sem fotografia: a marca já aparece ao lado, sobre o formulário.
+   O que ocupa este lado é uma ilustração do próprio trabalho do sistema —
+   um perímetro de imóvel com seus vértices e uma sobreposição destacada.
+   -------------------------------------------------------------------------- */
+
 .kns-auth__institucional {
     position: relative;
+    isolation: isolate;
     background:
-        radial-gradient(760px 520px at 78% 78%, rgba(3, 194, 237, .30), transparent 62%),
-        radial-gradient(680px 480px at 92% 30%, rgba(14, 145, 239, .34), transparent 60%),
-        linear-gradient(150deg, #071D2C 0%, #0B3A5C 55%, #0A5C96 100%);
+        radial-gradient(820px 620px at 82% 8%, rgba(3, 194, 237, .22), transparent 58%),
+        radial-gradient(760px 560px at 16% 92%, rgba(14, 145, 239, .26), transparent 60%),
+        linear-gradient(155deg, #061826 0%, #0A3252 52%, #0C4D7E 100%);
     color: #E6F1FA;
-    padding: 56px 60px;
+    padding: 60px 62px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    gap: 34px;
     overflow: hidden;
 }
 
+/* Malha de coordenadas, esmaecida nas bordas para não virar moldura. */
 .kns-auth__institucional::before {
     content: '';
     position: absolute;
-    inset: 0;
+    inset: -10%;
+    z-index: -2;
     background-image:
-        linear-gradient(rgba(255, 255, 255, .055) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, .055) 1px, transparent 1px);
-    background-size: 46px 46px;
-    mask-image: radial-gradient(circle at 50% 42%, #000 35%, transparent 78%);
-    -webkit-mask-image: radial-gradient(circle at 50% 42%, #000 35%, transparent 78%);
+        linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+    background-size: 52px 52px;
+    mask-image: radial-gradient(circle at 60% 45%, #000 28%, transparent 76%);
+    -webkit-mask-image: radial-gradient(circle at 60% 45%, #000 28%, transparent 76%);
 }
 
-.kns-auth__institucional > * {
-    position: relative;
-    z-index: 1;
+/* Brilho suave atrás da ilustração, para dar profundidade ao fundo chapado. */
+.kns-auth__institucional::after {
+    content: '';
+    position: absolute;
+    z-index: -2;
+    width: 560px;
+    height: 560px;
+    right: -150px;
+    top: 12%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(3, 194, 237, .20), transparent 62%);
+    filter: blur(14px);
 }
 
-/* Logo direto sobre o painel, sem placa. A legibilidade vem do fundo:
-   o gradiente foi virado para deixar o canto superior esquerdo escuro,
-   onde a marca fica. */
-.kns-auth__marca {
-    display: block;
-    align-self: flex-start;
-}
+/* --- Ilustração --- */
 
-.kns-auth__marca img {
-    width: 210px;
+.kns-auth__cena {
+    position: absolute;
+    z-index: -1;
+    right: -70px;
+    top: 50%;
+    transform: translateY(-46%);
+    width: 620px;
+    max-width: 92%;
     height: auto;
-    display: block;
+    opacity: .5;
+    pointer-events: none;
 }
 
-.kns-auth__titulo {
-    font-size: 34px;
-    line-height: 1.22;
-    font-weight: 600;
-    color: #FFFFFF;
-    letter-spacing: -0.02em;
-    margin: 0 0 14px;
-    max-width: 15ch;
+.kns-auth__vertices circle {
+    fill: #9FE8FF;
+    stroke: rgba(6, 24, 38, .85);
+    stroke-width: 2;
 }
 
-.kns-auth__texto {
-    color: rgba(230, 241, 250, .78);
-    font-size: 15px;
-    line-height: 1.65;
-    max-width: 46ch;
-    margin: 0;
+/* Varredura: sugere a análise correndo sobre o imóvel. Discreta de propósito —
+   é pano de fundo de uma tela de login, não uma animação de destaque. */
+.kns-auth__varredura {
+    stroke: rgba(159, 232, 255, .55);
+    stroke-width: 1.6;
+    stroke-dasharray: 3 7;
+    animation: kns-varre 7s linear infinite;
 }
 
-.kns-auth__pilares {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 26px;
+@keyframes kns-varre {
+    0%   { transform: translateY(44px); opacity: 0; }
+    12%  { opacity: 1; }
+    88%  { opacity: 1; }
+    100% { transform: translateY(410px); opacity: 0; }
 }
 
-.kns-auth__pilar {
+/* --- Conteúdo --- */
+
+.kns-auth__conteudo {
+    position: relative;
+    max-width: 30rem;
+}
+
+.kns-auth__etiqueta {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 7px 14px 7px 11px;
-    border: 1px solid rgba(255, 255, 255, .18);
+    padding: 7px 15px 7px 12px;
+    border: 1px solid rgba(159, 232, 255, .28);
     border-radius: 999px;
-    background: rgba(255, 255, 255, .06);
-    font-size: 12.5px;
-    color: #D6E8F5;
-    backdrop-filter: blur(2px);
+    background: rgba(8, 40, 64, .55);
+    backdrop-filter: blur(6px);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: #A9E2FB;
+    margin-bottom: 26px;
 }
 
-.kns-auth__pilar i {
+.kns-auth__etiqueta i {
     font-size: 15px;
-    color: #7FD3F7;
+    color: #5FD8FF;
+}
+
+.kns-auth__titulo {
+    font-size: clamp(30px, 3.1vw, 42px);
+    line-height: 1.14;
+    font-weight: 600;
+    color: #FFFFFF;
+    letter-spacing: -0.025em;
+    margin: 0 0 18px;
+}
+
+.kns-auth__titulo em {
+    font-style: normal;
+    color: #5FD8FF;
+}
+
+.kns-auth__texto {
+    color: rgba(230, 241, 250, .76);
+    font-size: 15px;
+    line-height: 1.68;
+    margin: 0;
+}
+
+/* --- Cartões --- */
+
+.kns-auth__cartoes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.kns-auth__cartao {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 15px 16px;
+    border: 1px solid rgba(159, 232, 255, .16);
+    border-radius: 14px;
+    background: rgba(8, 36, 58, .48);
+    backdrop-filter: blur(8px);
+    transition: border-color var(--kns-transicao), background var(--kns-transicao), transform var(--kns-transicao);
+}
+
+.kns-auth__cartao:hover {
+    border-color: rgba(159, 232, 255, .34);
+    background: rgba(10, 46, 74, .62);
+    transform: translateY(-2px);
+}
+
+.kns-auth__cartao i {
+    font-size: 19px;
+    color: #5FD8FF;
+    margin-bottom: 4px;
+}
+
+.kns-auth__cartao strong {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #FFFFFF;
+    letter-spacing: -0.005em;
+}
+
+.kns-auth__cartao span {
+    font-size: 12px;
+    color: rgba(230, 241, 250, .58);
+    line-height: 1.45;
 }
 
 .kns-auth__rodape {
+    position: relative;
     font-size: 12px;
-    color: rgba(230, 241, 250, .5);
+    color: rgba(230, 241, 250, .45);
+    margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kns-auth__varredura {
+        animation: none;
+        opacity: .35;
+    }
 }
 
 /* Painel do formulário */
