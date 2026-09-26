@@ -755,9 +755,9 @@ textarea.form-control {
 .kns-auth__institucional {
     position: relative;
     background:
-        radial-gradient(900px 500px at 15% 12%, rgba(3, 194, 237, .34), transparent 60%),
-        radial-gradient(700px 500px at 85% 88%, rgba(14, 145, 239, .42), transparent 62%),
-        linear-gradient(150deg, #0A5C96 0%, #0B2A3F 100%);
+        radial-gradient(760px 520px at 78% 78%, rgba(3, 194, 237, .30), transparent 62%),
+        radial-gradient(680px 480px at 92% 30%, rgba(14, 145, 239, .34), transparent 60%),
+        linear-gradient(150deg, #071D2C 0%, #0B3A5C 55%, #0A5C96 100%);
     color: #E6F1FA;
     padding: 56px 60px;
     display: flex;
@@ -783,15 +783,11 @@ textarea.form-control {
     z-index: 1;
 }
 
-/* Placa branca: a logo tem texto azul e se perderia no painel escuro.
-   Preserva a marca original em vez de recoloria-la. */
+/* Logo direto sobre o painel, sem placa. A legibilidade vem do fundo:
+   o gradiente foi virado para deixar o canto superior esquerdo escuro,
+   onde a marca fica. */
 .kns-auth__marca {
-    display: inline-flex;
-    align-items: center;
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 14px 22px;
-    box-shadow: 0 10px 30px rgba(5, 25, 40, .28);
+    display: block;
     align-self: flex-start;
 }
 
