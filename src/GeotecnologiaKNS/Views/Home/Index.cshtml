@@ -131,9 +131,11 @@
     <script type="text/javascript">
         (function () {
             var canvas = document.getElementById('barChart');
+            var tema = window.knsTemaComponentes;
+            var cores = tema ? tema.opcoesGrafico() : { grade: '#DDE7EF', texto: '#6C8394' };
 
             if (canvas) {
-                new Chart(canvas.getContext('2d'), {
+                var grafico = new Chart(canvas.getContext('2d'), {
                     type: 'bar',
                     data: {
                         labels: ['Liberados', 'Alerta', 'Bloqueados', 'Aguardando'],
@@ -152,16 +154,19 @@
                         legend: { display: false },
                         scales: {
                             yAxes: [{
-                                ticks: { beginAtZero: true, precision: 0, fontColor: '#6B7F76' },
-                                gridLines: { color: '#E2E9E5', zeroLineColor: '#E2E9E5' }
+                                ticks: { beginAtZero: true, precision: 0, fontColor: cores.texto },
+                                gridLines: { color: cores.grade, zeroLineColor: cores.grade }
                             }],
                             xAxes: [{
-                                ticks: { fontColor: '#6B7F76' },
+                                ticks: { fontColor: cores.texto },
                                 gridLines: { display: false }
                             }]
                         }
                     }
                 });
+
+                // Canvas não acompanha a troca de variável CSS; precisa ser redesenhado.
+                if (tema) { tema.registrarGrafico(grafico); }
             }
 
             document.querySelectorAll('.table-row').forEach(function (linha) {

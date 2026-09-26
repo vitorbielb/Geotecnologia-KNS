@@ -1070,3 +1070,181 @@ textarea.form-control {
         animation-duration: .01ms !important;
     }
 }
+
+/* ==========================================================================
+   Tema escuro
+   --------------------------------------------------------------------------
+   Quase tudo vem da troca dos tokens: a camada de tema já usa variáveis para
+   superfície, linha, fundo e texto, então redefini-las alcança cartões,
+   tabelas, formulários, navbar e sidebar de uma vez.
+
+   O que precisa de regra própria é o que veio do template vendor com cor
+   fixa — menus suspensos, modais, alertas e os controles do DataTables.
+
+   O escuro é azulado, não neutro: puxa para o mesmo azul da marca, em vez de
+   um cinza que brigaria com ela.
+   ========================================================================== */
+
+:root {
+    color-scheme: light;
+}
+
+:root[data-tema="escuro"] {
+    color-scheme: dark;
+
+    /* Texto: a escala clara inverte de ponta a ponta */
+    --kns-grafite: #EAF2F8;
+    --kns-carvao: #D2E0EC;
+    --kns-ardosia: #A6BCCC;
+    --kns-neutro: #8098AC;
+
+    /* Superfícies */
+    --kns-linha: #1D3243;
+    --kns-fundo: #0A1621;
+    --kns-superficie: #11232F;
+
+    /* Tonalidade de realce (item ativo, linha sob o cursor) */
+    --kns-azul-claro: #14293B;
+    --kns-azul-tenue: #0E1F2C;
+
+    /* A marca clareia um pouco: o azul médio perde contraste no escuro */
+    --kns-azul: #3BA5F2;
+    --kns-azul-escuro: #2E93E0;
+
+    /* Estados: frente mais clara, fundo como véu translúcido */
+    --kns-liberado: #4CC98A;
+    --kns-liberado-fundo: rgba(31, 157, 87, .16);
+    --kns-alerta: #E3AE3F;
+    --kns-alerta-fundo: rgba(201, 138, 0, .17);
+    --kns-bloqueado: #F08466;
+    --kns-bloqueado-fundo: rgba(199, 68, 47, .17);
+    --kns-solicitado: #5FB8F5;
+    --kns-solicitado-fundo: rgba(14, 145, 239, .16);
+
+    /* No escuro a sombra some; a separação passa a vir da borda */
+    --kns-sombra: 0 1px 2px rgba(0, 0, 0, .34), 0 8px 24px rgba(0, 0, 0, .28);
+    --kns-sombra-alta: 0 2px 6px rgba(0, 0, 0, .40), 0 18px 44px rgba(0, 0, 0, .36);
+}
+
+/* --- Ajustes de componentes do template --- */
+
+:root[data-tema="escuro"] .navbar,
+:root[data-tema="escuro"] .navbar .navbar-brand-wrapper,
+:root[data-tema="escuro"] .navbar .navbar-menu-wrapper {
+    background: var(--kns-superficie) !important;
+}
+
+:root[data-tema="escuro"] .sidebar {
+    background: var(--kns-superficie);
+}
+
+:root[data-tema="escuro"] .dropdown-menu,
+:root[data-tema="escuro"] .modal-content {
+    background: var(--kns-superficie);
+    border: 1px solid var(--kns-linha);
+    color: var(--kns-carvao);
+}
+
+:root[data-tema="escuro"] .dropdown-item {
+    color: var(--kns-carvao);
+}
+
+:root[data-tema="escuro"] .dropdown-item:hover,
+:root[data-tema="escuro"] .dropdown-item:focus {
+    background: var(--kns-azul-claro);
+    color: var(--kns-grafite);
+}
+
+:root[data-tema="escuro"] .dropdown-divider,
+:root[data-tema="escuro"] .modal-header,
+:root[data-tema="escuro"] .modal-footer {
+    border-color: var(--kns-linha);
+}
+
+:root[data-tema="escuro"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(1.6);
+}
+
+:root[data-tema="escuro"] .table-striped tbody tr:nth-of-type(odd) {
+    background: rgba(255, 255, 255, .022);
+}
+
+:root[data-tema="escuro"] .alert-success { color: #7FE0AC; }
+:root[data-tema="escuro"] .alert-warning { color: #F0C878; }
+:root[data-tema="escuro"] .alert-danger  { color: #F8A992; }
+:root[data-tema="escuro"] .alert-info    { color: #92CDF8; }
+
+:root[data-tema="escuro"] .dataTables_wrapper,
+:root[data-tema="escuro"] .dataTables_wrapper .dataTables_info,
+:root[data-tema="escuro"] .dataTables_wrapper .dataTables_length,
+:root[data-tema="escuro"] .dataTables_wrapper .dataTables_filter,
+:root[data-tema="escuro"] .dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: var(--kns-ardosia) !important;
+}
+
+:root[data-tema="escuro"] .dataTables_wrapper .dataTables_filter input,
+:root[data-tema="escuro"] .dataTables_wrapper .dataTables_length select {
+    background: var(--kns-superficie);
+    color: var(--kns-carvao);
+    border-color: var(--kns-linha);
+}
+
+:root[data-tema="escuro"] pre {
+    background: var(--kns-azul-tenue);
+    color: var(--kns-ardosia);
+    border-radius: var(--kns-raio-sm);
+    padding: 12px 14px;
+}
+
+/* O lado do formulário do login acompanha o tema; o painel institucional já
+   é escuro nos dois, então fica como está. */
+:root[data-tema="escuro"] .kns-auth {
+    background: var(--kns-superficie);
+}
+
+/* ==========================================================================
+   Botão de alternância
+   ========================================================================== */
+
+.kns-tema {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin-right: 12px;
+    border: 1px solid var(--kns-linha);
+    border-radius: 10px;
+    background: var(--kns-fundo);
+    color: var(--kns-ardosia);
+    cursor: pointer;
+    transition: background var(--kns-transicao), color var(--kns-transicao), border-color var(--kns-transicao);
+}
+
+.kns-tema:hover {
+    background: var(--kns-azul-claro);
+    border-color: var(--kns-azul);
+    color: var(--kns-azul);
+}
+
+.kns-tema i {
+    font-size: 19px;
+    line-height: 1;
+}
+
+/* Um ícone por tema: o mostrado é o do modo para onde o clique leva. */
+.kns-tema .kns-tema__escuro { display: inline-block; }
+.kns-tema .kns-tema__claro { display: none; }
+
+:root[data-tema="escuro"] .kns-tema .kns-tema__escuro { display: none; }
+:root[data-tema="escuro"] .kns-tema .kns-tema__claro { display: inline-block; }
+
+/* Versão flutuante, para a tela de login, que não tem navbar. */
+.kns-tema--flutuante {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 20;
+    background: var(--kns-superficie);
+    box-shadow: var(--kns-sombra);
+}

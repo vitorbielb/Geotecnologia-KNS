@@ -94,6 +94,8 @@ function desenharPerimetro(imovel) {
                 disableDefaultUI: true,
                 mapTypeId: 'terrain'
             });
+
+            if (window.knsTemaComponentes) { window.knsTemaComponentes.registrarMapa(mapaCar); }
         } else {
             mapaCar.setCenter(centro);
         }
@@ -104,10 +106,10 @@ function desenharPerimetro(imovel) {
         mapaCar.data.forEach(function (feature) { mapaCar.data.remove(feature); });
         mapaCar.data.addGeoJson(JSON.parse(imovel.perimetro));
         mapaCar.data.setStyle({
-            strokeColor: '#00b347',
+            strokeColor: '#2FA7F5',
             strokeOpacity: 0.8,
             strokeWeight: 2,
-            fillColor: '#00b347',
+            fillColor: '#2FA7F5',
             fillOpacity: 0.35
         });
     };
