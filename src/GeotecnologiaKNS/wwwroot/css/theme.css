@@ -12,35 +12,42 @@
    ========================================================================== */
 
 :root {
-    /* Marca */
-    --kns-verde: #2FA36B;
-    --kns-verde-escuro: #127A4B;
-    --kns-verde-profundo: #0B4F31;
-    --kns-verde-claro: #E8F5EE;
+    /* Marca — azuis extraídos da logo institucional da KNS.
+       #0E91EF é o azure dominante; #03C2ED é o ciano de acento;
+       #127CC3 é o azul mais fechado usado nas sombras do traçado. */
+    --kns-azul: #0E91EF;
+    --kns-azul-ciano: #03C2ED;
+    --kns-azul-escuro: #127CC3;
+    --kns-azul-profundo: #0A5C96;
+    --kns-azul-noite: #0B2A3F;
+    --kns-azul-claro: #E8F4FE;
+    --kns-azul-tenue: #F4FAFF;
 
-    /* Chassi industrial */
-    --kns-grafite: #16211D;
-    --kns-carvao: #1F2B26;
-    --kns-ardosia: #46574F;
-    --kns-neutro: #6B7F76;
-    --kns-linha: #E2E9E5;
-    --kns-fundo: #F4F7F5;
+    /* Chassi — neutros com leve viés frio, para conversar com o azul */
+    --kns-grafite: #123047;
+    --kns-carvao: #1E3A4F;
+    --kns-ardosia: #4A6275;
+    --kns-neutro: #6C8394;
+    --kns-linha: #DDE7EF;
+    --kns-fundo: #F3F7FB;
     --kns-superficie: #FFFFFF;
 
-    /* Estados — o vocabulário de veredito do sistema */
+    /* Estados — o vocabulário de veredito do sistema.
+       Mantidos fora da família azul de propósito: num sistema que veda
+       compra, o veredito não pode se confundir com a cor da marca. */
     --kns-liberado: #1F9D57;
     --kns-liberado-fundo: #E6F6ED;
     --kns-alerta: #C98A00;
     --kns-alerta-fundo: #FCF4E0;
     --kns-bloqueado: #C7442F;
     --kns-bloqueado-fundo: #FBEBE8;
-    --kns-solicitado: #2B6CB0;
-    --kns-solicitado-fundo: #E8F1FA;
+    --kns-solicitado: #0E91EF;
+    --kns-solicitado-fundo: #E8F4FE;
 
     --kns-raio: 12px;
     --kns-raio-sm: 8px;
-    --kns-sombra: 0 1px 2px rgba(16, 33, 27, .04), 0 8px 24px rgba(16, 33, 27, .06);
-    --kns-sombra-alta: 0 2px 4px rgba(16, 33, 27, .06), 0 16px 40px rgba(16, 33, 27, .10);
+    --kns-sombra: 0 1px 2px rgba(18, 48, 71, .04), 0 8px 24px rgba(18, 48, 71, .06);
+    --kns-sombra-alta: 0 2px 4px rgba(18, 48, 71, .06), 0 16px 40px rgba(18, 48, 71, .10);
     --kns-transicao: 160ms cubic-bezier(.4, 0, .2, 1);
 }
 
@@ -64,13 +71,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-    color: var(--kns-verde-escuro);
+    color: var(--kns-azul-escuro);
     text-decoration: none;
     transition: color var(--kns-transicao);
 }
 
 a:hover {
-    color: var(--kns-verde);
+    color: var(--kns-azul);
 }
 
 /* Foco visível: o sistema é operado por teclado em mesa de análise. */
@@ -78,7 +85,7 @@ a:focus-visible,
 button:focus-visible,
 .form-control:focus-visible,
 select:focus-visible {
-    outline: 2px solid var(--kns-verde);
+    outline: 2px solid var(--kns-azul);
     outline-offset: 2px;
 }
 
@@ -89,7 +96,7 @@ select:focus-visible {
 .navbar {
     background: var(--kns-superficie) !important;
     border-bottom: 1px solid var(--kns-linha);
-    box-shadow: 0 1px 2px rgba(16, 33, 27, .04);
+    box-shadow: 0 1px 2px rgba(18, 48, 71, .04);
     height: 66px;
 }
 
@@ -101,13 +108,13 @@ select:focus-visible {
 }
 
 .navbar .navbar-brand-wrapper .navbar-brand img {
-    max-width: 176px;
-    height: auto;
+    max-height: 40px;
+    width: auto;
 }
 
 .navbar .navbar-brand-wrapper .brand-logo-mini img {
-    max-width: 34px;
-    height: auto;
+    max-height: 36px;
+    width: auto;
 }
 
 .navbar .navbar-menu-wrapper {
@@ -138,7 +145,7 @@ select:focus-visible {
     height: 28px;
     border-radius: 50%;
     object-fit: cover;
-    background: var(--kns-verde-claro);
+    background: var(--kns-azul-claro);
 }
 
 .kns-tenant__rotulo {
@@ -163,25 +170,40 @@ select:focus-visible {
 
 /* ==========================================================================
    Sidebar
+   --------------------------------------------------------------------------
+   Superfície clara, na mesma família do resto da interface. A versão escura
+   anterior criava um bloco pesado à esquerda que competia com o conteúdo —
+   num painel de análise, o que deve puxar o olho é o veredito, não o menu.
+   A navegação recua para o segundo plano e só o item ativo tem peso.
    ========================================================================== */
 
 .sidebar {
-    background: var(--kns-grafite);
+    background: var(--kns-superficie);
     width: 248px;
     border: none;
-    padding-top: 12px;
+    border-right: 1px solid var(--kns-linha);
+    padding: 16px 0 24px;
+}
+
+.sidebar .nav {
+    padding: 0;
 }
 
 .sidebar .nav .nav-item {
     padding: 0 12px;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .sidebar .nav .nav-item .nav-link {
-    color: #AFC0B7;
-    border-radius: var(--kns-raio-sm);
-    padding: 11px 14px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--kns-ardosia);
+    background: transparent;
+    border-radius: 10px;
+    padding: 10px 14px;
     height: auto;
+    white-space: nowrap;
     transition: background var(--kns-transicao), color var(--kns-transicao);
 }
 
@@ -189,58 +211,135 @@ select:focus-visible {
     font-size: 13.5px;
     font-weight: 500;
     color: inherit;
+    line-height: 1.3;
 }
 
 .sidebar .nav .nav-item .nav-link i.menu-icon,
 .sidebar .nav .nav-item .nav-link .menu-icon {
-    color: inherit;
-    font-size: 18px;
+    color: var(--kns-neutro);
+    font-size: 19px;
+    width: 22px;
     margin-right: 12px;
+    text-align: center;
+    line-height: 1;
+    transition: color var(--kns-transicao);
 }
 
-/* Os ícones SVG do menu vêm com fill fixo cinza; força a herdar a cor do item. */
-.sidebar .nav .nav-item .nav-link .menu-icon svg path,
-.sidebar .nav .nav-item .nav-link .menu-icon svg rect {
-    fill: currentColor;
-    stroke: currentColor;
+/* A seta do submenu vai para a direita e gira ao abrir. */
+.sidebar .nav .nav-item .nav-link .menu-arrow {
+    margin-left: auto;
+    font-size: 15px;
+    color: var(--kns-neutro);
+    transition: transform var(--kns-transicao);
+}
+
+.sidebar .nav .nav-item .nav-link .menu-arrow:before {
+    content: '\F035D'; /* mdi-chevron-down */
+    font-family: 'Material Design Icons';
+}
+
+.sidebar .nav .nav-item .nav-link[aria-expanded="true"] .menu-arrow {
+    transform: rotate(180deg);
 }
 
 .sidebar .nav .nav-item .nav-link:hover {
-    background: rgba(255, 255, 255, .06);
-    color: #FFFFFF;
+    background: var(--kns-fundo);
+    color: var(--kns-grafite);
 }
 
-.sidebar .nav .nav-item.active > .nav-link,
-.sidebar .nav .nav-item .nav-link.active {
-    background: var(--kns-verde-escuro);
-    color: #FFFFFF;
+.sidebar .nav .nav-item .nav-link:hover .menu-icon {
+    color: var(--kns-azul);
 }
 
+/* Item ativo: fundo azul tênue, texto e ícone na cor da marca, e uma barra
+   à esquerda que dá a localização mesmo em leitura periférica. */
+.sidebar .nav .nav-item > .nav-link.active {
+    background: var(--kns-azul-claro);
+    color: var(--kns-azul-escuro);
+    font-weight: 600;
+}
+
+.sidebar .nav .nav-item > .nav-link.active .menu-title {
+    font-weight: 600;
+}
+
+.sidebar .nav .nav-item > .nav-link.active .menu-icon {
+    color: var(--kns-azul);
+}
+
+.sidebar .nav .nav-item > .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 22px;
+    border-radius: 0 3px 3px 0;
+    background: var(--kns-azul);
+}
+
+/* Submenu */
 .sidebar .nav .sub-menu {
-    padding: 2px 0 6px 0;
-    margin-left: 14px;
-    border-left: 1px solid rgba(255, 255, 255, .10);
+    padding: 2px 0 6px;
+    margin: 2px 0 2px 26px;
+    border-left: 1px solid var(--kns-linha);
+}
+
+.sidebar .nav .sub-menu .nav-item {
+    padding: 0 0 0 4px;
+    margin-bottom: 0;
 }
 
 .sidebar .nav .sub-menu .nav-item .nav-link {
     font-size: 13px;
+    font-weight: 400;
     padding: 8px 12px;
-    color: #94A8A0;
+    color: var(--kns-neutro);
+    border-radius: 8px;
 }
 
 .sidebar .nav .sub-menu .nav-item .nav-link:hover {
-    color: #FFFFFF;
-    background: rgba(255, 255, 255, .05);
+    color: var(--kns-grafite);
+    background: var(--kns-fundo);
 }
 
-/* Rótulo de seção acima de cada grupo do menu. */
+.sidebar .nav .sub-menu .nav-item .nav-link.active {
+    color: var(--kns-azul-escuro);
+    background: var(--kns-azul-claro);
+    font-weight: 600;
+}
+
+/* Rótulo de seção: separa os grupos sem o peso de uma linha divisória. */
 .sidebar .kns-secao {
-    padding: 18px 26px 6px;
+    padding: 20px 26px 7px;
     font-size: 10px;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: #63776E;
-    font-weight: 600;
+    color: #9AAFBF;
+    font-weight: 700;
+    list-style: none;
+}
+
+.sidebar .kns-secao:first-of-type {
+    padding-top: 12px;
+}
+
+/* Quando o menu está minimizado, rótulos de seção viram um traço. */
+.sidebar-icon-only .sidebar .kns-secao {
+    font-size: 0;
+    padding: 12px 20px 6px;
+}
+
+.sidebar-icon-only .sidebar .kns-secao::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--kns-linha);
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-icon {
+    margin-right: 0;
 }
 
 .page-body-wrapper {
@@ -317,7 +416,7 @@ select:focus-visible {
 }
 
 .kns-trilha__atual {
-    color: var(--kns-verde-escuro);
+    color: var(--kns-azul-escuro);
     font-weight: 600;
 }
 
@@ -448,16 +547,16 @@ select:focus-visible {
 
 .btn-primary:not(.status-btn),
 .btn.gradient-button {
-    background: var(--kns-verde-escuro) !important;
-    border-color: var(--kns-verde-escuro) !important;
+    background: var(--kns-azul-escuro) !important;
+    border-color: var(--kns-azul-escuro) !important;
     color: #FFFFFF !important;
-    box-shadow: 0 1px 2px rgba(18, 122, 75, .25);
+    box-shadow: 0 1px 2px rgba(18, 124, 195, .25);
 }
 
 .btn-primary:not(.status-btn):hover,
 .btn.gradient-button:hover {
-    background: var(--kns-verde) !important;
-    border-color: var(--kns-verde) !important;
+    background: var(--kns-azul) !important;
+    border-color: var(--kns-azul) !important;
 }
 
 .btn-secondary:not(.status-btn) {
@@ -512,8 +611,8 @@ textarea.form-control {
 }
 
 .form-control:focus {
-    border-color: var(--kns-verde);
-    box-shadow: 0 0 0 3px rgba(47, 163, 107, .14);
+    border-color: var(--kns-azul);
+    box-shadow: 0 0 0 3px rgba(14, 145, 239, .14);
     background: var(--kns-superficie);
 }
 
@@ -575,7 +674,7 @@ textarea.form-control {
 }
 
 .table tbody tr:hover {
-    background: var(--kns-verde-claro);
+    background: var(--kns-azul-claro);
 }
 
 .table-row {
@@ -594,8 +693,8 @@ textarea.form-control {
 }
 
 .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: var(--kns-verde-escuro) !important;
-    border-color: var(--kns-verde-escuro) !important;
+    background: var(--kns-azul-escuro) !important;
+    border-color: var(--kns-azul-escuro) !important;
     color: #fff !important;
     border-radius: var(--kns-raio-sm);
 }
@@ -649,15 +748,15 @@ textarea.form-control {
     background: var(--kns-superficie);
 }
 
-/* Painel institucional: malha de coordenadas sobre verde profundo.
+/* Painel institucional: malha de coordenadas sobre azul profundo.
    Substitui a fotografia — carrega em qualquer conexão e não envelhece. */
 .kns-auth__institucional {
     position: relative;
     background:
-        radial-gradient(900px 500px at 15% 12%, rgba(47, 163, 107, .38), transparent 60%),
-        radial-gradient(700px 500px at 85% 88%, rgba(18, 122, 75, .45), transparent 62%),
-        linear-gradient(150deg, #0B4F31 0%, #0A2A1E 100%);
-    color: #EAF3EE;
+        radial-gradient(900px 500px at 15% 12%, rgba(3, 194, 237, .34), transparent 60%),
+        radial-gradient(700px 500px at 85% 88%, rgba(14, 145, 239, .42), transparent 62%),
+        linear-gradient(150deg, #0A5C96 0%, #0B2A3F 100%);
+    color: #E6F1FA;
     padding: 56px 60px;
     display: flex;
     flex-direction: column;
@@ -683,10 +782,8 @@ textarea.form-control {
 }
 
 .kns-auth__marca img {
-    width: 200px;
+    width: 92px;
     height: auto;
-    filter: brightness(0) invert(1);
-    opacity: .96;
 }
 
 .kns-auth__titulo {
@@ -700,7 +797,7 @@ textarea.form-control {
 }
 
 .kns-auth__texto {
-    color: rgba(234, 243, 238, .78);
+    color: rgba(230, 241, 250, .78);
     font-size: 15px;
     line-height: 1.65;
     max-width: 46ch;
@@ -723,18 +820,18 @@ textarea.form-control {
     border-radius: 999px;
     background: rgba(255, 255, 255, .06);
     font-size: 12.5px;
-    color: #DCEAE3;
+    color: #D6E8F5;
     backdrop-filter: blur(2px);
 }
 
 .kns-auth__pilar i {
     font-size: 15px;
-    color: #7FD6A8;
+    color: #7FD3F7;
 }
 
 .kns-auth__rodape {
     font-size: 12px;
-    color: rgba(234, 243, 238, .5);
+    color: rgba(230, 241, 250, .5);
 }
 
 /* Painel do formulário */
@@ -750,13 +847,12 @@ textarea.form-control {
     max-width: 392px;
 }
 
-.kns-auth__marca-mobile {
-    display: none;
-    margin-bottom: 28px;
+.kns-auth__marca-form {
+    margin-bottom: 30px;
 }
 
-.kns-auth__marca-mobile img {
-    width: 184px;
+.kns-auth__marca-form img {
+    width: 178px;
     height: auto;
 }
 
@@ -816,7 +912,7 @@ textarea.form-control {
 }
 
 .kns-auth__selo i {
-    color: var(--kns-verde);
+    color: var(--kns-azul);
     font-size: 17px;
 }
 
@@ -827,10 +923,6 @@ textarea.form-control {
 
     .kns-auth__institucional {
         display: none;
-    }
-
-    .kns-auth__marca-mobile {
-        display: block;
     }
 }
 
