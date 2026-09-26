@@ -26,6 +26,22 @@ var configuration = new ConfigurationBuilder()
     .AddCommandLine(args)
     .Build();
 
+var comando = args.FirstOrDefault()?.ToLowerInvariant();
+
+// Inspecionar lê só o arquivo; não faz sentido exigir banco para isso.
+if (comando == "inspecionar")
+{
+    try
+    {
+        return Inspecionar(configuration);
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Falhou: {ex.Message}");
+        return 1;
+    }
+}
+
 var connectionString = configuration.GetConnectionString("Geo")
     ?? configuration["ConnectionStrings__Geo"];
 
@@ -41,7 +57,6 @@ var services = new ServiceCollection()
     .BuildServiceProvider();
 
 using var scope = services.CreateScope();
-var comando = args.FirstOrDefault()?.ToLowerInvariant();
 
 try
 {
@@ -59,7 +74,11 @@ try
             return await ConsultarAsync(scope.ServiceProvider, configuration);
 
         default:
-            Console.Error.WriteLine("Comandos: migrar | importar --arquivo <caminho.shp> --origem <nome> [--uf UF] | consultar --car <codigo>");
+            Console.Error.WriteLine("Comandos:");
+            Console.Error.WriteLine("  inspecionar --arquivo <caminho.shp>");
+            Console.Error.WriteLine("  migrar");
+            Console.Error.WriteLine("  importar --arquivo <caminho.shp> --origem <nome> [--uf UF]");
+            Console.Error.WriteLine("  consultar --car <codigo>");
             return 1;
     }
 }
@@ -67,6 +86,57 @@ catch (Exception ex)
 {
     Console.Error.WriteLine($"Falhou: {ex.Message}");
     return 1;
+}
+
+static int Inspecionar(IConfiguration configuration)
+{
+    var arquivo = configuration["arquivo"];
+
+    if (string.IsNullOrWhiteSpace(arquivo))
+    {
+        Console.Error.WriteLine("Informe --arquivo <caminho.shp>.");
+        return 1;
+    }
+
+    var inspecao = ShapefileInspector.Inspecionar(arquivo);
+
+    Console.WriteLine($"Arquivo:   {inspecao.Arquivo}");
+    Console.WriteLine($"Geometria: {inspecao.TipoGeometria ?? "(nenhuma)"}");
+    Console.WriteLine($"Amostra:   {inspecao.RegistrosAmostrados} feição(ões)");
+    Console.WriteLine();
+    Console.WriteLine($"{"COLUNA",-16} {"RECONHECIDA COMO",-16} EXEMPLO");
+
+    foreach (var campo in inspecao.Campos)
+    {
+        var destino = campo.Reconhecido ? campo.MapeadoPara! : "-";
+        var exemplo = campo.Exemplo ?? string.Empty;
+
+        if (exemplo.Length > 45)
+        {
+            exemplo = exemplo[..45] + "...";
+        }
+
+        Console.WriteLine($"{campo.Nome,-16} {destino,-16} {exemplo}");
+    }
+
+    if (inspecao.Problemas.Count == 0)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Todas as colunas necessárias foram reconhecidas. Pode importar.");
+        return 0;
+    }
+
+    Console.WriteLine();
+
+    foreach (var problema in inspecao.Problemas)
+    {
+        Console.WriteLine($"ATENÇÃO: {problema}");
+    }
+
+    Console.WriteLine();
+    Console.WriteLine("Ajuste os nomes aceitos em SicarShapefileImporter.MapeamentoDeCampos antes de importar.");
+
+    return 2;
 }
 
 static async Task<int> ImportarAsync(IServiceProvider provider, IConfiguration configuration)

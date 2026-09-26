@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using GeotecnologiaKNS.Geo.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -27,13 +28,30 @@ public class SicarShapefileImporter
 {
     private const int TamanhoLote = 2_000;
 
-    /// <summary>Nomes de campo usados pelas diferentes origens para o mesmo dado.</summary>
-    private static readonly string[] CamposCodigo = { "COD_IMOVEL", "cod_imovel", "CAR", "car", "COD_CAR" };
-    private static readonly string[] CamposArea = { "NUM_AREA", "num_area", "AREA_HA", "area_ha", "AREA" };
-    private static readonly string[] CamposMunicipio = { "MUNICIPIO", "municipio", "NOM_MUNICI", "NM_MUNICIP" };
-    private static readonly string[] CamposUf = { "COD_ESTADO", "cod_estado", "UF", "uf", "SIGLA_UF" };
-    private static readonly string[] CamposSituacao = { "IND_STATUS", "ind_status", "SITUACAO", "situacao", "STATUS" };
-    private static readonly string[] CamposTipo = { "IND_TIPO", "ind_tipo", "TIPO_IMOVE", "tipo" };
+    private static readonly CultureInfo CulturaPtBr = CultureInfo.GetCultureInfo("pt-BR");
+
+    private static readonly string[] CamposCodigo = { "COD_IMOVEL", "CAR", "COD_CAR", "CODIGO_CAR", "CAR_ID" };
+    private static readonly string[] CamposArea = { "NUM_AREA", "AREA_HA", "AREA", "AREA_IMOVE" };
+    private static readonly string[] CamposMunicipio = { "MUNICIPIO", "NOM_MUNICI", "NM_MUNICIP", "NOME_MUNIC" };
+    private static readonly string[] CamposUf = { "COD_ESTADO", "UF", "SIGLA_UF", "ESTADO" };
+    private static readonly string[] CamposSituacao = { "IND_STATUS", "SITUACAO", "STATUS", "DES_CONDIC" };
+    private static readonly string[] CamposTipo = { "IND_TIPO", "TIPO_IMOVE", "TIPO" };
+
+    /// <summary>
+    /// Destino lógico → nomes de coluna aceitos. A comparação é case-insensitive,
+    /// porque cada origem (SICAR, MapBiomas, SEMAs estaduais) escreve de um jeito.
+    /// Exposto para que o comando "inspecionar" mostre o que é reconhecido.
+    /// </summary>
+    public static readonly IReadOnlyDictionary<string, string[]> MapeamentoDeCampos =
+        new Dictionary<string, string[]>
+        {
+            ["codigo_car"] = CamposCodigo,
+            ["area_ha"] = CamposArea,
+            ["municipio"] = CamposMunicipio,
+            ["uf"] = CamposUf,
+            ["situacao"] = CamposSituacao,
+            ["tipo"] = CamposTipo
+        };
 
     private readonly GeoDbContext _context;
     private readonly ILogger<SicarShapefileImporter> _logger;
@@ -216,14 +234,20 @@ public class SicarShapefileImporter
 
     private static string? Texto(NetTopologySuite.Features.IAttributesTable atributos, string[] candidatos)
     {
-        foreach (var nome in candidatos)
+        var nomesReais = atributos.GetNames();
+
+        foreach (var candidato in candidatos)
         {
-            if (!atributos.Exists(nome))
+            // Comparação case-insensitive: o SICAR grava em maiúsculas e outras
+            // origens em minúsculas, para a mesma coluna.
+            var nomeReal = nomesReais.FirstOrDefault(n => string.Equals(n, candidato, StringComparison.OrdinalIgnoreCase));
+
+            if (nomeReal is null)
             {
                 continue;
             }
 
-            var valor = atributos[nome]?.ToString();
+            var valor = atributos[nomeReal]?.ToString();
 
             if (!string.IsNullOrWhiteSpace(valor))
             {
@@ -234,19 +258,109 @@ public class SicarShapefileImporter
         return null;
     }
 
+    /// <summary>Valor cru do primeiro campo encontrado, sem conversão para texto.</summary>
+    private static object? Bruto(NetTopologySuite.Features.IAttributesTable atributos, string[] candidatos)
+    {
+        var nomesReais = atributos.GetNames();
+
+        foreach (var candidato in candidatos)
+        {
+            var nomeReal = nomesReais.FirstOrDefault(n => string.Equals(n, candidato, StringComparison.OrdinalIgnoreCase));
+
+            if (nomeReal is not null && atributos[nomeReal] is { } valor)
+            {
+                return valor;
+            }
+        }
+
+        return null;
+    }
+
     private static double? Numero(NetTopologySuite.Features.IAttributesTable atributos, string[] candidatos)
     {
-        var texto = Texto(atributos, candidatos);
+        return ConverterParaDouble(Bruto(atributos, candidatos));
+    }
 
-        if (texto is null)
+    /// <summary>
+    /// Converte o valor cru de um campo do .dbf para double.
+    /// </summary>
+    /// <remarks>
+    /// Campos numéricos chegam como double/decimal e não podem passar por
+    /// ToString(), que aplica a cultura corrente e produz "1234,5" — texto que
+    /// o parser invariante rejeita, zerando a área de todos os registros.
+    /// Campos de texto podem vir com vírgula ou com ponto, conforme a origem.
+    /// </remarks>
+    public static double? ConverterParaDouble(object? bruto)
+    {
+        switch (bruto)
+        {
+            case null:
+                return null;
+            case double d:
+                return d;
+            case float f:
+                return f;
+            case decimal m:
+                return (double)m;
+            case int i:
+                return i;
+            case long l:
+                return l;
+        }
+
+        var texto = bruto.ToString()?.Trim();
+
+        if (string.IsNullOrWhiteSpace(texto))
         {
             return null;
         }
 
-        return double.TryParse(texto, System.Globalization.NumberStyles.Any,
-            System.Globalization.CultureInfo.InvariantCulture, out var valor)
+        var normalizado = NormalizarSeparadores(texto);
+
+        // NumberStyles.Float, e não Any: com AllowThousands o .NET aceita
+        // agrupamento em qualquer posição, e "1234,5" viraria 12345 em silêncio.
+        return double.TryParse(normalizado, NumberStyles.Float, CultureInfo.InvariantCulture, out var valor)
             ? valor
             : null;
+    }
+
+    /// <summary>
+    /// Reduz um número escrito em qualquer convenção para a forma invariante.
+    /// </summary>
+    /// <remarks>
+    /// Regras, nesta ordem:
+    /// "1.234,56" ou "1,234.56" → o separador que aparece por último é o decimal;
+    /// só vírgulas → vírgula é decimal (as origens são brasileiras, que escrevem
+    /// milhar com ponto); só pontos, mais de um → todos são separadores de milhar.
+    /// </remarks>
+    private static string NormalizarSeparadores(string texto)
+    {
+        var limpo = new string(texto.Where(c => !char.IsWhiteSpace(c)).ToArray());
+
+        var ultimaVirgula = limpo.LastIndexOf(',');
+        var ultimoPonto = limpo.LastIndexOf('.');
+
+        if (ultimaVirgula >= 0 && ultimoPonto >= 0)
+        {
+            var decimalEhVirgula = ultimaVirgula > ultimoPonto;
+            var milhar = decimalEhVirgula ? '.' : ',';
+            var separador = decimalEhVirgula ? ',' : '.';
+
+            return new string(limpo.Where(c => c != milhar).ToArray()).Replace(separador, '.');
+        }
+
+        if (ultimaVirgula >= 0)
+        {
+            return limpo.Replace(',', '.');
+        }
+
+        // Mais de um ponto só pode ser agrupamento de milhar: "1.234.567".
+        if (limpo.Count(c => c == '.') > 1)
+        {
+            return limpo.Replace(".", string.Empty);
+        }
+
+        return limpo;
     }
 
     private static async Task<string> CalcularHashAsync(string caminho, CancellationToken cancellationToken)
