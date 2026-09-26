@@ -112,9 +112,10 @@ select:focus-visible {
     width: auto;
 }
 
-/* Menu recolhido: a mesma logo completa, apenas reduzida. */
+/* Menu recolhido: a mesma logo completa, apenas reduzida.
+   Proporcao do arquivo e 2.8:1, entao limitar pela altura e o que cabe. */
 .navbar .navbar-brand-wrapper .brand-logo-mini img {
-    max-height: 26px;
+    max-height: 24px;
     width: auto;
 }
 
@@ -795,7 +796,7 @@ textarea.form-control {
 }
 
 .kns-auth__marca img {
-    width: 206px;
+    width: 210px;
     height: auto;
     display: block;
 }
@@ -866,8 +867,9 @@ textarea.form-control {
 }
 
 .kns-auth__marca-form img {
-    width: 178px;
+    width: 188px;
     height: auto;
+    display: block;
 }
 
 .kns-auth__saudacao {
