@@ -3,89 +3,107 @@
 
 @{
     Layout = "_NoContent";
+    ViewData["Title"] = "Entrar";
 }
 
-<!-- Section: Design Block -->
-<section class="background-radial-gradient overflow-hidden">
-    <style>
-        .login {
-            min-height: 100vh;
-        }
+<div class="kns-auth">
 
-        .bg-image {
-            background-image: linear-gradient(rgba(0, 100, 200, 0.0), rgba(0, 180, 255, 0.0)), url('/images/login-background4.jpeg');
-            background-size: cover;
-            background-position: center;
-        }
+    <aside class="kns-auth__institucional">
+        <div class="kns-auth__marca">
+            <img src="~/images/logo.svg" alt="KNS Ambiental — Geotecnologia" />
+        </div>
 
-        .login-heading {
-            font-weight: 300;
-        }
+        <div>
+            <h1 class="kns-auth__titulo">Conformidade socioambiental da sua cadeia de fornecimento.</h1>
+            <p class="kns-auth__texto">
+                Cada imóvel rural é cruzado com as bases públicas de embargos, terras
+                indígenas, unidades de conservação e desmatamento — com laudo auditável
+                e rastreável até a versão da base consultada.
+            </p>
 
-        .btn-login {
-            font-size: 0.9rem;
-            letter-spacing: 0.05rem;
-            padding: 0.75rem 1rem;
-        }
-
-    </style>
-
-    <!-- html -->
-    <div class="container-fluid ps-md-0">
-        <div class="row g-0">
-            <div class="d-none d-md-flex col-md-4 col-lg-6 bg-image"></div>
-            <div class="col-md-8 col-lg-6">
-                <div class="login d-flex align-items-center py-5">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-12 text-center">
-                                <img width="241" height="89"
-                                     style="padding-left: 40px; padding-bottom: 30px; padding-right: 40px; padding-top: 0px;"
-                                     src="https://knsambiental.com.br/wp-content/uploads/2022/03/logo-kns-ambiental-ok.png" class="attachment-full size-full wp-image-1939" alt="">
-                            </div>
-                            <div class="col-md-9 col-lg-8 mx-auto">
-                                <h3 class="login-heading mb-4">Bem vindo(a)</h3>
-
-                                <!-- Sign In Form -->
-                                <form id="account" method="post">
-                                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                                    <div class="form-floating mb-3">
-                                        <input asp-for="Input.Email" type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-                                        <label asp-for="Input.Email" for="floatingInput">Email</label>
-                                    </div>
-                                    <div class="form-floating mb-3">
-                                        <input asp-for="Input.Password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
-                                        <label asp-for="Input.Password" for="floatingPassword">Senha</label>
-                                    </div>
-
-                                    <div class="form-check mb-3">
-                                        <input asp-for="Input.RememberMe" type="hidden" value="false">
-                                        <input class="form-check-input" type="checkbox" id="rememberPasswordCheck" style="margin-left: 0px;" onclick="switchCheckBoxValue($(this))">
-                                        <label asp-for="Input.RememberMe" class="form-check-label" for="rememberPasswordCheck">
-                                            Lembrar senha
-                                        </label>
-                                    </div>
-
-                                    <div class="d-grid">
-                                        <button id="login-submit" type="submit" class="btn btn-lg btn-primary btn-login text-uppercase fw-bold mb-2">Entrar</button>
-                                        <div class="text-center">
-                                            <a class="small" href="#">Esqueceu senha?</a>
-                                        </div>
-                                        <div class="text-center">
-                                            <a class="small" href="#">Solicitar demonstração</a>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="kns-auth__pilares">
+                <span class="kns-auth__pilar">
+                    <i class="mdi mdi-map-marker-radius"></i> Perímetro pelo CAR
+                </span>
+                <span class="kns-auth__pilar">
+                    <i class="mdi mdi-leaf"></i> Bases oficiais
+                </span>
+                <span class="kns-auth__pilar">
+                    <i class="mdi mdi-shield-check"></i> Análise automática
+                </span>
+                <span class="kns-auth__pilar">
+                    <i class="mdi mdi-file-document-outline"></i> Laudo auditável
+                </span>
             </div>
         </div>
-    </div>
 
-</section>
+        <p class="kns-auth__rodape">KNS Ambiental · Geotecnologia aplicada à originação responsável</p>
+    </aside>
+
+    <main class="kns-auth__formulario">
+        <div class="kns-auth__caixa">
+
+            <div class="kns-auth__marca-mobile">
+                <img src="~/images/logo.svg" alt="KNS Ambiental — Geotecnologia" />
+            </div>
+
+            <h2 class="kns-auth__saudacao">Bem-vindo de volta</h2>
+            <p class="kns-auth__instrucao">Entre para acessar o painel de análises.</p>
+
+            <form id="account" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" role="alert"></div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Email" type="email" class="form-control" id="floatingInput"
+                           placeholder="nome@empresa.com.br" autocomplete="username" />
+                    <label asp-for="Input.Email" for="floatingInput">E-mail</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Password" type="password" class="form-control" id="floatingPassword"
+                           placeholder="Senha" autocomplete="current-password" />
+                    <label asp-for="Input.Password" for="floatingPassword">Senha</label>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="Input.RememberMe" type="hidden" value="false" />
+                    <input class="form-check-input" type="checkbox" id="rememberPasswordCheck"
+                           style="margin-left: 0;" onclick="switchCheckBoxValue($(this))" />
+                    <label asp-for="Input.RememberMe" class="form-check-label" for="rememberPasswordCheck"
+                           style="text-transform: none; letter-spacing: 0; font-weight: 400;">
+                        Manter conectado
+                    </label>
+                </div>
+
+                <button id="login-submit" type="submit" class="btn btn-primary kns-auth__acao">
+                    Entrar
+                </button>
+
+                <div class="kns-auth__links">
+                    <a href="#">Esqueci minha senha</a>
+                    <a href="#">Solicitar demonstração</a>
+                </div>
+            </form>
+
+            <div class="kns-auth__selo">
+                <i class="mdi mdi-lock-outline"></i>
+                <span>Acesso restrito. Cada sessão é vinculada à indústria do usuário.</span>
+            </div>
+        </div>
+    </main>
+
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/areas/identity/pages/account/login.js"></script>
+    <script>
+        // O resumo de validação só deve ocupar espaço quando há erro.
+        (function () {
+            var resumo = document.querySelector('[data-valmsg-summary="true"], .validation-summary-errors');
+            if (resumo && resumo.textContent.trim()) {
+                resumo.classList.remove('d-none');
+            }
+        })();
+    </script>
 }
