@@ -148,4 +148,8 @@
 	  <Folder Include="wwwroot\images\industrias\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\GeotecnologiaKNS.Geo\GeotecnologiaKNS.Geo.csproj" />
+	</ItemGroup>
+
 </Project>

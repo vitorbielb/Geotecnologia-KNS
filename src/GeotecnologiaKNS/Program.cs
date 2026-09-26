@@ -25,6 +25,10 @@ builder.Services.AddDefaultIdentity<ApplicationUser>()
 
 builder.Services.Configure<GoogleMapsOptions>(builder.Configuration.GetSection(GoogleMapsOptions.SectionName));
 
+// Bases geoespaciais de referência (PostGIS). Sem a connection string "Geo"
+// configurada, o app segue funcionando com o cadastro manual.
+builder.Services.AddGeo(builder.Configuration.GetConnectionString("Geo"));
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     // Cookie settings

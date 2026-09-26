@@ -9,4 +9,6 @@ global using GeotecnologiaKNS.Models;
 global using GeotecnologiaKNS;
 global using GeotecnologiaKNS.Utils;
 global using GeotecnologiaKNS.Infra;
+global using GeotecnologiaKNS.Geo;
+global using GeotecnologiaKNS.Geo.Services;
 

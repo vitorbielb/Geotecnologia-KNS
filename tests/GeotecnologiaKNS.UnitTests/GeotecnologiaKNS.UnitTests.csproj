@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\GeotecnologiaKNS\GeotecnologiaKNS.csproj" />
+    <ProjectReference Include="..\..\src\GeotecnologiaKNS.Geo\GeotecnologiaKNS.Geo.csproj" />
   </ItemGroup>
 
 </Project>
