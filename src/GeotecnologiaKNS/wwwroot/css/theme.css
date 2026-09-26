@@ -112,8 +112,9 @@ select:focus-visible {
     width: auto;
 }
 
+/* Menu recolhido: a mesma logo completa, apenas reduzida. */
 .navbar .navbar-brand-wrapper .brand-logo-mini img {
-    max-height: 36px;
+    max-height: 26px;
     width: auto;
 }
 
@@ -781,9 +782,22 @@ textarea.form-control {
     z-index: 1;
 }
 
+/* Placa branca: a logo tem texto azul e se perderia no painel escuro.
+   Preserva a marca original em vez de recoloria-la. */
+.kns-auth__marca {
+    display: inline-flex;
+    align-items: center;
+    background: #FFFFFF;
+    border-radius: 14px;
+    padding: 14px 22px;
+    box-shadow: 0 10px 30px rgba(5, 25, 40, .28);
+    align-self: flex-start;
+}
+
 .kns-auth__marca img {
-    width: 92px;
+    width: 206px;
     height: auto;
+    display: block;
 }
 
 .kns-auth__titulo {
