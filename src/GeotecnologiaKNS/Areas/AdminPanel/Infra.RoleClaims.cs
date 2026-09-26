@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using System.Text.RegularExpressions;
 
 namespace GeotecnologiaKNS.Infra;
 
@@ -12,14 +12,23 @@ namespace GeotecnologiaKNS.Infra;
 [DebuggerDisplay("{RoleName} {Claims}")]
 public class RoleClaims : IEnumerable<Claim>
 {
-    private const string Pattern = @"(?<=get_)[^()\n]*";
-    private const int StartIndexToSearchPropertyName = 40;
     private ApplicationRole? _role;
 
-    public RoleClaims(Expression<Func<Features, object>> access)
+    /// <param name="access">Expressão que descreve as permissões do papel.</param>
+    /// <param name="roleName">
+    /// Nome do papel. Preenchido automaticamente pelo compilador com o nome da propriedade
+    /// que constrói o <see cref="RoleClaims"/> (ver <see cref="Roles"/>).
+    /// </param>
+    public RoleClaims(
+        Expression<Func<Features, object>> access,
+        [CallerMemberName] string roleName = "")
     {
-        var match = Regex.Match(Environment.StackTrace[StartIndexToSearchPropertyName..], Pattern);
-        RoleName = match.Value;
+        if (string.IsNullOrWhiteSpace(roleName))
+        {
+            throw new ArgumentException("O nome do papel não pôde ser determinado.", nameof(roleName));
+        }
+
+        RoleName = roleName;
         Claims = Build(access);
     }
 
@@ -35,7 +44,7 @@ public class RoleClaims : IEnumerable<Claim>
     {
         Id = RoleName,
         Name = RoleName,
-        NormalizedName = RoleName
+        NormalizedName = RoleName.ToUpperInvariant()
     };
 
     private static List<Claim> Build(Expression<Func<Features, object>> featuresAccess)

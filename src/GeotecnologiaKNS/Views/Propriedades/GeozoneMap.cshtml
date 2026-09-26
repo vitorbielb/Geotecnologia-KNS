@@ -1,9 +1,12 @@
 ﻿@model GeotecnologiaKNS.Models.GeozoneViewModel
 @using NuGet.Protocol;
 @using System.Web;
+@using Microsoft.Extensions.Options
+@inject IOptions<GoogleMapsOptions> googleMaps
 
 @{
     Layout = null;
+    var apiKey = googleMaps.Value.ApiKey;
 }
 
 <div class="row">
@@ -14,7 +17,18 @@
                 <input asp-for="UtmAsJson" type="hidden" />
                 <input id="geozoneValue" name="Geozone.UtmAsJson" type="hidden" />
                 <input id="geozoneTenantId" name="Geozone.TenantId" type="hidden" value="@User.Identity?.GetTenantId()" />
-                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4aBCeXoYnw4JLLfI3Pv2no121BrG37_8&callback=initMap&libraries=drawing&v=weekly" defer></script>
+
+                @if (string.IsNullOrWhiteSpace(apiKey))
+                {
+                    <div class="alert alert-warning">
+                        Mapa indisponível: a chave da API do Google Maps não está configurada
+                        (<code>GoogleMaps:ApiKey</code>).
+                    </div>
+                }
+                else
+                {
+                    <script src="https://maps.googleapis.com/maps/api/js?key=@apiKey&callback=initMap&libraries=drawing&v=weekly" defer></script>
+                }
 
                 <script type="text/javascript">
                     function initMap() {

@@ -1,69 +1,92 @@
-﻿<!doctype html>
-<html>
-<head>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-    <style>
-        #map {
-            height: 100%;
-        }
+@using Microsoft.Extensions.Options
+@inject IOptions<GoogleMapsOptions> googleMaps
+@inject IPropriedadeRepository propriedadeRepository
 
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-    </style>
-</head>
-<body>
-    <div id="map"></div>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4aBCeXoYnw4JLLfI3Pv2no121BrG37_8&callback=initMap&libraries=drawing&v=weekly"
-            defer></script>
-    <script type="text/javascript">
-        function initMap() {
-            const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 4,
-                center: { lat: 24.886, lng: -70.268 },
-                disableDefaultUI: true,
-                mapTypeId: "terrain",
-            });
+@{
+    var maps = googleMaps.Value;
 
-            //const drawingManager = new google.maps.drawing.DrawingManager({
-            //    drawingMode: google.maps.drawing.OverlayType.POLYGON,
-            //    drawingControl: false,
-            //    drawingControlOptions: {
-            //        position: google.maps.ControlPosition.TOP_CENTER
-            //    },
-            //    polygonOptions: {
-            //        strokeColor: "#00b347",
-            //        strokeWeight: 2,
-            //        fillColor: "#00FF00",
-            //        fillOpacity: 0.5
-            //    }
-            //});
-            //drawingManager.setMap(map);
+    var propriedades = propriedadeRepository
+        .ObterParaMapa()
+        .Select(p => new
+        {
+            nome = p.NomePropriedade,
+            municipio = p.Municipio,
+            lat = p.Latitude,
+            lng = p.Longitude,
+            poligono = (p.Geozone?.Utm ?? Array.Empty<Vertice>())
+                .Select(v => new { lat = v.Lat, lng = v.Lng })
+                .ToArray()
+        })
+        .ToList();
 
-            const triangleCoords = [
-                { lat: 25.774, lng: -80.19 },
-                { lat: 18.466, lng: -66.118 },
-                { lat: 32.321, lng: -64.757 },
-                { lat: 25.774, lng: -80.19 },
-            ];
-            // Construct the polygon.
-            const bermudaTriangle = new google.maps.Polygon({
-                paths: triangleCoords,
-                strokeColor: "#FF0000",
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                fillColor: "#FF0000",
-                fillOpacity: 0.35,
-            });
+    var comCoordenadas = propriedades.Where(p => p.lat != 0 || p.lng != 0).ToList();
 
-            bermudaTriangle.setMap(map);
-        }
+    var centerLat = comCoordenadas.Count > 0 ? comCoordenadas.Average(p => p.lat) : maps.DefaultLat;
+    var centerLng = comCoordenadas.Count > 0 ? comCoordenadas.Average(p => p.lng) : maps.DefaultLng;
+}
 
-        window.initMap = initMap;
+<div class="card-body">
+    <h4 class="card-title">Propriedades monitoradas</h4>
 
-    </script>
-</body>
-</html>
+    @if (string.IsNullOrWhiteSpace(maps.ApiKey))
+    {
+        <div class="alert alert-warning mb-0">
+            Mapa indisponível: a chave da API do Google Maps não está configurada
+            (<code>GoogleMaps:ApiKey</code>).
+        </div>
+    }
+    else
+    {
+        <div id="map" style="height: 380px;"></div>
+
+        <script type="text/javascript">
+            var propriedadesMonitoradas = @Json.Serialize(propriedades);
+
+            function initMap() {
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: @(comCoordenadas.Count > 0 ? 6 : 4),
+                    center: { lat: @centerLat.ToString(System.Globalization.CultureInfo.InvariantCulture), lng: @centerLng.ToString(System.Globalization.CultureInfo.InvariantCulture) },
+                    disableDefaultUI: true,
+                    mapTypeId: "terrain",
+                });
+
+                const infoWindow = new google.maps.InfoWindow();
+
+                propriedadesMonitoradas.forEach(function (propriedade) {
+                    if (propriedade.poligono && propriedade.poligono.length > 0) {
+                        const poligono = new google.maps.Polygon({
+                            paths: propriedade.poligono,
+                            strokeColor: "#00b347",
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: "#00b347",
+                            fillOpacity: 0.35,
+                        });
+
+                        poligono.setMap(map);
+                        return;
+                    }
+
+                    if (propriedade.lat === 0 && propriedade.lng === 0) {
+                        return;
+                    }
+
+                    const marcador = new google.maps.Marker({
+                        position: { lat: propriedade.lat, lng: propriedade.lng },
+                        map: map,
+                        title: propriedade.nome,
+                    });
+
+                    marcador.addListener("click", function () {
+                        infoWindow.setContent(propriedade.nome + " - " + propriedade.municipio);
+                        infoWindow.open(map, marcador);
+                    });
+                });
+            }
+
+            window.initMap = initMap;
+        </script>
+
+        <script src="https://maps.googleapis.com/maps/api/js?key=@maps.ApiKey&callback=initMap&v=weekly" defer></script>
+    }
+</div>

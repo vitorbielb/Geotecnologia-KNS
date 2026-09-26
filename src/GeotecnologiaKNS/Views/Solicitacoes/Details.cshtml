@@ -1,6 +1,30 @@
 ﻿@using GeotecnologiaKNS.Views;
+@using Microsoft.Extensions.Options
 @model GeotecnologiaKNS.Models.Solicitacao
 @inject GeotecnologiaKNS.Repositories.Interfaces.ISolicitacaoRepository repository
+@inject IOptions<GoogleMapsOptions> googleMaps
+
+@{
+    var maps = googleMaps.Value;
+    var apiKey = maps.ApiKey;
+
+    var poligono = (Model.Propriedade?.Geozone?.Utm ?? Array.Empty<Vertice>())
+        .Select(v => new { lat = v.Lat, lng = v.Lng })
+        .ToArray();
+
+    var temCoordenadas = Model.Propriedade is not null
+        && (Model.Propriedade.Latitude != 0 || Model.Propriedade.Longitude != 0);
+
+    var centroLat = temCoordenadas ? Model.Propriedade!.Latitude : maps.DefaultLat;
+    var centroLng = temCoordenadas ? Model.Propriedade!.Longitude : maps.DefaultLng;
+
+    if (poligono.Length > 0)
+    {
+        centroLat = poligono.Average(v => v.lat);
+        centroLng = poligono.Average(v => v.lng);
+        temCoordenadas = true;
+    }
+}
 
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -228,54 +252,55 @@
             <div class="card-body">
                 <div id="map" style="height: 380px;"></div>
 
-                <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4aBCeXoYnw4JLLfI3Pv2no121BrG37_8&callback=initMap&libraries=drawing&v=weekly"
-                        defer></script>
-                <script type="text/javascript">
-                    function initMap() {
-                        const map = new google.maps.Map(document.getElementById("map"), {
-                            zoom: 4,
-                            center: { lat: 24.886, lng: -70.268 },
-                            disableDefaultUI: true,
-                            mapTypeId: "terrain",
-                        });
+                @if (string.IsNullOrWhiteSpace(apiKey))
+                {
+                    <div class="alert alert-warning">
+                        Mapa indisponível: a chave da API do Google Maps não está configurada
+                        (<code>GoogleMaps:ApiKey</code>).
+                    </div>
+                }
+                else
+                {
+                    <script type="text/javascript">
+                        var poligonoPropriedade = @Json.Serialize(poligono);
 
-                        //const drawingManager = new google.maps.drawing.DrawingManager({
-                        //    drawingMode: google.maps.drawing.OverlayType.POLYGON,
-                        //    drawingControl: false,
-                        //    drawingControlOptions: {
-                        //        position: google.maps.ControlPosition.TOP_CENTER
-                        //    },
-                        //    polygonOptions: {
-                        //        strokeColor: "#00b347",
-                        //        strokeWeight: 2,
-                        //        fillColor: "#00FF00",
-                        //        fillOpacity: 0.5
-                        //    }
-                        //});
-                        //drawingManager.setMap(map);
+                        function initMap() {
+                            const centro = {
+                                lat: @centroLat.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                                lng: @centroLng.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                            };
 
-                        const triangleCoords = [
-                            { lat: 25.774, lng: -80.19 },
-                            { lat: 18.466, lng: -66.118 },
-                            { lat: 32.321, lng: -64.757 },
-                            { lat: 25.774, lng: -80.19 },
-                        ];
-                        // Construct the polygon.
-                        const bermudaTriangle = new google.maps.Polygon({
-                            paths: triangleCoords,
-                            strokeColor: "#FF0000",
-                            strokeOpacity: 0.8,
-                            strokeWeight: 2,
-                            fillColor: "#FF0000",
-                            fillOpacity: 0.35,
-                        });
+                            const map = new google.maps.Map(document.getElementById("map"), {
+                                zoom: @(temCoordenadas ? 13 : 4),
+                                center: centro,
+                                disableDefaultUI: true,
+                                mapTypeId: "terrain",
+                            });
 
-                        bermudaTriangle.setMap(map);
-                    }
+                            if (poligonoPropriedade.length > 0) {
+                                new google.maps.Polygon({
+                                    paths: poligonoPropriedade,
+                                    strokeColor: "#00b347",
+                                    strokeOpacity: 0.8,
+                                    strokeWeight: 2,
+                                    fillColor: "#00b347",
+                                    fillOpacity: 0.35,
+                                }).setMap(map);
+                            }
+                            else if (@(temCoordenadas ? "true" : "false")) {
+                                new google.maps.Marker({
+                                    position: centro,
+                                    map: map,
+                                    title: @Json.Serialize(Model.Propriedade!.NomePropriedade),
+                                });
+                            }
+                        }
 
-                    window.initMap = initMap;
+                        window.initMap = initMap;
+                    </script>
 
-                </script>
+                    <script src="https://maps.googleapis.com/maps/api/js?key=@apiKey&callback=initMap&v=weekly" defer></script>
+                }
 
                 <div class="row">
                     <h5 class="text-center" style="margin-top: 20px;">Parecer</h5>

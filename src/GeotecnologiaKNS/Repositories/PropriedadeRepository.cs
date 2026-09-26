@@ -21,6 +21,14 @@ namespace GeotecnologiaKNS.Repositories
                 .ToList();
         }
 
+        public IEnumerable<Propriedade> ObterParaMapa()
+        {
+            return _context.Propriedades
+                .AsNoTracking()
+                .Include(p => p.Geozone)
+                .ToList();
+        }
+
         public Propriedade? ObterPropriedadePorId(int id)
         {
             return _context.Propriedades

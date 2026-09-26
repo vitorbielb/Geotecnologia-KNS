@@ -23,11 +23,24 @@ builder.Services.AddDefaultIdentity<ApplicationUser>()
                 .AddClaimsPrincipalFactory<AppClaimsPrincipalFactory>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.Configure<GoogleMapsOptions>(builder.Configuration.GetSection(GoogleMapsOptions.SectionName));
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     // Cookie settings
     options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+    options.Cookie.SameSite = SameSiteMode.Lax;
+
+    // Em desenvolvimento o perfil de launch "http" não tem HTTPS; exigir o cookie
+    // seguro ali impediria o login.
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
+
+    // Com SlidingExpiration a janela é renovada a cada requisição;
+    // 5 minutos derrubavam o usuário no meio de um preenchimento de formulário.
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(
+        builder.Configuration.GetValue<int?>("Identity:CookieExpirationMinutes") ?? 60);
 
     options.LoginPath = "/Identity/Account/Login";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
@@ -102,75 +115,3 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 app.Run();
-
-
-
-// Optimization pass: 2025-04-07 01:23:53
-
-// Optimization pass: 2025-04-10 22:09:08
-
-// Optimization pass: 2025-04-11 16:37:24
-
-// Optimization pass: 2025-04-16 09:18:58
-
-// Optimization pass: 2025-04-17 09:25:14
-
-// Optimization pass: 2025-05-02 21:26:33
-
-// Optimization pass: 2025-05-09 01:27:19
-
-// Optimization pass: 2025-05-15 00:16:29
-
-// Optimization pass: 2025-05-21 06:53:56
-
-// Optimization pass: 2025-05-21 21:54:51
-
-// Optimization pass: 2025-05-29 10:53:01
-
-// Optimization pass: 2025-08-04 22:19:24
-
-// Optimization pass: 2025-08-11 05:33:46
-
-// Optimization pass: 2025-08-13 22:33:47
-
-// Optimization pass: 2025-08-15 18:32:33
-
-// Optimization pass: 2025-08-19 11:22:43
-
-// Optimization pass: 2025-08-20 19:12:10
-
-// Optimization pass: 2025-08-25 05:34:09
-
-// Optimization pass: 2025-09-03 05:44:35
-
-// Optimization pass: 2025-09-04 19:33:49
-
-// Optimization pass: 2025-09-05 22:27:35
-
-// Optimization pass: 2025-09-11 14:54:12
-
-// Optimization pass: 2025-09-15 19:45:35
-
-// Optimization pass: 2025-09-18 06:28:00
-
-// Optimization pass: 2025-09-22 23:24:48
-
-// Optimization pass: 2025-09-25 13:03:56
-
-// Optimization pass: 2025-09-29 05:05:31
-
-// Optimization pass: 2025-10-01 04:50:36
-
-// Optimization pass: 2025-10-08 12:33:07
-
-// Optimization pass: 2025-10-10 12:08:32
-
-// Optimization pass: 2025-10-14 09:18:45
-
-// Optimization pass: 2025-10-16 16:55:47
-
-// Optimization pass: 2025-10-20 02:57:13
-
-// Optimization pass: 2025-10-22 20:55:30
-
-// Optimization pass: 2025-10-24 11:37:21

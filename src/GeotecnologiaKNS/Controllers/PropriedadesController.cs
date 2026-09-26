@@ -67,7 +67,14 @@ namespace GeotecnologiaKNS.Controllers
         [TenantFilter]
         public async Task<IActionResult> Create(Propriedade propriedade)
         {
-            propriedade.Produtor = _context.Produtores.Find(propriedade.Id)!;
+            // A navegação é resolvida pelo EF a partir de ProdutorId; validamos apenas
+            // se o produtor existe dentro do tenant atual (garantido pelo query filter).
+            ModelState.Remove(nameof(Propriedade.Produtor));
+
+            if (!await _context.Produtores.AnyAsync(x => x.Id == propriedade.ProdutorId))
+            {
+                ModelState.AddModelError(nameof(Propriedade.ProdutorId), "Produtor não encontrado.");
+            }
 
             if (ModelState.IsValid)
             {
