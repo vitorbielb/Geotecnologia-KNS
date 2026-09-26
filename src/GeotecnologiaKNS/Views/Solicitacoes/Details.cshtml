@@ -128,15 +128,23 @@
 
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">
-        <div class="card">
-            <div class="card-body">
-                <input type="hidden" asp-for="Id" />
-
-                <div class="row">
-                    @Html.DisplayStatus(Model.Status)
+        @if (ViewBag.Analise is GeotecnologiaKNS.Models.AnaliseAutomatica analise)
+        {
+            <partial name="_analise" model="analise" />
+        }
+        else
+        {
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        @Html.DisplayStatus(Model.Status)
+                    </div>
+                    <p class="text-muted mt-2 mb-0">
+                        Esta solicitação não tem análise automática registrada.
+                    </p>
                 </div>
             </div>
-        </div>
+        }
     </div>
 </div>
 <div class="row">

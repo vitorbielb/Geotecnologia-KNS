@@ -12,4 +12,5 @@ global using GeotecnologiaKNS.Infra;
 global using GeotecnologiaKNS.Geo;
 global using GeotecnologiaKNS.Geo.Services;
 global using GeotecnologiaKNS.Services;
+global using GeotecnologiaKNS.Analises;
 

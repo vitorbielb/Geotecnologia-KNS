@@ -23,6 +23,10 @@ public class GeoDbContext : DbContext
 
     public DbSet<CargaBaseCar> Cargas => Set<CargaBaseCar>();
 
+    public DbSet<CamadaReferencia> Camadas => Set<CamadaReferencia>();
+
+    public DbSet<FeicaoReferencia> Feicoes => Set<FeicaoReferencia>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -54,6 +58,46 @@ public class GeoDbContext : DbContext
                   .WithMany(x => x.Imoveis)
                   .HasForeignKey(x => x.CargaId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CamadaReferencia>(entity =>
+        {
+            entity.ToTable("camada_referencia");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Id).HasColumnName("id");
+            entity.Property(x => x.Chave).HasColumnName("chave").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.Nome).HasColumnName("nome").HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Tipo).HasColumnName("tipo").HasConversion<int>();
+            entity.Property(x => x.Origem).HasColumnName("origem").HasMaxLength(200).IsRequired();
+            entity.Property(x => x.AnoReferencia).HasColumnName("ano_referencia");
+            entity.Property(x => x.Ativa).HasColumnName("ativa");
+            entity.Property(x => x.AtualizadaEm).HasColumnName("atualizada_em");
+            entity.Property(x => x.TotalFeicoes).HasColumnName("total_feicoes");
+
+            entity.HasIndex(x => x.Chave).IsUnique();
+            entity.HasIndex(x => x.Tipo);
+        });
+
+        modelBuilder.Entity<FeicaoReferencia>(entity =>
+        {
+            entity.ToTable("feicao_referencia");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Id).HasColumnName("id");
+            entity.Property(x => x.CamadaId).HasColumnName("camada_id");
+            entity.Property(x => x.Geometria).HasColumnName("geometria").HasColumnType($"geometry(Geometry,{Srid})").IsRequired();
+            entity.Property(x => x.AtributosJson).HasColumnName("atributos").HasColumnType("jsonb");
+            entity.Property(x => x.Rotulo).HasColumnName("rotulo").HasMaxLength(300);
+
+            // O índice espacial é o que torna o cruzamento viável: sem ele cada
+            // análise varreria milhões de polígonos nacionais.
+            entity.HasIndex(x => x.Geometria).HasMethod("gist");
+
+            entity.HasOne(x => x.Camada)
+                  .WithMany(x => x.Feicoes)
+                  .HasForeignKey(x => x.CamadaId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<CargaBaseCar>(entity =>

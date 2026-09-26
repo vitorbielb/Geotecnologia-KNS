@@ -1,3 +1,4 @@
+using GeotecnologiaKNS.Geo.Entities;
 using GeotecnologiaKNS.Geo.Ingestao;
 using GeotecnologiaKNS.Geo.Services;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ public static class GeoDiExtension
         if (string.IsNullOrWhiteSpace(connectionString))
         {
             services.AddScoped<ICarLookupService, CarLookupIndisponivel>();
+            services.AddScoped<IIntersecaoService, IntersecaoIndisponivel>();
             return services;
         }
 
@@ -28,10 +30,29 @@ public static class GeoDiExtension
             }));
 
         services.AddScoped<ICarLookupService, CarLookupService>();
+        services.AddScoped<IIntersecaoService, IntersecaoService>();
         services.AddScoped<SicarShapefileImporter>();
+        services.AddScoped<CamadaShapefileImporter>();
 
         return services;
     }
+}
+
+/// <summary>
+/// Implementação nula usada quando o PostGIS ainda não foi configurado.
+/// Falha explicitamente em vez de devolver "nenhuma sobreposição", que seria
+/// lido como imóvel limpo.
+/// </summary>
+internal sealed class IntersecaoIndisponivel : IIntersecaoService
+{
+    private const string Mensagem =
+        "As bases geoespaciais não estão configuradas; a análise automática não pode ser executada.";
+
+    public Task<ResultadoCruzamento> CruzarPorCarAsync(string codigoCar, CancellationToken cancellationToken = default)
+        => throw new InvalidOperationException(Mensagem);
+
+    public Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<CamadaReferencia>>(Array.Empty<CamadaReferencia>());
 }
 
 /// <summary>

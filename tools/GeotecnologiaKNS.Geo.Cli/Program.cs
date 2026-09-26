@@ -1,3 +1,4 @@
+using GeotecnologiaKNS.Geo.Entities;
 using GeotecnologiaKNS.Geo;
 using GeotecnologiaKNS.Geo.Ingestao;
 using GeotecnologiaKNS.Geo.Services;
@@ -73,12 +74,27 @@ try
         case "consultar":
             return await ConsultarAsync(scope.ServiceProvider, configuration);
 
+        case "importar-camada":
+            return await ImportarCamadaAsync(scope.ServiceProvider, configuration);
+
+        case "camadas":
+            return await ListarCamadasAsync(scope.ServiceProvider);
+
+        case "cruzar":
+            return await CruzarAsync(scope.ServiceProvider, configuration);
+
         default:
             Console.Error.WriteLine("Comandos:");
             Console.Error.WriteLine("  inspecionar --arquivo <caminho.shp>");
             Console.Error.WriteLine("  migrar");
             Console.Error.WriteLine("  importar --arquivo <caminho.shp> --origem <nome> [--uf UF]");
             Console.Error.WriteLine("  consultar --car <codigo>");
+            Console.Error.WriteLine("  importar-camada --arquivo <caminho.shp> --chave <chave> --nome <nome>");
+            Console.Error.WriteLine("                  --tipo <tipo> --origem <origem> [--ano <ano>]");
+            Console.Error.WriteLine("  camadas");
+            Console.Error.WriteLine("  cruzar --car <codigo>");
+            Console.Error.WriteLine();
+            Console.Error.WriteLine("  Tipos de camada: " + string.Join(", ", Enum.GetNames<TipoCamada>()));
             return 1;
     }
 }
@@ -163,6 +179,91 @@ static async Task<int> ImportarAsync(IServiceProvider provider, IConfiguration c
     if (resultado.Avisos.Count > 20)
     {
         Console.WriteLine($"  ... e mais {resultado.Avisos.Count - 20} avisos.");
+    }
+
+    return 0;
+}
+
+static async Task<int> ImportarCamadaAsync(IServiceProvider provider, IConfiguration configuration)
+{
+    var arquivo = configuration["arquivo"];
+    var chave = configuration["chave"];
+    var nome = configuration["nome"];
+    var origem = configuration["origem"];
+    var tipoTexto = configuration["tipo"];
+
+    if (string.IsNullOrWhiteSpace(arquivo) || string.IsNullOrWhiteSpace(chave) ||
+        string.IsNullOrWhiteSpace(nome) || string.IsNullOrWhiteSpace(origem) ||
+        string.IsNullOrWhiteSpace(tipoTexto))
+    {
+        Console.Error.WriteLine("Informe --arquivo, --chave, --nome, --tipo e --origem.");
+        Console.Error.WriteLine("Tipos: " + string.Join(", ", Enum.GetNames<TipoCamada>()));
+        return 1;
+    }
+
+    if (!Enum.TryParse<TipoCamada>(tipoTexto, ignoreCase: true, out var tipo))
+    {
+        Console.Error.WriteLine($"Tipo '{tipoTexto}' desconhecido.");
+        Console.Error.WriteLine("Tipos: " + string.Join(", ", Enum.GetNames<TipoCamada>()));
+        return 1;
+    }
+
+    int? ano = int.TryParse(configuration["ano"], out var anoLido) ? anoLido : null;
+
+    var importer = provider.GetRequiredService<CamadaShapefileImporter>();
+    var resultado = await importer.ImportarAsync(arquivo, chave, nome, tipo, origem, ano);
+
+    Console.WriteLine(
+        $"Camada '{resultado.Chave}' (id {resultado.CamadaId}): " +
+        $"{resultado.Gravados} feições gravadas, {resultado.Descartados} descartadas de {resultado.Lidos} lidas.");
+
+    return 0;
+}
+
+static async Task<int> ListarCamadasAsync(IServiceProvider provider)
+{
+    var camadas = await provider.GetRequiredService<IIntersecaoService>().ObterCamadasAtivasAsync();
+
+    if (camadas.Count == 0)
+    {
+        Console.WriteLine("Nenhuma camada ativa. Use 'importar-camada' para carregar.");
+        return 0;
+    }
+
+    Console.WriteLine($"{"CHAVE",-24} {"TIPO",-24} {"FEIÇÕES",8}  NOME");
+
+    foreach (var camada in camadas)
+    {
+        Console.WriteLine($"{camada.Chave,-24} {camada.Tipo,-24} {camada.TotalFeicoes,8}  {camada.Nome}");
+    }
+
+    return 0;
+}
+
+static async Task<int> CruzarAsync(IServiceProvider provider, IConfiguration configuration)
+{
+    var car = configuration["car"];
+
+    if (string.IsNullOrWhiteSpace(car))
+    {
+        Console.Error.WriteLine("Informe --car <codigo do CAR>.");
+        return 1;
+    }
+
+    var resultado = await provider.GetRequiredService<IIntersecaoService>().CruzarPorCarAsync(car);
+
+    Console.WriteLine($"CAR:   {resultado.CodigoCar}");
+    Console.WriteLine($"Área:  {resultado.AreaImovelHa:N2} ha");
+    Console.WriteLine($"Sobreposições: {resultado.Sobreposicoes.Count}");
+    Console.WriteLine();
+
+    foreach (var sobreposicao in resultado.Sobreposicoes)
+    {
+        Console.WriteLine(
+            $"  [{sobreposicao.Tipo}] {sobreposicao.CamadaNome}" +
+            (string.IsNullOrWhiteSpace(sobreposicao.Rotulo) ? string.Empty : $" — {sobreposicao.Rotulo}"));
+        Console.WriteLine(
+            $"     {sobreposicao.AreaSobrepostaHa:N2} ha ({sobreposicao.PercentualDoImovel:N2}% do imóvel)");
     }
 
     return 0;

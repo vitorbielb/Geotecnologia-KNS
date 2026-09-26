@@ -30,6 +30,8 @@ namespace GeotecnologiaKNS.Data
         public DbSet<Geozone> Geozones { get; set; }
         public DbSet<CartografiaArquivo> CartografiasArquivos { get; set; }
         public DbSet<Cartografia> Cartografias { get; set; }
+        public DbSet<AnaliseAutomatica> AnalisesAutomaticas { get; set; }
+        public DbSet<AnaliseOcorrencia> AnalisesOcorrencias { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -96,6 +98,26 @@ namespace GeotecnologiaKNS.Data
 
             modelBuilder.Entity<Cartografia>()
                 .HasMany(x => x.Arquivos);
+
+            modelBuilder.Entity<AnaliseAutomatica>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            modelBuilder.Entity<AnaliseAutomatica>()
+                .HasOne(e => e.Industria)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AnaliseAutomatica>()
+                .HasMany(x => x.Ocorrencias)
+                .WithOne(x => x.Analise)
+                .HasForeignKey(x => x.AnaliseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Filtro espelhado no lado dependente: sem ele, uma ocorrência de
+            // análise de outro tenant poderia ser lida por consulta direta.
+            modelBuilder.Entity<AnaliseOcorrencia>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.Analise!.TenantId == _userContext.TenantId);
 
             modelBuilder.Entity<ApplicationUser>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);

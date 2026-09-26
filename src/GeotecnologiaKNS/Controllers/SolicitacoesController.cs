@@ -8,10 +8,12 @@ namespace GeotecnologiaKNS.Controllers
     public class SolicitacoesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAnaliseAutomaticaService _analise;
 
-        public SolicitacoesController(ApplicationDbContext context)
+        public SolicitacoesController(ApplicationDbContext context, IAnaliseAutomaticaService analise)
         {
             _context = context;
+            _analise = analise;
         }
 
         // GET: Solicitacoes
@@ -51,6 +53,12 @@ namespace GeotecnologiaKNS.Controllers
             }
             solicitacao.Cartografia ??= new Cartografia();
 
+            ViewBag.Analise = await _context.AnalisesAutomaticas
+                .Include(x => x.Ocorrencias)
+                .Where(x => x.SolicitacaoId == solicitacao.Id)
+                .OrderByDescending(x => x.IniciadaEm)
+                .FirstOrDefaultAsync();
+
             return View(solicitacao);
         }
 
@@ -74,7 +82,13 @@ namespace GeotecnologiaKNS.Controllers
                 solicitacao.DataSolicitacao = DateTime.Now;
                 _context.Add(solicitacao);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                // A análise roda em seguida e define o status. Se falhar, a
+                // solicitação fica como Solicitado e o erro vai para o laudo —
+                // nunca é liberada por omissão.
+                await _analise.ExecutarAsync(solicitacao.Id);
+
+                return RedirectToAction(nameof(Details), new { id = solicitacao.Id });
             }
             FillPropriedadesViewBag();
             return View(solicitacao);
