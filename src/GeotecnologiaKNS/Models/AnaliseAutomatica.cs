@@ -41,6 +41,17 @@ namespace GeotecnologiaKNS.Models
         [StringLength(200)]
         public string Politica { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Retrato das regras vigentes quando a análise rodou, em JSON.
+        /// </summary>
+        /// <remarks>
+        /// Guardar só o nome não basta: a política pode mudar depois, e um
+        /// bloqueio contestado meses adiante precisa ser explicável pelas regras
+        /// que de fato o produziram.
+        /// </remarks>
+        [Display(Name = "Regras aplicadas")]
+        public string? PoliticaAplicada { get; set; }
+
         [Display(Name = "Área do imóvel (ha)")]
         public double AreaImovelHa { get; set; }
 

@@ -17,17 +17,20 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
     private readonly ApplicationDbContext _context;
     private readonly IIntersecaoService _intersecao;
     private readonly IMotorDeRegras _motor;
+    private readonly IPoliticaAnaliseRepository _politicas;
     private readonly ILogger<AnaliseAutomaticaService> _logger;
 
     public AnaliseAutomaticaService(
         ApplicationDbContext context,
         IIntersecaoService intersecao,
         IMotorDeRegras motor,
+        IPoliticaAnaliseRepository politicas,
         ILogger<AnaliseAutomaticaService> logger)
     {
         _context = context;
         _intersecao = intersecao;
         _motor = motor;
+        _politicas = politicas;
         _logger = logger;
     }
 
@@ -41,14 +44,21 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
         var propriedade = solicitacao.Propriedade
             ?? throw new InvalidOperationException($"Solicitação {solicitacaoId} sem propriedade vinculada.");
 
-        var politica = PoliticaAnalise.Padrao();
+        // Cada indústria tem o próprio corte de conformidade; sem política
+        // cadastrada, vale o protocolo padrão.
+        var politica = await _politicas.ObterDoTenantAsync(solicitacao.TenantId, cancellationToken);
 
         var analise = new AnaliseAutomatica
         {
             TenantId = solicitacao.TenantId,
             SolicitacaoId = solicitacao.Id,
             CodigoCar = propriedade.CodigoCar,
-            Politica = politica.Nome
+            Politica = politica.Nome,
+
+            // Retrato das regras vigentes no momento da análise: a política pode
+            // ser afrouxada depois, e o laudo precisa continuar explicando o
+            // veredito que deu na época.
+            PoliticaAplicada = RetratoDaPolitica.Serializar(politica)
         };
 
         _context.AnalisesAutomaticas.Add(analise);

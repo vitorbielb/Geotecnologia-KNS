@@ -32,6 +32,8 @@ namespace GeotecnologiaKNS.Data
         public DbSet<Cartografia> Cartografias { get; set; }
         public DbSet<AnaliseAutomatica> AnalisesAutomaticas { get; set; }
         public DbSet<AnaliseOcorrencia> AnalisesOcorrencias { get; set; }
+        public DbSet<PoliticaTenant> Politicas { get; set; }
+        public DbSet<RegraTenant> Regras { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -129,6 +131,33 @@ namespace GeotecnologiaKNS.Data
             modelBuilder.Entity<PropriedadeArquivo>().HasIndex(x => x.TenantId);
             modelBuilder.Entity<AnaliseArquivo>().HasIndex(x => x.TenantId);
             modelBuilder.Entity<CartografiaArquivo>().HasIndex(x => x.TenantId);
+
+            modelBuilder.Entity<PoliticaTenant>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            modelBuilder.Entity<PoliticaTenant>()
+                .HasOne(e => e.Industria)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Uma política por indústria: mais de uma ativa tornaria ambíguo
+            // qual regra produziu um laudo.
+            modelBuilder.Entity<PoliticaTenant>()
+                .HasIndex(x => x.TenantId)
+                .IsUnique();
+
+            modelBuilder.Entity<PoliticaTenant>()
+                .HasMany(x => x.Regras)
+                .WithOne(x => x.Politica)
+                .HasForeignKey(x => x.PoliticaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Filtro espelhado no lado dependente, como em AnaliseOcorrencia:
+            // sem ele, uma regra de outra indústria seria alcançável por
+            // consulta direta ao conjunto.
+            modelBuilder.Entity<RegraTenant>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.Politica!.TenantId == _userContext.TenantId);
 
             modelBuilder.Entity<AnaliseAutomatica>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
