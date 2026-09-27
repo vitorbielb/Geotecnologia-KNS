@@ -40,6 +40,22 @@ public interface ICarLookupService
 
     /// <summary>Indica se há alguma carga concluída, isto é, se a base está utilizável.</summary>
     Task<bool> BaseDisponivelAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Indica se o município já teve sua base carregada.
+    /// </summary>
+    /// <remarks>
+    /// É o que separa "ainda não carregamos este município", que é pendência de
+    /// quem opera o serviço, de "este CAR não existe na base", que é dado do
+    /// cliente. Sem a distinção, o suporte recebe as duas como a mesma queixa.
+    /// </remarks>
+    Task<bool> MunicipioCobertoAsync(string codigoIbge, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Anota que alguém consultou um município ainda não carregado, para que a
+    /// carga seja priorizada por demanda real.
+    /// </summary>
+    Task RegistrarLacunaAsync(string codigoIbge, string uf, string codigoCar, int tenantId, CancellationToken cancellationToken = default);
 }
 
 public class CarLookupService : ICarLookupService
@@ -94,5 +110,51 @@ public class CarLookupService : ICarLookupService
     public Task<bool> BaseDisponivelAsync(CancellationToken cancellationToken = default)
     {
         return _context.Cargas.AnyAsync(x => x.Status == StatusCarga.Concluida, cancellationToken);
+    }
+
+    public Task<bool> MunicipioCobertoAsync(string codigoIbge, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(codigoIbge))
+        {
+            return Task.FromResult(false);
+        }
+
+        return _context.Cobertura.AnyAsync(x => x.CodigoIbge == codigoIbge, cancellationToken);
+    }
+
+    public async Task RegistrarLacunaAsync(
+        string codigoIbge,
+        string uf,
+        string codigoCar,
+        int tenantId,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(codigoIbge))
+        {
+            return;
+        }
+
+        var lacuna = await _context.Lacunas
+            .FirstOrDefaultAsync(x => x.CodigoIbge == codigoIbge && x.TenantId == tenantId, cancellationToken);
+
+        if (lacuna is null)
+        {
+            _context.Lacunas.Add(new LacunaCobertura
+            {
+                CodigoIbge = codigoIbge,
+                TenantId = tenantId,
+                Uf = uf,
+                UltimoCodigoCar = codigoCar,
+                Consultas = 1
+            });
+        }
+        else
+        {
+            lacuna.Consultas++;
+            lacuna.UltimaEm = DateTime.UtcNow;
+            lacuna.UltimoCodigoCar = codigoCar;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

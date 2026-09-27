@@ -91,6 +91,9 @@ try
         case "simular-car":
             return await SimularCarAsync(scope.ServiceProvider, configuration);
 
+        case "cobertura":
+            return await CoberturaAsync(scope.ServiceProvider);
+
         default:
             Console.Error.WriteLine("Comandos:");
             Console.Error.WriteLine("  diagnostico");
@@ -103,6 +106,7 @@ try
             Console.Error.WriteLine("  camadas");
             Console.Error.WriteLine("  cruzar --car <codigo>");
             Console.Error.WriteLine("  simular-car --car <codigo> [--area-ha 1000]");
+            Console.Error.WriteLine("  cobertura");
             Console.Error.WriteLine();
             Console.Error.WriteLine("  Tipos de camada: " + string.Join(", ", Enum.GetNames<TipoCamada>()));
             return 1;
@@ -112,6 +116,82 @@ catch (Exception ex)
 {
     Console.Error.WriteLine($"Falhou: {ex.Message}");
     return 1;
+}
+
+/// <summary>
+/// Mostra o que está coberto e, principalmente, o que os clientes pediram e não
+/// existe. A fila de lacunas é o que guia a próxima carga: em vez de tentar
+/// mapear o país, carrega-se o que está sendo usado de verdade.
+/// </summary>
+static async Task<int> CoberturaAsync(IServiceProvider provider)
+{
+    var contexto = provider.GetRequiredService<GeoDbContext>();
+
+    var cobertos = await contexto.Cobertura
+        .OrderBy(x => x.Uf).ThenBy(x => x.Municipio)
+        .ToListAsync();
+
+    Console.WriteLine($"Municípios cobertos: {cobertos.Count}");
+
+    if (cobertos.Count > 0)
+    {
+        var porUf = cobertos
+            .GroupBy(x => x.Uf)
+            .Select(g => new { Uf = g.Key, Municipios = g.Count(), Imoveis = g.Sum(x => x.Imoveis) })
+            .OrderByDescending(x => x.Municipios);
+
+        Console.WriteLine();
+        Console.WriteLine($"  {"UF",-4} {"MUNICÍPIOS",11} {"IMÓVEIS",12}  MAIS ANTIGA");
+
+        foreach (var uf in porUf)
+        {
+            var maisAntiga = cobertos.Where(x => x.Uf == uf.Uf).Min(x => x.CobertoEm);
+            Console.WriteLine($"  {uf.Uf,-4} {uf.Municipios,11} {uf.Imoveis,12:N0}  {maisAntiga:dd/MM/yyyy}");
+        }
+    }
+
+    var lacunas = await contexto.Lacunas.ToListAsync();
+
+    Console.WriteLine();
+
+    if (lacunas.Count == 0)
+    {
+        Console.WriteLine("Nenhum município pendente: tudo que foi consultado está coberto.");
+        return 0;
+    }
+
+    // Ordenado por quantos clientes distintos pedem, não por número de
+    // consultas: município pedido por três indústrias vale mais que um
+    // município que uma só consultou trinta vezes.
+    var fila = lacunas
+        .GroupBy(x => new { x.CodigoIbge, x.Uf })
+        .Select(g => new
+        {
+            g.Key.CodigoIbge,
+            g.Key.Uf,
+            Industrias = g.Select(x => x.TenantId).Distinct().Count(),
+            Consultas = g.Sum(x => x.Consultas),
+            Ultima = g.Max(x => x.UltimaEm),
+            Exemplo = g.OrderByDescending(x => x.UltimaEm).First().UltimoCodigoCar
+        })
+        .OrderByDescending(x => x.Industrias)
+        .ThenByDescending(x => x.Consultas)
+        .ToList();
+
+    Console.WriteLine($"Municípios pedidos e não carregados: {fila.Count}");
+    Console.WriteLine();
+    Console.WriteLine($"  {"UF",-4} {"IBGE",-9} {"INDÚSTRIAS",11} {"CONSULTAS",10}  ÚLTIMO PEDIDO");
+
+    foreach (var item in fila)
+    {
+        Console.WriteLine($"  {item.Uf,-4} {item.CodigoIbge,-9} {item.Industrias,11} {item.Consultas,10}  {item.Ultima:dd/MM/yyyy}");
+    }
+
+    Console.WriteLine();
+    Console.WriteLine("Carregue estes municípios pelo portal do SICAR e importe com 'importar'.");
+    Console.WriteLine("A importação resolve as lacunas correspondentes automaticamente.");
+
+    return 0;
 }
 
 /// <summary>

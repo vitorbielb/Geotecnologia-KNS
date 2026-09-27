@@ -12,7 +12,14 @@ public enum ResultadoConsultaCar
     BaseIndisponivel = 3,
 
     /// <summary>O acesso ao PostGIS não está configurado neste servidor.</summary>
-    NaoConfigurado = 4
+    NaoConfigurado = 4,
+
+    /// <summary>
+    /// O município do código ainda não teve a base carregada. Distinto de
+    /// <see cref="NaoEncontrado"/>: aqui a pendência é de quem opera o serviço,
+    /// não do dado que o cliente informou.
+    /// </summary>
+    MunicipioNaoCoberto = 5
 }
 
 public record ConsultaCar(
@@ -38,10 +45,17 @@ public interface IPropriedadeCarService
 public class PropriedadeCarService : IPropriedadeCarService
 {
     private readonly ICarLookupService _carLookup;
+    private readonly IUserContext _userContext;
+    private readonly ILogger<PropriedadeCarService> _logger;
 
-    public PropriedadeCarService(ICarLookupService carLookup)
+    public PropriedadeCarService(
+        ICarLookupService carLookup,
+        IUserContext userContext,
+        ILogger<PropriedadeCarService> logger)
     {
         _carLookup = carLookup;
+        _userContext = userContext;
+        _logger = logger;
     }
 
     public async Task<ConsultaCar> ConsultarAsync(string? codigoCar, CancellationToken cancellationToken = default)
@@ -79,15 +93,51 @@ public class PropriedadeCarService : IPropriedadeCarService
 
         var imovel = await _carLookup.ObterPorCodigoAsync(normalizado, cancellationToken);
 
-        if (imovel is null)
+        if (imovel is not null)
         {
-            return new ConsultaCar(
-                ResultadoConsultaCar.NaoEncontrado,
-                null,
-                "CAR não encontrado na versão carregada da base. Isso pode significar cadastro recente ainda não publicado, e não necessariamente CAR inválido.");
+            return new ConsultaCar(ResultadoConsultaCar.Encontrado, imovel, "Imóvel localizado na base do CAR.");
         }
 
-        return new ConsultaCar(ResultadoConsultaCar.Encontrado, imovel, "Imóvel localizado na base do CAR.");
+        // O código do CAR carrega o município dentro dele. Se esse município
+        // nunca foi carregado, a ausência do imóvel não diz nada sobre o CAR —
+        // e a pendência é de quem opera o serviço, não do cliente.
+        var codigoIbge = CodigoCar.ExtrairCodigoIbge(normalizado);
+        var uf = CodigoCar.ExtrairUf(normalizado) ?? string.Empty;
+
+        if (codigoIbge is not null && !await _carLookup.MunicipioCobertoAsync(codigoIbge, cancellationToken))
+        {
+            await RegistrarLacunaSemInterromperAsync(codigoIbge, uf, normalizado, cancellationToken);
+
+            return new ConsultaCar(
+                ResultadoConsultaCar.MunicipioNaoCoberto,
+                null,
+                $"A base deste município ({uf}, código IBGE {codigoIbge}) ainda não foi carregada no sistema. " +
+                "O pedido foi registrado e o município entrará na próxima carga.");
+        }
+
+        return new ConsultaCar(
+            ResultadoConsultaCar.NaoEncontrado,
+            null,
+            "O município está na base, mas este CAR não foi localizado nele. " +
+            "Confira o número; pode também ser cadastro recente, ainda não publicado pelo SICAR.");
+    }
+
+    /// <summary>
+    /// Falhar ao anotar a lacuna não pode derrubar a consulta: o registro serve
+    /// para priorizar carga, não para responder ao usuário.
+    /// </summary>
+    private async Task RegistrarLacunaSemInterromperAsync(
+        string codigoIbge, string uf, string codigoCar, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _carLookup.RegistrarLacunaAsync(
+                codigoIbge, uf, codigoCar, _userContext.TenantId ?? 0, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Não foi possível registrar a lacuna de cobertura de {CodigoIbge}.", codigoIbge);
+        }
     }
 
     public void Aplicar(Propriedade propriedade, ImovelCarDto imovel)

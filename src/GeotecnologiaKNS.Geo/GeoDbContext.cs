@@ -23,6 +23,10 @@ public class GeoDbContext : DbContext
 
     public DbSet<CargaBaseCar> Cargas => Set<CargaBaseCar>();
 
+    public DbSet<CoberturaMunicipio> Cobertura => Set<CoberturaMunicipio>();
+
+    public DbSet<LacunaCobertura> Lacunas => Set<LacunaCobertura>();
+
     public DbSet<CamadaReferencia> Camadas => Set<CamadaReferencia>();
 
     public DbSet<FeicaoReferencia> Feicoes => Set<FeicaoReferencia>();
@@ -58,6 +62,45 @@ public class GeoDbContext : DbContext
                   .WithMany(x => x.Imoveis)
                   .HasForeignKey(x => x.CargaId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CoberturaMunicipio>(entity =>
+        {
+            entity.ToTable("cobertura_municipio");
+            entity.HasKey(x => x.CodigoIbge);
+
+            entity.Property(x => x.CodigoIbge).HasColumnName("codigo_ibge").HasMaxLength(7);
+            entity.Property(x => x.Uf).HasColumnName("uf").HasMaxLength(2).IsRequired();
+            entity.Property(x => x.Municipio).HasColumnName("municipio").HasMaxLength(150);
+            entity.Property(x => x.Imoveis).HasColumnName("imoveis");
+            entity.Property(x => x.CargaId).HasColumnName("carga_id");
+            entity.Property(x => x.CobertoEm).HasColumnName("coberto_em");
+
+            entity.HasIndex(x => x.Uf);
+
+            entity.HasOne(x => x.Carga)
+                  .WithMany()
+                  .HasForeignKey(x => x.CargaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<LacunaCobertura>(entity =>
+        {
+            entity.ToTable("lacuna_cobertura");
+
+            // Chave por município e inquilino: permite contar quantos clientes
+            // distintos pedem o mesmo município, que é o critério de prioridade.
+            entity.HasKey(x => new { x.CodigoIbge, x.TenantId });
+
+            entity.Property(x => x.CodigoIbge).HasColumnName("codigo_ibge").HasMaxLength(7);
+            entity.Property(x => x.TenantId).HasColumnName("tenant_id");
+            entity.Property(x => x.Uf).HasColumnName("uf").HasMaxLength(2).IsRequired();
+            entity.Property(x => x.UltimoCodigoCar).HasColumnName("ultimo_codigo_car").HasMaxLength(100);
+            entity.Property(x => x.Consultas).HasColumnName("consultas");
+            entity.Property(x => x.PrimeiraEm).HasColumnName("primeira_em");
+            entity.Property(x => x.UltimaEm).HasColumnName("ultima_em");
+
+            entity.HasIndex(x => x.UltimaEm);
         });
 
         modelBuilder.Entity<CamadaReferencia>(entity =>

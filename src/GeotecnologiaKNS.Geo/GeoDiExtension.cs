@@ -67,4 +67,10 @@ internal sealed class CarLookupIndisponivel : ICarLookupService
 
     public Task<bool> BaseDisponivelAsync(CancellationToken cancellationToken = default)
         => Task.FromResult(false);
+
+    public Task<bool> MunicipioCobertoAsync(string codigoIbge, CancellationToken cancellationToken = default)
+        => Task.FromResult(false);
+
+    public Task RegistrarLacunaAsync(string codigoIbge, string uf, string codigoCar, int tenantId, CancellationToken cancellationToken = default)
+        => Task.CompletedTask;
 }

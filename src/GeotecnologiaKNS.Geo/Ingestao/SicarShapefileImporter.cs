@@ -87,6 +87,11 @@ public class SicarShapefileImporter
         var avisos = new List<string>();
         var lote = new List<ImovelCar>(TamanhoLote);
 
+        // Municípios efetivamente vistos no arquivo. É daqui que sai a cobertura:
+        // deduzi-la da existência de imóveis confundiria município sem cadastro
+        // com município nunca carregado.
+        var municipiosVistos = new Dictionary<string, (string Uf, string? Nome, int Imoveis)>();
+
         try
         {
             // OpenRead e não ReadAllFeatures: este devolve Feature[], materializando
@@ -109,6 +114,7 @@ public class SicarShapefileImporter
                 }
 
                 lote.Add(imovel);
+                ContabilizarMunicipio(municipiosVistos, imovel);
 
                 if (lote.Count >= TamanhoLote)
                 {
@@ -121,6 +127,8 @@ public class SicarShapefileImporter
             {
                 carga.RegistrosGravados += await GravarLoteAsync(lote, cancellationToken);
             }
+
+            await RegistrarCoberturaAsync(municipiosVistos, carga.Id, cancellationToken);
 
             carga.Status = StatusCarga.Concluida;
             carga.ConcluidaEm = DateTime.UtcNow;
@@ -199,6 +207,80 @@ public class SicarShapefileImporter
             Tipo = Texto(atributos, CamposTipo),
             CargaId = cargaId
         };
+    }
+
+    private static void ContabilizarMunicipio(
+        Dictionary<string, (string Uf, string? Nome, int Imoveis)> municipios,
+        ImovelCar imovel)
+    {
+        if (string.IsNullOrWhiteSpace(imovel.CodigoIbge))
+        {
+            return;
+        }
+
+        if (municipios.TryGetValue(imovel.CodigoIbge, out var atual))
+        {
+            municipios[imovel.CodigoIbge] = (atual.Uf, atual.Nome ?? imovel.Municipio, atual.Imoveis + 1);
+            return;
+        }
+
+        municipios[imovel.CodigoIbge] = (imovel.Uf ?? string.Empty, imovel.Municipio, 1);
+    }
+
+    /// <summary>
+    /// Marca como cobertos os municípios vistos no arquivo e limpa as lacunas
+    /// correspondentes — o que era pedido e não existia agora existe.
+    /// </summary>
+    private async Task RegistrarCoberturaAsync(
+        Dictionary<string, (string Uf, string? Nome, int Imoveis)> municipios,
+        long cargaId,
+        CancellationToken cancellationToken)
+    {
+        if (municipios.Count == 0)
+        {
+            return;
+        }
+
+        var codigos = municipios.Keys.ToList();
+
+        var existentes = await _context.Cobertura
+            .Where(x => codigos.Contains(x.CodigoIbge))
+            .ToDictionaryAsync(x => x.CodigoIbge, cancellationToken);
+
+        foreach (var (codigoIbge, dados) in municipios)
+        {
+            if (existentes.TryGetValue(codigoIbge, out var cobertura))
+            {
+                cobertura.Uf = dados.Uf;
+                cobertura.Municipio = dados.Nome ?? cobertura.Municipio;
+                cobertura.Imoveis = dados.Imoveis;
+                cobertura.CargaId = cargaId;
+                cobertura.CobertoEm = DateTime.UtcNow;
+                continue;
+            }
+
+            _context.Cobertura.Add(new CoberturaMunicipio
+            {
+                CodigoIbge = codigoIbge,
+                Uf = dados.Uf,
+                Municipio = dados.Nome,
+                Imoveis = dados.Imoveis,
+                CargaId = cargaId,
+                CobertoEm = DateTime.UtcNow
+            });
+        }
+
+        var lacunasResolvidas = await _context.Lacunas
+            .Where(x => codigos.Contains(x.CodigoIbge))
+            .ToListAsync(cancellationToken);
+
+        _context.Lacunas.RemoveRange(lacunasResolvidas);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation(
+            "Cobertura atualizada: {Municipios} município(s); {Lacunas} lacuna(s) resolvida(s).",
+            municipios.Count, lacunasResolvidas.Count);
     }
 
     /// <summary>
