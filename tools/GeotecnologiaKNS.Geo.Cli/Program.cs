@@ -1,3 +1,4 @@
+using System.Globalization;
 using GeotecnologiaKNS.Geo.Entities;
 using GeotecnologiaKNS.Geo;
 using GeotecnologiaKNS.Geo.Ingestao;
@@ -87,6 +88,9 @@ try
         case "cruzar":
             return await CruzarAsync(scope.ServiceProvider, configuration);
 
+        case "simular-car":
+            return await SimularCarAsync(scope.ServiceProvider, configuration);
+
         default:
             Console.Error.WriteLine("Comandos:");
             Console.Error.WriteLine("  diagnostico");
@@ -98,6 +102,7 @@ try
             Console.Error.WriteLine("                  --tipo <tipo> --origem <origem> [--ano <ano>]");
             Console.Error.WriteLine("  camadas");
             Console.Error.WriteLine("  cruzar --car <codigo>");
+            Console.Error.WriteLine("  simular-car --car <codigo> [--area-ha 1000]");
             Console.Error.WriteLine();
             Console.Error.WriteLine("  Tipos de camada: " + string.Join(", ", Enum.GetNames<TipoCamada>()));
             return 1;
@@ -107,6 +112,155 @@ catch (Exception ex)
 {
     Console.Error.WriteLine($"Falhou: {ex.Message}");
     return 1;
+}
+
+/// <summary>
+/// Marca usada em toda carga simulada. É por ela que o resto do sistema
+/// distingue perímetro inventado de perímetro oficial.
+/// </summary>
+const string OrigemSimulada = "SIMULADO - NAO USAR PARA DECISAO";
+
+/// <summary>
+/// Insere um perímetro fictício para um código de CAR, ancorado no município
+/// que o próprio código indica.
+/// </summary>
+/// <remarks>
+/// Serve para exercitar o fluxo enquanto a base real do SICAR não está
+/// carregada — o download dela não é automatizável (CAPTCHA no portal do SICAR,
+/// plataforma com login no MapBiomas).
+///
+/// O município e a localização são verdadeiros: o código do CAR carrega o
+/// código IBGE, e a malha municipal vem da API do IBGE. Só o perímetro é
+/// inventado — um quadrado da área pedida sobre o centroide do município.
+///
+/// Num sistema que veda compra, perímetro inventado sob código real é
+/// perigoso: alguém pode analisar o imóvel depois sem saber da procedência.
+/// Por isso a carga é marcada de forma inequívoca, a marca aparece na tela e
+/// no laudo, e o comando se recusa a sobrescrever registro vindo de carga real.
+/// </remarks>
+static async Task<int> SimularCarAsync(IServiceProvider provider, IConfiguration configuration)
+{
+    var codigo = CodigoCar.Normalizar(configuration["car"]);
+
+    if (codigo is null)
+    {
+        Console.Error.WriteLine("Informe --car com um código válido (UF-CódigoIBGE-Hash).");
+        return 1;
+    }
+
+    var areaHa = double.TryParse(configuration["area-ha"], NumberStyles.Any, CultureInfo.InvariantCulture, out var a) && a > 0
+        ? a
+        : 1000d;
+
+    var contexto = provider.GetRequiredService<GeoDbContext>();
+    var conexao = (Npgsql.NpgsqlConnection)contexto.Database.GetDbConnection();
+
+    if (conexao.State != System.Data.ConnectionState.Open)
+    {
+        await conexao.OpenAsync();
+    }
+
+    // Não sobrescreve dado oficial: se o CAR já veio de uma carga real, a
+    // simulação degradaria a base sem deixar rastro.
+    await using (var checagem = conexao.CreateCommand())
+    {
+        checagem.CommandText = @"
+            SELECT c.origem
+            FROM geo.imovel_car i
+            JOIN geo.carga_base_car c ON c.id = i.carga_id
+            WHERE i.codigo_car = @codigo";
+        checagem.Parameters.AddWithValue("codigo", codigo);
+
+        if (await checagem.ExecuteScalarAsync() is string origemAtual && origemAtual != OrigemSimulada)
+        {
+            Console.Error.WriteLine($"{codigo} já existe na base, vindo de '{origemAtual}'.");
+            Console.Error.WriteLine("Simular por cima apagaria o perímetro real. Nada foi alterado.");
+            return 1;
+        }
+    }
+
+    var codigoIbge = CodigoCar.ExtrairCodigoIbge(codigo)!;
+    Console.WriteLine($"CAR      : {codigo}");
+    Console.WriteLine($"Município: código IBGE {codigoIbge}");
+
+    string municipio, uf, malhaGeoJson;
+
+    using (var http = new HttpClient { Timeout = TimeSpan.FromSeconds(60) })
+    {
+        try
+        {
+            var meta = await http.GetStringAsync(
+                $"https://servicodados.ibge.gov.br/api/v1/localidades/municipios/{codigoIbge}");
+
+            using var doc = System.Text.Json.JsonDocument.Parse(meta);
+            municipio = doc.RootElement.GetProperty("nome").GetString() ?? "(desconhecido)";
+            uf = doc.RootElement.GetProperty("microrregiao").GetProperty("mesorregiao")
+                    .GetProperty("UF").GetProperty("sigla").GetString() ?? CodigoCar.ExtrairUf(codigo)!;
+
+            var malha = await http.GetStringAsync(
+                $"https://servicodados.ibge.gov.br/api/v3/malhas/municipios/{codigoIbge}" +
+                "?formato=application/vnd.geo+json&qualidade=minima");
+
+            using var geo = System.Text.Json.JsonDocument.Parse(malha);
+            malhaGeoJson = geo.RootElement.GetProperty("features")[0].GetProperty("geometry").GetRawText();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Não foi possível consultar o IBGE: {CausaRaiz(ex)}");
+            return 1;
+        }
+    }
+
+    Console.WriteLine($"           {municipio}/{uf}");
+
+    // Quadrado equivalente à área pedida: metade do lado como raio do buffer.
+    var ladoMetros = Math.Sqrt(areaHa * 10_000);
+
+    await using var comando = conexao.CreateCommand();
+    comando.CommandText = @"
+        WITH carga AS (
+            INSERT INTO geo.carga_base_car
+                (origem, arquivo, uf, iniciada_em, concluida_em,
+                 registros_lidos, registros_gravados, registros_descartados, status)
+            VALUES (@origem, 'simular-car', @uf, now(), now(), 1, 1, 0, 1)
+            RETURNING id
+        ), municipio AS (
+            SELECT ST_SetSRID(ST_GeomFromGeoJSON(@malha), 4326) AS geom
+        )
+        INSERT INTO geo.imovel_car
+            (codigo_car, perimetro, centroide, area_ha, municipio, uf, codigo_ibge, situacao, tipo, carga_id)
+        SELECT @codigo,
+               ST_SetSRID(ST_Envelope(ST_Buffer(ST_Centroid(m.geom)::geography, @raio)::geometry), 4326),
+               ST_SetSRID(ST_Centroid(m.geom), 4326),
+               @area, @municipio, @uf, @ibge, 'AT', 'IRU', carga.id
+        FROM municipio m, carga
+        ON CONFLICT (codigo_car) DO UPDATE
+           SET perimetro = EXCLUDED.perimetro,
+               centroide = EXCLUDED.centroide,
+               area_ha   = EXCLUDED.area_ha,
+               municipio = EXCLUDED.municipio,
+               uf        = EXCLUDED.uf,
+               carga_id  = EXCLUDED.carga_id;";
+
+    comando.Parameters.AddWithValue("origem", OrigemSimulada);
+    comando.Parameters.AddWithValue("codigo", codigo);
+    comando.Parameters.AddWithValue("malha", malhaGeoJson);
+    comando.Parameters.AddWithValue("raio", ladoMetros / 2);
+    comando.Parameters.AddWithValue("area", areaHa);
+    comando.Parameters.AddWithValue("municipio", municipio);
+    comando.Parameters.AddWithValue("uf", uf);
+    comando.Parameters.AddWithValue("ibge", codigoIbge);
+
+    await comando.ExecuteNonQueryAsync();
+
+    Console.WriteLine($"Perímetro: quadrado de {areaHa:N0} ha no centroide do município");
+    Console.WriteLine($"Procedência: {OrigemSimulada}");
+    Console.WriteLine();
+    Console.WriteLine("Pronto. O imóvel já aparece na consulta por CAR.");
+    Console.WriteLine("Atenção: o perímetro é inventado. Serve para exercitar o fluxo,");
+    Console.WriteLine("não para decidir sobre o imóvel. Carregar a base real o substitui.");
+
+    return 0;
 }
 
 /// <summary>
