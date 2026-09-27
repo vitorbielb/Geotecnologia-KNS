@@ -30,6 +30,14 @@ public interface ICarLookupService
     /// </summary>
     Task<ImovelCarDto?> ObterPorCodigoAsync(string codigoCar, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Indica se o acesso ao PostGIS está configurado neste servidor.
+    /// Distinto de <see cref="BaseDisponivelAsync"/>: sem configuração não há
+    /// nem para onde perguntar, e a causa que o administrador precisa tratar
+    /// é outra.
+    /// </summary>
+    bool EstaConfigurado { get; }
+
     /// <summary>Indica se há alguma carga concluída, isto é, se a base está utilizável.</summary>
     Task<bool> BaseDisponivelAsync(CancellationToken cancellationToken = default);
 }
@@ -80,6 +88,8 @@ public class CarLookupService : ICarLookupService
             imovel.Carga?.Origem ?? string.Empty,
             imovel.Carga?.ConcluidaEm);
     }
+
+    public bool EstaConfigurado => true;
 
     public Task<bool> BaseDisponivelAsync(CancellationToken cancellationToken = default)
     {

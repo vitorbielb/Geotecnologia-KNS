@@ -51,6 +51,20 @@ namespace GeotecnologiaKNS.UnitTests.Services
 
             resultado.Resultado.Should().Be(ResultadoConsultaCar.BaseIndisponivel);
             resultado.Sucesso.Should().BeFalse();
+            resultado.Mensagem.Should().Contain("não foi importada");
+        }
+
+        [Fact]
+        public async Task ConsultarAsync_SemBancoGeoespacial_DeveDistinguirDaBaseVazia()
+        {
+            // Falta de configuração e falta de carga têm remédios diferentes;
+            // a mensagem precisa dizer qual dos dois é.
+            var lookup = new LookupFalso { EstaConfigurado = false };
+            var resultado = await Service(lookup).ConsultarAsync(CodigoValido);
+
+            resultado.Resultado.Should().Be(ResultadoConsultaCar.NaoConfigurado);
+            resultado.Mensagem.Should().Contain("não está configurado");
+            lookup.ConsultasFeitas.Should().Be(0);
         }
 
         [Fact]
@@ -155,6 +169,7 @@ namespace GeotecnologiaKNS.UnitTests.Services
         private sealed class LookupFalso : ICarLookupService
         {
             public ImovelCarDto? Imovel { get; set; }
+            public bool EstaConfigurado { get; set; } = true;
             public bool BaseDisponivel { get; set; } = true;
             public int ConsultasFeitas { get; private set; }
             public string? UltimoCodigoConsultado { get; private set; }

@@ -53,7 +53,8 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 var services = new ServiceCollection()
-    .AddLogging(builder => builder.AddSimpleConsole(options => options.SingleLine = true))
+    .AddLogging(builder => builder.AddSimpleConsole(options => options.SingleLine = true)
+        .AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning))
     .AddGeo(connectionString)
     .BuildServiceProvider();
 
@@ -63,6 +64,9 @@ try
 {
     switch (comando)
     {
+        case "diagnostico":
+            return await DiagnosticarAsync(scope.ServiceProvider, connectionString);
+
         case "migrar":
             await scope.ServiceProvider.GetRequiredService<GeoDbContext>().Database.MigrateAsync();
             Console.WriteLine("Esquema geo atualizado.");
@@ -85,6 +89,7 @@ try
 
         default:
             Console.Error.WriteLine("Comandos:");
+            Console.Error.WriteLine("  diagnostico");
             Console.Error.WriteLine("  inspecionar --arquivo <caminho.shp>");
             Console.Error.WriteLine("  migrar");
             Console.Error.WriteLine("  importar --arquivo <caminho.shp> --origem <nome> [--uf UF]");
@@ -102,6 +107,135 @@ catch (Exception ex)
 {
     Console.Error.WriteLine($"Falhou: {ex.Message}");
     return 1;
+}
+
+/// <summary>
+/// Percorre a cadeia toda na ordem em que ela quebra e diz qual elo falta.
+/// Existe porque "a base do CAR não foi carregada" tem várias causas possíveis
+/// — sem servidor, sem esquema, sem carga — e cada uma tem um remédio.
+/// </summary>
+static async Task<int> DiagnosticarAsync(IServiceProvider provider, string connectionString)
+{
+    var problemas = 0;
+    var contexto = provider.GetRequiredService<GeoDbContext>();
+
+    Console.WriteLine("Diagnóstico da base geoespacial");
+    Console.WriteLine(new string('-', 52));
+
+    var servidor = "(não identificado)";
+    try
+    {
+        var construtor = new Npgsql.NpgsqlConnectionStringBuilder(connectionString);
+        servidor = $"{construtor.Host}:{construtor.Port}/{construtor.Database}";
+    }
+    catch { /* connection string malformada; o teste de conexão abaixo acusa */ }
+
+    Console.WriteLine($"Servidor configurado : {servidor}");
+
+    // 1. Conexão
+    try
+    {
+        await contexto.Database.OpenConnectionAsync();
+        await contexto.Database.CloseConnectionAsync();
+        Console.WriteLine("Conexão             : OK");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("Conexão             : FALHOU");
+        Console.WriteLine($"  {CausaRaiz(ex)}");
+        Console.WriteLine();
+        Console.WriteLine("  O PostgreSQL não está no ar ou a connection string está errada.");
+        Console.WriteLine("  Com Docker:  docker compose up -d postgis");
+        return 1;
+    }
+
+    // 2. Esquema
+    try
+    {
+        var pendentes = (await contexto.Database.GetPendingMigrationsAsync()).ToList();
+
+        if (pendentes.Count == 0)
+        {
+            Console.WriteLine("Esquema             : atualizado");
+        }
+        else
+        {
+            problemas++;
+            Console.WriteLine($"Esquema             : {pendentes.Count} migration(s) pendente(s)");
+            Console.WriteLine("  Execute:  dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- migrar");
+        }
+    }
+    catch (Exception ex)
+    {
+        problemas++;
+        Console.WriteLine("Esquema             : não pôde ser verificado");
+        Console.WriteLine($"  {CausaRaiz(ex)}");
+        return 1;
+    }
+
+    // 3. Base do CAR
+    try
+    {
+        var cargas = await contexto.Cargas.CountAsync(x => x.Status == StatusCarga.Concluida);
+        var imoveis = await contexto.ImoveisCar.CountAsync();
+
+        if (cargas == 0)
+        {
+            problemas++;
+            Console.WriteLine("Base do CAR         : VAZIA — nenhuma carga concluída");
+            Console.WriteLine("  Baixe a camada de imóveis e execute:");
+            Console.WriteLine("    ... -- importar --arquivo <AREA_IMOVEL.shp> --origem <nome da fonte>");
+        }
+        else
+        {
+            Console.WriteLine($"Base do CAR         : {imoveis:N0} imóveis em {cargas} carga(s)");
+        }
+    }
+    catch (Exception ex)
+    {
+        problemas++;
+        Console.WriteLine("Base do CAR         : não pôde ser consultada");
+        Console.WriteLine($"  {CausaRaiz(ex)}");
+    }
+
+    // 4. Camadas de cruzamento
+    try
+    {
+        var camadas = await contexto.Camadas.CountAsync(x => x.Ativa);
+
+        if (camadas == 0)
+        {
+            Console.WriteLine("Camadas de análise  : nenhuma — o cadastro funciona, a análise não acusa nada");
+            Console.WriteLine("    ... -- importar-camada --arquivo <camada.shp> --chave <chave> ...");
+        }
+        else
+        {
+            Console.WriteLine($"Camadas de análise  : {camadas} ativa(s)");
+        }
+    }
+    catch
+    {
+        Console.WriteLine("Camadas de análise  : não puderam ser consultadas");
+    }
+
+    Console.WriteLine(new string('-', 52));
+    Console.WriteLine(problemas == 0
+        ? "Tudo pronto para cadastrar imóveis pelo CAR."
+        : $"{problemas} pendência(s) acima impedem a consulta ao CAR.");
+
+    return problemas == 0 ? 0 : 1;
+}
+
+/// <summary>
+/// A mensagem externa do Npgsql costuma ser genérica ("transient failure");
+/// a causa útil ("connection refused", "password authentication failed")
+/// está na exceção mais interna.
+/// </summary>
+static string CausaRaiz(Exception ex)
+{
+    var atual = ex;
+    while (atual.InnerException is not null) { atual = atual.InnerException; }
+    return atual.Message.Split('\n')[0].Trim();
 }
 
 static int Inspecionar(IConfiguration configuration)

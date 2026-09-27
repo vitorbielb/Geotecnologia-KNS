@@ -24,6 +24,20 @@ namespace GeotecnologiaKNS.UnitTests.Geo
             CodigoCar.Normalizar(digitado).Should().Be(CodigoValido);
         }
 
+        [Fact]
+        public void Normalizar_FormatoDoReciboDoSicar_DeveSerAceito()
+        {
+            // É assim que o código aparece no recibo do SICAR e que o usuário
+            // copia e cola: o hash vem separado em grupos de quatro por pontos.
+            const string ComoAparece = "TO-1702000-6BC8.B06A.2D45.4929.BAD5.2CBE.5A2C.5475";
+            const string Esperado = "TO-1702000-6BC8B06A2D454929BAD52CBE5A2C5475";
+
+            CodigoCar.Normalizar(ComoAparece).Should().Be(Esperado);
+            CodigoCar.EhValido(ComoAparece).Should().BeTrue();
+            CodigoCar.ExtrairUf(ComoAparece).Should().Be("TO");
+            CodigoCar.ExtrairCodigoIbge(ComoAparece).Should().Be("1702000");
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]

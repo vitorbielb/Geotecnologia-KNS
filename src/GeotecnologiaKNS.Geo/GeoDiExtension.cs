@@ -63,6 +63,8 @@ internal sealed class CarLookupIndisponivel : ICarLookupService
     public Task<ImovelCarDto?> ObterPorCodigoAsync(string codigoCar, CancellationToken cancellationToken = default)
         => Task.FromResult<ImovelCarDto?>(null);
 
+    public bool EstaConfigurado => false;
+
     public Task<bool> BaseDisponivelAsync(CancellationToken cancellationToken = default)
         => Task.FromResult(false);
 }

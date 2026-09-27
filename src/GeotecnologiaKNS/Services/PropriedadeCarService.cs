@@ -7,7 +7,12 @@ public enum ResultadoConsultaCar
     Encontrado = 0,
     CodigoInvalido = 1,
     NaoEncontrado = 2,
-    BaseIndisponivel = 3
+
+    /// <summary>Há conexão com o PostGIS, mas nenhuma carga da base foi concluída.</summary>
+    BaseIndisponivel = 3,
+
+    /// <summary>O acesso ao PostGIS não está configurado neste servidor.</summary>
+    NaoConfigurado = 4
 }
 
 public record ConsultaCar(
@@ -51,12 +56,25 @@ public class PropriedadeCarService : IPropriedadeCarService
                 "Número do CAR inválido. O formato esperado é UF-CódigoIBGE-Hash, por exemplo MT-5107925-A1B2...");
         }
 
+        // Os dois casos abaixo davam a mesma mensagem, e têm causas diferentes:
+        // num falta configurar o banco geoespacial, no outro falta carregar a
+        // base nele. Quem vai resolver precisa saber qual dos dois é.
+        if (!_carLookup.EstaConfigurado)
+        {
+            return new ConsultaCar(
+                ResultadoConsultaCar.NaoConfigurado,
+                null,
+                "O banco geoespacial não está configurado neste servidor " +
+                "(connection string 'Geo'). Sem ele não é possível consultar o CAR.");
+        }
+
         if (!await _carLookup.BaseDisponivelAsync(cancellationToken))
         {
             return new ConsultaCar(
                 ResultadoConsultaCar.BaseIndisponivel,
                 null,
-                "A base do CAR ainda não foi carregada. Procure o administrador do sistema.");
+                "O banco geoespacial está acessível, mas a base do CAR ainda não foi importada. " +
+                "É preciso executar a carga antes de cadastrar imóveis.");
         }
 
         var imovel = await _carLookup.ObterPorCodigoAsync(normalizado, cancellationToken);
