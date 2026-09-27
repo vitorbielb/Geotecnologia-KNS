@@ -91,7 +91,11 @@ public class CamadaShapefileImporter
         var gravados = 0;
         var lote = new List<FeicaoReferencia>(TamanhoLote);
 
-        foreach (var feature in Shapefile.ReadAllFeatures(caminhoShapefile))
+        // Leitura em fluxo: ReadAllFeatures materializaria o shapefile inteiro,
+        // e camadas como o PRODES Cerrado passam de dois milhões de polígonos.
+        using var leitor = Shapefile.OpenRead(caminhoShapefile);
+
+        foreach (var feature in leitor)
         {
             cancellationToken.ThrowIfCancellationRequested();
             lidos++;

@@ -89,7 +89,13 @@ public class SicarShapefileImporter
 
         try
         {
-            foreach (var feature in Shapefile.ReadAllFeatures(caminhoShapefile))
+            // OpenRead e não ReadAllFeatures: este devolve Feature[], materializando
+            // o arquivo inteiro. Medido em 224 MB para 48 mil feições — a base
+            // nacional do CAR, com milhões de imóveis, não caberia na memória.
+            // Em fluxo o mesmo arquivo custa 5 MB.
+            using var leitor = Shapefile.OpenRead(caminhoShapefile);
+
+            foreach (var feature in leitor)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 carga.RegistrosLidos++;

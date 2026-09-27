@@ -34,7 +34,12 @@ public static class ShapefileInspector
         string? tipoGeometria = null;
         var lidos = 0;
 
-        foreach (var feature in Shapefile.ReadAllFeatures(caminhoShapefile))
+        // Crítico ser em fluxo: ReadAllFeatures leria o arquivo todo antes de o
+        // laço poder parar na amostra. Inspecionar a base nacional do CAR, que é
+        // justamente o primeiro passo, estouraria a memória.
+        using var leitor = Shapefile.OpenRead(caminhoShapefile);
+
+        foreach (var feature in leitor)
         {
             tipoGeometria ??= feature.Geometry?.GeometryType;
 
