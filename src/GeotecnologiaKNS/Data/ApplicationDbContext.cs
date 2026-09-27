@@ -60,6 +60,14 @@ namespace GeotecnologiaKNS.Data
             modelBuilder.Entity<Propriedade>()
                 .HasIndex(x => x.CodigoCar);
 
+            // O nome é opcional no formulário, mas nunca chega nulo ao banco:
+            // quando vem em branco, o serviço do CAR gera um. Declarar
+            // obrigatório aqui mantém a coluna NOT NULL sem tornar o campo
+            // exigido na tela.
+            modelBuilder.Entity<Propriedade>()
+                .Property(x => x.NomePropriedade)
+                .IsRequired();
+
             modelBuilder.Entity<Propriedade>()
                 .HasOne(e => e.Industria)
                 .WithMany(c => c.Propriedades)

@@ -15,7 +15,7 @@ namespace GeotecnologiaKNS.Models
     public class Propriedade : IIndustriaInfo, IPrimaryKeyInfo<int>
     {
         private const string RequiredMessage = "Campo obrigatório";
-        private const string NomeLengthMessage = "O nome deve ter no mínimo 2 e no máximo 100 caracteres";
+        private const string NomeLengthMessage = "O nome deve ter no máximo 100 caracteres";
 
         public int Id { get; set; }
 
@@ -39,10 +39,20 @@ namespace GeotecnologiaKNS.Models
 
         public Produtor? Produtor { get; set; }
 
-        /// <summary>Apelido interno. A base do CAR não tem nome de imóvel.</summary>
+        /// <summary>
+        /// Apelido interno. A base do CAR não tem nome de imóvel, então este
+        /// campo é opcional: em branco, o sistema gera um a partir do município
+        /// e do final do código.
+        /// </summary>
+        /// <remarks>
+        /// Declarado anulável de propósito. Com nullable habilitado, o ASP.NET
+        /// trata string não-anulável como obrigatória e o campo passaria a ser
+        /// exigido no formulário. A coluna segue NOT NULL por configuração no
+        /// ApplicationDbContext, já que o valor é sempre preenchido antes de gravar.
+        /// </remarks>
         [Display(Name = "Nome da propriedade")]
-        [StringLength(100, MinimumLength = 2, ErrorMessage = NomeLengthMessage)]
-        public string NomePropriedade { get; set; } = string.Empty;
+        [StringLength(100, ErrorMessage = NomeLengthMessage)]
+        public string? NomePropriedade { get; set; }
 
         #endregion
 

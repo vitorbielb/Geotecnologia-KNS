@@ -221,7 +221,11 @@ namespace GeotecnologiaKNS.Controllers
                 return NotFound();
             }
 
-            persistida.NomePropriedade = propriedade.NomePropriedade;
+            // Nome em branco na edição significa "manter o que está lá", não apagar.
+            if (!string.IsNullOrWhiteSpace(propriedade.NomePropriedade))
+            {
+                persistida.NomePropriedade = propriedade.NomePropriedade.Trim();
+            }
             persistida.ProdutorId = propriedade.ProdutorId;
             persistida.TipoPropriedade = propriedade.TipoPropriedade;
             persistida.CicloProducao = propriedade.CicloProducao;
