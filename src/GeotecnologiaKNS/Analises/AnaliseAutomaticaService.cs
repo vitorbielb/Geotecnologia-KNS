@@ -89,7 +89,10 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             // continua podendo sobrescrever pela tela de análise — a automação
             // decide o caso comum, não tira a palavra final de quem responde.
             solicitacao.Status = avaliacao.Status;
-            solicitacao.Parecer = avaliacao.Parecer;
+
+            // Resumo, não o laudo: a coluna da solicitação tem 2000 caracteres
+            // e o laudo completo, que não tem limite, fica em analise.Parecer.
+            solicitacao.Parecer = avaliacao.Resumo;
             solicitacao.DataAnalise = DateTime.Now;
             solicitacao.Analista = "Análise automática";
 

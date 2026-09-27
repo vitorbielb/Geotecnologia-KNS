@@ -153,6 +153,48 @@ namespace GeotecnologiaKNS.UnitTests.Analises
         }
 
         [Fact]
+        public void Avaliar_MuitasSobreposicoesDaMesmaCamada_ResumoDeveCaberNaColunaDaSolicitacao()
+        {
+            // Caso real: um imóvel sobre PRODES tocou 11 polígonos da mesma camada
+            // e o laudo completo estourou o limite de 2000 caracteres de
+            // Solicitacao.Parecer, derrubando a gravação com erro de truncamento.
+            var muitas = Enumerable.Range(0, 60)
+                .Select(i => Sobreposicao(TipoCamada.DesmatamentoConsolidado, areaHa: 10 + i, ano: 2024,
+                                          nome: "PRODES Amazônia 2024"))
+                .ToArray();
+
+            var resultado = Avaliar(muitas);
+
+            resultado.Status.Should().Be(Status.Bloqueado);
+            resultado.Resumo.Length.Should().BeLessThanOrEqualTo(2000);
+            resultado.Achados.Should().HaveCount(60, "cada sobreposição continua sendo evidência");
+        }
+
+        [Fact]
+        public void Avaliar_SobreposicoesDaMesmaCamada_ParecerDeveAgruparEmVezDeListarUmaAUma()
+        {
+            var resultado = Avaliar(
+                Sobreposicao(TipoCamada.DesmatamentoConsolidado, areaHa: 100, percentual: 10, ano: 2024, nome: "PRODES 2024"),
+                Sobreposicao(TipoCamada.DesmatamentoConsolidado, areaHa: 50, percentual: 5, ano: 2024, nome: "PRODES 2024"),
+                Sobreposicao(TipoCamada.DesmatamentoConsolidado, areaHa: 25, percentual: 2.5, ano: 2024, nome: "PRODES 2024"));
+
+            // Uma linha por regra+camada, com o total somado — e não três blocos.
+            resultado.Parecer.Should().Contain("175,00 ha");
+            resultado.Parecer.Should().Contain("17,50%");
+            resultado.Parecer.Should().Contain("3 polígono(s)");
+            resultado.Parecer.Should().Contain("1 regra(s) acionada(s), 3 sobreposição(ões)");
+        }
+
+        [Fact]
+        public void Avaliar_SemAchados_ResumoDeveDizerLiberado()
+        {
+            var resultado = Avaliar();
+
+            resultado.Resumo.Should().Contain("LIBERADO");
+            resultado.Resumo.Length.Should().BeLessThanOrEqualTo(2000);
+        }
+
+        [Fact]
         public void Satisfeita_TipoDiferente_DeveSerFalso()
         {
             var regra = new RegraAnalise { Tipo = TipoCamada.TerraIndigena, Severidade = Severidade.Bloqueio };
