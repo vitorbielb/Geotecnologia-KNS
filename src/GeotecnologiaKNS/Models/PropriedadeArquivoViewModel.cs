@@ -7,6 +7,8 @@ namespace GeotecnologiaKNS.Models
     {
         public override PropriedadeArquivo Model => new()
         {
+            TenantId = TenantId,
+
             VinculoId = VinculoId,
             ContentType = ContentType,
             Dados = Dados,

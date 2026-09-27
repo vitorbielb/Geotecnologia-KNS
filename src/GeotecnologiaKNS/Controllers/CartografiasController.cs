@@ -113,6 +113,7 @@ namespace GeotecnologiaKNS.Controllers
             return View(cartografia);
         }
         [HttpPost, ActionName("Upload")]
+        [TenantFilter]
         public async Task<ActionResult> UploadAsync(CartografiaArquivoViewModel arquivo)
         {
 

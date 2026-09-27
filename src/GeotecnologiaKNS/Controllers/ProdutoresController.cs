@@ -143,6 +143,7 @@ public class ProdutoresController : Controller
     }
 
     [HttpPost, ActionName("Upload")]
+    [TenantFilter]
     public async Task<ActionResult> UploadAsync(ProdutorArquivoViewModel arquivo)
     {
         if (!ModelState.IsValid)

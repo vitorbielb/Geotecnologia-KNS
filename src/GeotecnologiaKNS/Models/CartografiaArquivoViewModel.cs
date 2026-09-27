@@ -8,6 +8,8 @@ namespace GeotecnologiaKNS.Models
         public string Tipo { get; set; }
         public override CartografiaArquivo Model => new()
         {
+            TenantId = TenantId,
+
             VinculoId = VinculoId,
             ContentType = ContentType,
             Dados = Dados,

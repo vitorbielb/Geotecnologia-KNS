@@ -285,6 +285,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         [HttpPost, ActionName("Upload")]
+
         public async Task<ActionResult> UploadAsync(PropriedadeArquivoViewModel arquivo)
         {
             if (!ModelState.IsValid)

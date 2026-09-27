@@ -107,6 +107,29 @@ namespace GeotecnologiaKNS.Data
             modelBuilder.Entity<Cartografia>()
                 .HasMany(x => x.Arquivos);
 
+            // Documentos: os endpoints de download buscam pelo Id inteiro, então
+            // sem filtro global era possível ler e apagar arquivo de outra
+            // indústria só iterando o Id. Filtrar aqui vale para qualquer
+            // consulta, inclusive as que ainda não foram escritas.
+            modelBuilder.Entity<ProdutorArquivo>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            modelBuilder.Entity<PropriedadeArquivo>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            modelBuilder.Entity<AnaliseArquivo>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            modelBuilder.Entity<CartografiaArquivo>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            // O filtro acima entra em toda consulta de documento; sem índice,
+            // cada download varreria a tabela inteira.
+            modelBuilder.Entity<ProdutorArquivo>().HasIndex(x => x.TenantId);
+            modelBuilder.Entity<PropriedadeArquivo>().HasIndex(x => x.TenantId);
+            modelBuilder.Entity<AnaliseArquivo>().HasIndex(x => x.TenantId);
+            modelBuilder.Entity<CartografiaArquivo>().HasIndex(x => x.TenantId);
+
             modelBuilder.Entity<AnaliseAutomatica>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
 
