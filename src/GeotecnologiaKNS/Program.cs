@@ -6,8 +6,10 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar a conexão com o banco de dados
-builder.Configuration.AddJsonFile("appsettings.json");
+// Não adicionar appsettings.json aqui: CreateBuilder já o carregou, e recarregá-lo
+// o coloca no fim da cadeia, com prioridade sobre user-secrets e variáveis de
+// ambiente. Era por isso que um valor vazio no arquivo vencia o segredo
+// configurado — e, em produção, venceria a variável de ambiente.
 
 // Adicionar serviços ao contêiner
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
