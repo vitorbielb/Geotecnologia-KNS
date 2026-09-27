@@ -314,7 +314,10 @@ namespace GeotecnologiaKNS.Controllers
 
             if (arquivo == null)
             {
-                return Problem();
+                // NotFound e não Problem: o documento pode simplesmente não existir, ou
+                // pertencer a outra indústria e ser filtrado. Nenhum dos dois é erro
+                // do servidor, e devolver 500 ainda poluiria o monitoramento.
+                return NotFound();
             }
 
             var produtor = await _context.Propriedades
@@ -334,7 +337,10 @@ namespace GeotecnologiaKNS.Controllers
 
             if (arquivo == null)
             {
-                return Problem();
+                // NotFound e não Problem: o documento pode simplesmente não existir, ou
+                // pertencer a outra indústria e ser filtrado. Nenhum dos dois é erro
+                // do servidor, e devolver 500 ainda poluiria o monitoramento.
+                return NotFound();
             }
 
             return File(arquivo.Dados, arquivo.ContentType);
