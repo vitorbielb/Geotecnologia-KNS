@@ -159,10 +159,48 @@ namespace GeotecnologiaKNS.Data
                 .HasForeignKey(e => e.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Papéis internos são globais (TenantId 0) e precisam ser visíveis a
+            // todas as indústrias — sem isso o administrador do cliente não
+            // conseguia atribuir Solicitante nem Analista, porque o filtro exigia
+            // igualdade com o tenant dele.
+            //
+            // O filtro trata só de inquilino; quem pode administrar papéis é
+            // decisão da policy no controller. Misturar as duas coisas foi o que
+            // produziu aquele defeito.
+            //
+            // Administrador fica de fora: é o papel de administração da própria
+            // aplicação, e nenhum cliente deve poder concedê-lo.
             modelBuilder.Entity<ApplicationRole>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue ||
                                      _userContext.IsApplicationAdmin ||
-                                     (x.Name != nameof(Infra.Roles.Administrador) && _userContext.IsTenantAdmin && x.TenantId == _userContext.TenantId));
+                                     x.TenantId == _userContext.TenantId ||
+                                     (x.TenantId == RoleGlobal.TenantId && x.Name != nameof(Infra.Roles.Administrador)));
+
+            // O Identity cria índice único global em NormalizedName, o que impedia
+            // duas indústrias de terem um papel com o mesmo nome — a segunda
+            // recebia erro de chave duplicada por causa de um registro que ela
+            // sequer podia ver. A unicidade passa a ser por inquilino.
+            //
+            // O índice da classe base precisa ser removido explicitamente: os dois
+            // usam o nome RoleNameIndex e o EF recusa mapear colunas diferentes
+            // para o mesmo índice.
+            var tipoRole = modelBuilder.Entity<ApplicationRole>().Metadata;
+            var propriedadeNome = tipoRole.FindProperty(nameof(ApplicationRole.NormalizedName));
+
+            if (propriedadeNome is not null)
+            {
+                var indiceGlobal = tipoRole.FindIndex(propriedadeNome);
+
+                if (indiceGlobal is not null)
+                {
+                    tipoRole.RemoveIndex(indiceGlobal);
+                }
+            }
+
+            modelBuilder.Entity<ApplicationRole>()
+                .HasIndex(x => new { x.TenantId, x.NormalizedName })
+                .HasDatabaseName("RoleNameIndex")
+                .IsUnique();
 
             modelBuilder.Entity<ApplicationRole>()
                 .HasMany(x => x.Claims)
