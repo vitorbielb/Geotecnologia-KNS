@@ -14,7 +14,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
     <link rel="icon" type="image/png" href="~/images/favicon.png" />
-    <partial name="_temaScript" />
+    @* Sem tema aqui de propósito: as telas de fora do sistema (login e o
+       primeiro acesso) têm identidade própria e ficam sempre claras. O
+       _temaScript, no layout interno, também herdava o tema do sistema
+       operacional — quem usa o Windows no escuro abria o login escurecido
+       sem nunca ter escolhido isso. *@
 </head>
 <body>
     @RenderBody()
@@ -34,8 +38,6 @@
     <script src="~/js/dataTables.bootstrap4.js"></script>
     <script src="~/js/jquery.cookie.js" type="text/javascript"></script>
     <script src="~/js/file-upload.js"></script>
-    <script src="~/js/tema.js" asp-append-version="true"></script>
-    <script src="~/js/tema-componentes.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

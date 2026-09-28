@@ -1238,13 +1238,3 @@ textarea.form-control {
 
 :root[data-tema="escuro"] .kns-tema .kns-tema__escuro { display: none; }
 :root[data-tema="escuro"] .kns-tema .kns-tema__claro { display: inline-block; }
-
-/* Versão flutuante, para a tela de login, que não tem navbar. */
-.kns-tema--flutuante {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 20;
-    background: var(--kns-superficie);
-    box-shadow: var(--kns-sombra);
-}
