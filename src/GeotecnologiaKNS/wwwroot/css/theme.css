@@ -102,6 +102,9 @@ select:focus-visible {
 
 .navbar .navbar-brand-wrapper {
     background: var(--kns-superficie) !important;
+    /* O template também põe uma borda inferior cinza fixa aqui; ela cortava a
+       marca do resto da barra com um traço claro no tema escuro. */
+    border-bottom: 0;
     border-right: 1px solid var(--kns-linha);
     width: 248px;
     height: 66px;
@@ -194,6 +197,15 @@ select:focus-visible {
 .sidebar .nav .nav-item {
     padding: 0 12px;
     margin-bottom: 1px;
+}
+
+/* O template risca uma divisória sob cada item do menu, num cinza fixo
+   (#f3f3f3) que ele nunca revê. No claro ela some no branco do painel; no
+   escuro vira um traço branco atravessando a barra inteira, item a item. A
+   separação aqui já vem do espaçamento e da pílula do item ativo, então a
+   divisória sai — o seletor repete o do template para ter o mesmo peso. */
+.sidebar .nav:not(.sub-menu) > .nav-item {
+    border-bottom: 0;
 }
 
 .sidebar .nav .nav-item .nav-link {
@@ -640,6 +652,13 @@ textarea.form-control {
 .input-group .btn {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+}
+
+/* Mesmo caso das divisórias do menu: o traço em que as abas se apoiam vinha
+   de um cinza fixo (#ebedf2) e aparecia branco no tema escuro. Aqui a linha
+   é necessária — as abas precisam de base —, então passa a usar o token. */
+.nav-tabs {
+    border-bottom: 1px solid var(--kns-linha);
 }
 
 /* ==========================================================================
@@ -1136,6 +1155,17 @@ textarea.form-control {
 
 :root[data-tema="escuro"] .sidebar {
     background: var(--kns-superficie);
+}
+
+/* Rede de segurança: as classes utilitárias de borda do template pintam com
+   #f3f3f3 e com !important. Onde alguma tela as usar, a cor passa a ser a do
+   tema em vez de um risco claro. */
+:root[data-tema="escuro"] .border,
+:root[data-tema="escuro"] .border-top,
+:root[data-tema="escuro"] .border-right,
+:root[data-tema="escuro"] .border-bottom,
+:root[data-tema="escuro"] .border-left {
+    border-color: var(--kns-linha) !important;
 }
 
 :root[data-tema="escuro"] .dropdown-menu,
