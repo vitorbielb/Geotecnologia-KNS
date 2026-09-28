@@ -72,7 +72,24 @@ namespace GeotecnologiaKNS.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            await _userManager.AddToRoleAsync(user, viewModel.Role);
+            var vinculo = await _userManager.AddToRoleAsync(user, viewModel.Role);
+
+            if (!vinculo.Succeeded)
+            {
+                // O resultado era descartado: quando o Identity recusava o
+                // vínculo, o usuário ficava gravado sem papel algum — entrava
+                // no sistema e não enxergava nada, sem nenhum aviso a quem o
+                // cadastrou. Desfaz e mostra o motivo.
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+
+                foreach (var erro in vinculo.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, erro.Description);
+                }
+
+                return View(viewModel);
+            }
 
             return RedirectToAction(nameof(Index));
         }

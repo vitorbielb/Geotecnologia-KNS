@@ -19,7 +19,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>()
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+                {
+                    // O UserName aqui é o nome da pessoa, não um apelido de
+                    // login — quem entra no sistema usa o e-mail. O conjunto
+                    // padrão do Identity não tem espaço nem acento, e isso
+                    // reprovava "Ana Prado" ou "João Gonçalves" na hora de
+                    // atribuir o papel, deixando o usuário sem permissão
+                    // nenhuma.
+                    options.User.AllowedUserNameCharacters =
+                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+" +
+                        "áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ' ";
+                })
                 .AddUserManager<UserManager<ApplicationUser>>()
                 .AddRoles<ApplicationRole>()
                 .AddClaimsPrincipalFactory<AppClaimsPrincipalFactory>()
