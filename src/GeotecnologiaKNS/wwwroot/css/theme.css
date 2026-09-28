@@ -124,6 +124,11 @@ select:focus-visible {
 
 .navbar .navbar-menu-wrapper {
     background: var(--kns-superficie) !important;
+    /* Terceira borda cinza fixa do template, esta cruzando toda a largura sob
+       a barra superior. Não precisa existir: a barra usa a cor de superfície e
+       o conteúdo, a de fundo — a diferença de tom já separa os dois, nos dois
+       temas. */
+    border-bottom: 0;
     height: 66px;
     padding-left: 24px;
     padding-right: 24px;
