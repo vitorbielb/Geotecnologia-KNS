@@ -33,6 +33,7 @@ public static class GeoDiExtension
         services.AddScoped<IIntersecaoService, IntersecaoService>();
         services.AddScoped<SicarShapefileImporter>();
         services.AddScoped<CamadaShapefileImporter>();
+        services.AddScoped<EmbargoIbamaImporter>();
 
         return services;
     }

@@ -82,6 +82,9 @@ try
         case "importar-camada":
             return await ImportarCamadaAsync(scope.ServiceProvider, configuration);
 
+        case "importar-embargo":
+            return await ImportarEmbargoAsync(scope.ServiceProvider, configuration);
+
         case "camadas":
             return await ListarCamadasAsync(scope.ServiceProvider);
 
@@ -103,6 +106,7 @@ try
             Console.Error.WriteLine("  consultar --car <codigo>");
             Console.Error.WriteLine("  importar-camada --arquivo <caminho.shp> --chave <chave> --nome <nome>");
             Console.Error.WriteLine("                  --tipo <tipo> --origem <origem> [--ano <ano>]");
+            Console.Error.WriteLine("  importar-embargo --arquivo <termo_de_embargo.csv>");
             Console.Error.WriteLine("  camadas");
             Console.Error.WriteLine("  cruzar --car <codigo>");
             Console.Error.WriteLine("  simular-car --car <codigo> [--area-ha 1000]");
@@ -661,6 +665,36 @@ static async Task<int> ConsultarAsync(IServiceProvider provider, IConfiguration 
     Console.WriteLine($"Situação:  {imovel.Situacao}");
     Console.WriteLine($"Centro:    {imovel.CentroLat}, {imovel.CentroLng}");
     Console.WriteLine($"Origem:    {imovel.Origem} (carga de {imovel.BaseCarregadaEm:yyyy-MM-dd})");
+
+    return 0;
+}
+
+static async Task<int> ImportarEmbargoAsync(IServiceProvider provider, IConfiguration configuration)
+{
+    var arquivo = configuration["arquivo"];
+
+    if (string.IsNullOrWhiteSpace(arquivo))
+    {
+        Console.Error.WriteLine("Informe --arquivo com o CSV de termos de embargo do IBAMA.");
+        Console.Error.WriteLine("Baixe em: https://dadosabertos.ibama.gov.br/dataset/fiscalizacao-termo-de-embargo");
+        Console.Error.WriteLine("Recurso: 'Termos de embargo' (termo_de_embargo.csv)");
+        return 1;
+    }
+
+    var importer = provider.GetRequiredService<EmbargoIbamaImporter>();
+    var relogio = System.Diagnostics.Stopwatch.StartNew();
+
+    var resultado = await importer.ImportarAsync(arquivo);
+
+    relogio.Stop();
+
+    Console.WriteLine($"Camada de embargos (id {resultado.CamadaId}):");
+    Console.WriteLine($"  Lidos          : {resultado.Lidos:N0}");
+    Console.WriteLine($"  Gravados       : {resultado.Gravados:N0}");
+    Console.WriteLine($"  Cancelados     : {resultado.Cancelados:N0}  (embargo desfeito pelo IBAMA)");
+    Console.WriteLine($"  Sem geometria  : {resultado.SemGeometria:N0}  (termo sem area delimitada)");
+    Console.WriteLine($"  Invalidos      : {resultado.Invalidos:N0}  (WKT que nao pode ser lido)");
+    Console.WriteLine($"  Tempo          : {relogio.Elapsed.TotalSeconds:N1}s");
 
     return 0;
 }
