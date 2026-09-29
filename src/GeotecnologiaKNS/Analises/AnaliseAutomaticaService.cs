@@ -79,6 +79,11 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             analise.Resultado = avaliacao.Status;
             analise.Parecer = avaliacao.Parecer;
             analise.CamadasVerificadas = await DescreverCamadasAsync(cancellationToken);
+            analise.CoberturaCompleta = avaliacao.CoberturaCompleta;
+            analise.RegrasNaoAvaliadas = avaliacao.NaoAvaliadas.Count == 0
+                ? null
+                : string.Join(Environment.NewLine, avaliacao.NaoAvaliadas.Select(
+                    r => $"{r.CodigoRegra} — {r.Descricao}"));
             analise.Situacao = SituacaoAnalise.Concluida;
             analise.ConcluidaEm = DateTime.Now;
 
@@ -111,6 +116,16 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             _logger.LogInformation(
                 "Análise {AnaliseId} da solicitação {SolicitacaoId}: {Resultado} com {Ocorrencias} ocorrência(s).",
                 analise.Id, solicitacaoId, avaliacao.Status, avaliacao.Achados.Count);
+
+            if (!avaliacao.CoberturaCompleta)
+            {
+                _logger.LogWarning(
+                    "Análise {AnaliseId} saiu com cobertura parcial: {Quantidade} regra(s) sem camada ({Regras}). " +
+                    "Carregue as camadas correspondentes e reprocesse.",
+                    analise.Id,
+                    avaliacao.NaoAvaliadas.Count,
+                    string.Join(", ", avaliacao.NaoAvaliadas.Select(r => r.CodigoRegra)));
+            }
         }
         catch (Exception ex)
         {

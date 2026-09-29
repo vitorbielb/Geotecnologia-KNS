@@ -32,6 +32,28 @@
             }
         </p>
 
+        @* Cobertura parcial vem antes de tudo: um laudo sem ocorrências se lê
+           como aprovação, e é exatamente aí que a omissão engana. *@
+        @if (Model.Situacao == SituacaoAnalise.Concluida && !Model.CoberturaCompleta)
+        {
+            <div class="alert alert-warning">
+                <strong>Verificação incompleta.</strong>
+                As regras abaixo não puderam ser aplicadas porque nenhuma camada do
+                tipo que elas examinam estava carregada. O que não aparece nesta
+                análise não foi verificado — não é ausência de restrição.
+                @if (!string.IsNullOrWhiteSpace(Model.RegrasNaoAvaliadas))
+                {
+                    <ul class="mb-0 mt-2">
+                        @foreach (var regra in Model.RegrasNaoAvaliadas.Split('\n',
+                            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        {
+                            <li>@regra</li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+
         @if (Model.Situacao == SituacaoAnalise.Falhou)
         {
             <div class="alert alert-danger">
@@ -42,10 +64,17 @@
                 e a análise seja executada novamente.
             </div>
         }
-        else if (Model.Ocorrencias.Count == 0)
+        else if (Model.Ocorrencias.Count == 0 && Model.CoberturaCompleta)
         {
             <div class="alert alert-success mb-0">
                 Nenhuma sobreposição restritiva encontrada nas camadas verificadas.
+            </div>
+        }
+        else if (Model.Ocorrencias.Count == 0)
+        {
+            <div class="alert alert-info mb-0">
+                Nenhuma sobreposição nas camadas disponíveis. O resultado não é uma
+                liberação — veja acima o que ficou sem verificação.
             </div>
         }
         else

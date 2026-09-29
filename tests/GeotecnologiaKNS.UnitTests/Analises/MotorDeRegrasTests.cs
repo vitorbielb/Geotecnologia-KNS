@@ -29,8 +29,16 @@ namespace GeotecnologiaKNS.UnitTests.Analises
                 AreaSobrepostaHa: areaHa,
                 PercentualDoImovel: percentual);
 
+        /// <summary>
+        /// Todos os tipos que o protocolo padrão examina. Os testes de regra
+        /// partem de cobertura completa para isolar o que estão medindo — a
+        /// cobertura parcial tem testes próprios, mais abaixo.
+        /// </summary>
+        private static IReadOnlyList<TipoCamada> TodosOsTipos =>
+            PoliticaAnalise.Padrao().Regras.Select(r => r.Tipo).Distinct().ToList();
+
         private static ResultadoCruzamento Cruzamento(params Sobreposicao[] sobreposicoes) =>
-            new(Car, AreaImovelHa: 1000, sobreposicoes, DateTime.UtcNow);
+            new(Car, AreaImovelHa: 1000, sobreposicoes, DateTime.UtcNow, TodosOsTipos);
 
         private static ResultadoAvaliacao Avaliar(params Sobreposicao[] sobreposicoes) =>
             new MotorDeRegras().Avaliar(Cruzamento(sobreposicoes), PoliticaAnalise.Padrao());
@@ -231,5 +239,97 @@ namespace GeotecnologiaKNS.UnitTests.Analises
             regra.Satisfeita(Sobreposicao(TipoCamada.OutroPerimetro, areaHa: 3, percentual: 0.5))
                  .Should().BeFalse();
         }
+
+        #region Cobertura parcial
+
+        /// <summary>
+        /// Cruzamento com só um tipo de camada carregado — a situação real hoje,
+        /// em que existe PRODES e mais nada.
+        /// </summary>
+        private static ResultadoAvaliacao AvaliarComApenas(
+            TipoCamada tipoDisponivel,
+            params Sobreposicao[] sobreposicoes) =>
+            new MotorDeRegras().Avaliar(
+                new ResultadoCruzamento(Car, 1000, sobreposicoes, DateTime.UtcNow, new[] { tipoDisponivel }),
+                PoliticaAnalise.Padrao());
+
+        [Fact]
+        public void Avaliar_SemCamadaParaUmaRegra_NaoDeveLiberar()
+        {
+            // O ponto da mudança: sem isso, um imóvel confrontado apenas com
+            // desmatamento saía LIBERADO como se tivesse passado por todas as
+            // regras — inclusive embargo e terra indígena, que nem foram olhadas.
+            var resultado = AvaliarComApenas(TipoCamada.DesmatamentoConsolidado);
+
+            resultado.Achados.Should().BeEmpty();
+            resultado.Status.Should().NotBe(Status.Liberado);
+            resultado.Status.Should().Be(Status.Alerta);
+            resultado.CoberturaCompleta.Should().BeFalse();
+        }
+
+        [Fact]
+        public void Avaliar_SemCamadaParaUmaRegra_DeveNomearOQueNaoFoiVerificado()
+        {
+            var resultado = AvaliarComApenas(TipoCamada.DesmatamentoConsolidado);
+
+            resultado.NaoAvaliadas.Should().NotBeEmpty();
+            resultado.NaoAvaliadas.Should().Contain(r => r.Tipo == TipoCamada.EmbargoAmbiental);
+            resultado.NaoAvaliadas.Should().Contain(r => r.Tipo == TipoCamada.TerraIndigena);
+            resultado.NaoAvaliadas.Should().NotContain(r => r.Tipo == TipoCamada.DesmatamentoConsolidado);
+
+            resultado.Parecer.Should().Contain("REGRAS NÃO AVALIADAS");
+            resultado.Parecer.Should().Contain("terra indígena");
+            resultado.Resumo.Should().Contain("COBERTURA PARCIAL");
+        }
+
+        [Fact]
+        public void Avaliar_SemCamadaParaUmaRegra_NaoDeveDizerLiberadoNoLaudo()
+        {
+            var resultado = AvaliarComApenas(TipoCamada.DesmatamentoConsolidado);
+
+            // A palavra sozinha já induz a erro em quem só bate o olho no laudo.
+            resultado.Parecer.Should().NotContain("LIBERADO");
+            resultado.Parecer.Should().Contain("não é uma liberação");
+        }
+
+        [Fact]
+        public void Avaliar_BloqueioComCoberturaParcial_DeveContinuarBloqueando()
+        {
+            // Evidência de bloqueio é conclusiva por si: o que falta verificar
+            // só poderia piorar o caso, nunca melhorá-lo.
+            var resultado = AvaliarComApenas(
+                TipoCamada.EmbargoAmbiental,
+                Sobreposicao(TipoCamada.EmbargoAmbiental, areaHa: 50, percentual: 5));
+
+            resultado.Status.Should().Be(Status.Bloqueado);
+            resultado.CoberturaCompleta.Should().BeFalse();
+            resultado.Parecer.Should().Contain("REGRAS NÃO AVALIADAS");
+        }
+
+        [Fact]
+        public void Avaliar_CoberturaCompletaSemAchado_DeveLiberarComoAntes()
+        {
+            var resultado = Avaliar();
+
+            resultado.Status.Should().Be(Status.Liberado);
+            resultado.CoberturaCompleta.Should().BeTrue();
+            resultado.NaoAvaliadas.Should().BeEmpty();
+            resultado.Parecer.Should().Contain("LIBERADO");
+            resultado.Resumo.Should().NotContain("COBERTURA PARCIAL");
+        }
+
+        [Fact]
+        public void Avaliar_SemCamadaAlguma_NaoDeveLiberar()
+        {
+            var resultado = new MotorDeRegras().Avaliar(
+                new ResultadoCruzamento(Car, 1000, Array.Empty<Sobreposicao>(),
+                    DateTime.UtcNow, Array.Empty<TipoCamada>()),
+                PoliticaAnalise.Padrao());
+
+            resultado.Status.Should().Be(Status.Alerta);
+            resultado.NaoAvaliadas.Should().HaveCount(PoliticaAnalise.Padrao().Regras.Count);
+        }
+
+        #endregion
     }
 }

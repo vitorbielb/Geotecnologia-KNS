@@ -19,11 +19,17 @@ public record Sobreposicao(
     double AreaSobrepostaHa,
     double PercentualDoImovel);
 
+/// <param name="TiposVerificados">
+/// Tipos de camada que existiam e foram de fato cruzados. Ausência de
+/// sobreposição só significa "nada encontrado" para um tipo que está nesta
+/// lista; para os demais, significa que não houve o que consultar.
+/// </param>
 public record ResultadoCruzamento(
     string CodigoCar,
     double AreaImovelHa,
     IReadOnlyList<Sobreposicao> Sobreposicoes,
-    DateTime ExecutadoEm);
+    DateTime ExecutadoEm,
+    IReadOnlyList<TipoCamada> TiposVerificados);
 
 public interface IIntersecaoService
 {
@@ -59,7 +65,18 @@ public class IntersecaoService : IIntersecaoService
 
         var sobreposicoes = await ConsultarSobreposicoesAsync(normalizado, areaImovel.Value, cancellationToken);
 
-        return new ResultadoCruzamento(normalizado, areaImovel.Value, sobreposicoes, DateTime.UtcNow);
+        // O que foi consultado importa tanto quanto o que foi encontrado: sem
+        // esta lista, "nenhuma sobreposição" fica indistinguível de "não havia
+        // base para consultar".
+        var tiposVerificados = await _context.Camadas
+            .AsNoTracking()
+            .Where(x => x.Ativa)
+            .Select(x => x.Tipo)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return new ResultadoCruzamento(
+            normalizado, areaImovel.Value, sobreposicoes, DateTime.UtcNow, tiposVerificados);
     }
 
     public async Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(CancellationToken cancellationToken = default)

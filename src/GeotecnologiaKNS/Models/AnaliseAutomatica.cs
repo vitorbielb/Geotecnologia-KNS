@@ -68,6 +68,21 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Camadas verificadas")]
         public string? CamadasVerificadas { get; set; }
 
+        /// <summary>
+        /// Todas as regras da política puderam ser aplicadas nesta execução.
+        /// </summary>
+        /// <remarks>
+        /// Guardado como coluna, e não só no texto do parecer, para que seja
+        /// possível perguntar ao banco quais laudos foram emitidos com cobertura
+        /// parcial — e refazê-los quando a camada que faltava for carregada.
+        /// </remarks>
+        [Display(Name = "Cobertura completa")]
+        public bool CoberturaCompleta { get; set; }
+
+        /// <summary>Regras que ficaram sem base para consulta, uma por linha.</summary>
+        [Display(Name = "Regras não avaliadas")]
+        public string? RegrasNaoAvaliadas { get; set; }
+
         public string? Erro { get; set; }
 
         public DateTime IniciadaEm { get; set; } = DateTime.Now;

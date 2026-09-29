@@ -130,7 +130,13 @@ namespace GeotecnologiaKNS.UnitTests.Analises
                 "prodes", "PRODES 2024", TipoCamada.DesmatamentoConsolidado, "INPE",
                 2024, "polígono", null, 100, 10);
 
-            var cruzamento = new ResultadoCruzamento("MT-1-X", 1000, new[] { sobreposicao }, DateTime.UtcNow);
+            // Cobertura completa de propósito: o que este teste mede é a política
+            // por inquilino, e uma lacuna de camada mudaria o veredito por outro
+            // motivo, mascarando o que se quer provar.
+            var todosOsTipos = PoliticaAnalise.Padrao().Regras.Select(r => r.Tipo).Distinct().ToList();
+
+            var cruzamento = new ResultadoCruzamento(
+                "MT-1-X", 1000, new[] { sobreposicao }, DateTime.UtcNow, todosOsTipos);
 
             var vereditoA = motor.Avaliar(cruzamento, await repositorio.ObterDoTenantAsync(TenantA));
             var vereditoB = motor.Avaliar(cruzamento, await repositorio.ObterDoTenantAsync(TenantB));
