@@ -62,7 +62,7 @@ namespace GeotecnologiaKNS.UnitTests.Infra
 
             // assert
             claims.Should().Contain(c => c.Type == "Solicitacao.Update" && c.Value == "enabled");
-            claims.Should().Contain(c => c.Type == "Cartografia.Create" && c.Value == "enabled");
+            claims.Should().Contain(c => c.Type == "Solicitacao.Read" && c.Value == "enabled");
             claims.Should().Contain(c => c.Type == "Tenant.Create" && c.Value == "disabled");
         }
     }

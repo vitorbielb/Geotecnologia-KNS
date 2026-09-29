@@ -68,7 +68,6 @@ builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
     options.AddPolicy("UserCanUpdateSolicitacoes", policy => policy.RequireOperation(x => x.Solicitacao.Update));
-    options.AddPolicy("UserCanUpdateCartografias", policy => policy.RequireOperation(x => x.Cartografia.Update));
     options.AddPolicy("UserCanTenantCreate", policy => policy.RequireOperation(x => x.Tenant.Create));
     options.AddPolicy("UserCanUserCreate", policy => policy.RequireOperation(x => x.User.Create));
 });
@@ -78,7 +77,6 @@ builder.Services.AddScoped<IIndustriaRepository, IndustriaRepository>();
 builder.Services.AddScoped<ISolicitacaoRepository, SolicitacaoRepository>();
 builder.Services.AddScoped<IProdutorRepository, ProdutorRepository>();
 builder.Services.AddScoped<IPropriedadeRepository, PropriedadeRepository>();
-builder.Services.AddScoped<ICartografiaRepository, CartografiaRepository>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));

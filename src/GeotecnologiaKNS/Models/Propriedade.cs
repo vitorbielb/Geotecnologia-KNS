@@ -132,8 +132,6 @@ namespace GeotecnologiaKNS.Models
         [Obsolete("O perímetro passou a vir da base do CAR. Use PerimetroGeoJson.")]
         public Geozone? Geozone { get; set; }
 
-        public Cartografia? Cartografia { get; set; }
-
         /// <summary>Indica se o imóvel já teve o perímetro resolvido pela base do CAR.</summary>
         [NotMapped]
         public bool TemPerimetro => !string.IsNullOrWhiteSpace(PerimetroGeoJson);

@@ -61,10 +61,6 @@ namespace GeotecnologiaKNS.UnitTests.Data
                 new AnaliseArquivo { Id = 1, TenantId = TenantA, VinculoId = 1, Descricao = "laudo-do-A.pdf", Dados = new byte[] { 1 }, ContentType = "application/pdf" },
                 new AnaliseArquivo { Id = 2, TenantId = TenantB, VinculoId = 2, Descricao = "laudo-do-B.pdf", Dados = new byte[] { 2 }, ContentType = "application/pdf" });
 
-            contexto.CartografiasArquivos.AddRange(
-                new CartografiaArquivo { Id = 1, TenantId = TenantA, VinculoId = 1, Descricao = "mapa-do-A.pdf", Dados = new byte[] { 1 }, ContentType = "application/pdf", Tipo = "SUC" },
-                new CartografiaArquivo { Id = 2, TenantId = TenantB, VinculoId = 2, Descricao = "mapa-do-B.pdf", Dados = new byte[] { 2 }, ContentType = "application/pdf", Tipo = "SUC" });
-
             contexto.SaveChanges();
             return banco;
         }
@@ -99,15 +95,6 @@ namespace GeotecnologiaKNS.UnitTests.Data
             using var contexto = Contexto(banco, TenantA);
 
             (await contexto.AnalisesArquivos.FirstOrDefaultAsync(x => x.Id == 2)).Should().BeNull();
-        }
-
-        [Fact]
-        public async Task Cartografia_DeOutroTenant_NaoDeveSerAlcancavelPeloId()
-        {
-            var banco = SemearDoisTenants();
-            using var contexto = Contexto(banco, TenantA);
-
-            (await contexto.CartografiasArquivos.FirstOrDefaultAsync(x => x.Id == 2)).Should().BeNull();
         }
 
         [Fact]

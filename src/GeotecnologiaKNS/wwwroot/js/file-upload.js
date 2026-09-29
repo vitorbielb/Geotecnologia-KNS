@@ -14,11 +14,7 @@ function uploadfile(vinculoId) {
     enviarArquivo(vinculoId);
 }
 
-function uploadCartografiafile(vinculoId, tipo) {
-    enviarArquivo(vinculoId, tipo);
-}
-
-function enviarArquivo(vinculoId, tipo) {
+function enviarArquivo(vinculoId) {
     const input = $('.file-upload-default')[0];
     const file = input && input.files ? input.files[0] : null;
 
@@ -41,10 +37,6 @@ function enviarArquivo(vinculoId, tipo) {
     formData.append('Descricao', file.name);
     formData.append('ContentType', file.type);
     formData.append('Dados', file, file.name);
-
-    if (tipo) {
-        formData.append('Tipo', tipo);
-    }
 
     $.ajax({
         type: 'POST',

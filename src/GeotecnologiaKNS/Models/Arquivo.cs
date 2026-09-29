@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace GeotecnologiaKNS.Models
 {
     /// <summary>
-    /// Documento anexado a um produtor, imóvel, análise ou cartografia.
+    /// Documento anexado a um produtor, imóvel ou análise.
     /// </summary>
     /// <remarks>
     /// O TenantId é repetido aqui, embora já esteja no registro-pai. A razão é
@@ -42,11 +42,5 @@ namespace GeotecnologiaKNS.Models
     {
         [ForeignKey("Analise")] public override int VinculoId { get; set; }
         public DateTime? DataAnalise { get; set; } = DateTime.Now;
-    }
-    public class CartografiaArquivo : Arquivo
-    {
-        [ForeignKey("Cartografia")] public override int VinculoId { get; set; }
-        public DateTime? DataCartografia { get; set; } = DateTime.Now;
-        public string Tipo { get; set; }
     }
 }

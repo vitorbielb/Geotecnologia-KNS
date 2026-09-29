@@ -62,13 +62,6 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link @Ativo("Cartografias")" href="@Url.Action("Index", "Cartografias")">
-                <i class="mdi mdi-layers-outline menu-icon"></i>
-                <span class="menu-title">Cartografias</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
             <a class="nav-link" data-bs-toggle="collapse" href="#ui-validacao"
                aria-expanded="@(GrupoAberto("Produtores", "Propriedades") && action.StartsWith("Analise", StringComparison.OrdinalIgnoreCase) ? "true" : "false")"
                aria-controls="ui-validacao">

@@ -29,32 +29,6 @@ namespace GeotecnologiaKNS.Utils
         }
     }
 
-    internal class CartografiaArquivoEntityBinder : IModelBinder
-    {
-        public async Task BindModelAsync(ModelBindingContext bindingContext)
-        {
-            ArgumentNullException.ThrowIfNull(bindingContext);
-
-            var upload = await ArquivoUpload.LerAsync(bindingContext);
-
-            if (upload is null)
-            {
-                return;
-            }
-
-            var model = new CartografiaArquivoViewModel
-            {
-                Tipo = upload.Form["Tipo"].ToString(),
-                VinculoId = upload.VinculoId,
-                Descricao = upload.Descricao,
-                ContentType = upload.ContentType,
-                Dados = upload.Dados
-            };
-
-            bindingContext.Result = ModelBindingResult.Success(model);
-        }
-    }
-
     /// <summary>
     /// Leitura comum do formulário de upload: valida o vínculo e lê o arquivo
     /// enviado como multipart (campo <c>Dados</c>).

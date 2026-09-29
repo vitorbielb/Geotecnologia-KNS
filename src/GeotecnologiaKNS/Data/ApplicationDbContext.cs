@@ -28,8 +28,6 @@ namespace GeotecnologiaKNS.Data
         public DbSet<AnaliseArquivo> AnalisesArquivos { get; set; }
         public DbSet<Solicitacao> Solicitacao { get; set; }
         public DbSet<Geozone> Geozones { get; set; }
-        public DbSet<CartografiaArquivo> CartografiasArquivos { get; set; }
-        public DbSet<Cartografia> Cartografias { get; set; }
         public DbSet<AnaliseAutomatica> AnalisesAutomaticas { get; set; }
         public DbSet<AnaliseOcorrencia> AnalisesOcorrencias { get; set; }
         public DbSet<PoliticaTenant> Politicas { get; set; }
@@ -97,18 +95,6 @@ namespace GeotecnologiaKNS.Data
                 .HasForeignKey(e => e.TenantId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Cartografia>()
-                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
-
-            modelBuilder.Entity<Cartografia>()
-                .HasOne(e => e.Industria)
-                .WithMany(c => c.Cartografias)
-                .HasForeignKey(e => e.TenantId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Cartografia>()
-                .HasMany(x => x.Arquivos);
-
             // Documentos: os endpoints de download buscam pelo Id inteiro, então
             // sem filtro global era possível ler e apagar arquivo de outra
             // indústria só iterando o Id. Filtrar aqui vale para qualquer
@@ -122,15 +108,11 @@ namespace GeotecnologiaKNS.Data
             modelBuilder.Entity<AnaliseArquivo>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
 
-            modelBuilder.Entity<CartografiaArquivo>()
-                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
-
             // O filtro acima entra em toda consulta de documento; sem índice,
             // cada download varreria a tabela inteira.
             modelBuilder.Entity<ProdutorArquivo>().HasIndex(x => x.TenantId);
             modelBuilder.Entity<PropriedadeArquivo>().HasIndex(x => x.TenantId);
             modelBuilder.Entity<AnaliseArquivo>().HasIndex(x => x.TenantId);
-            modelBuilder.Entity<CartografiaArquivo>().HasIndex(x => x.TenantId);
 
             modelBuilder.Entity<PoliticaTenant>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);

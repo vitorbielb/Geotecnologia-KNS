@@ -36,8 +36,5 @@ public static partial class Roles
             p => p.Propriedade.Read,
 
             p => p.Solicitacao.Read,
-            p => p.Solicitacao.Update,
-            
-            p => p.Cartografia.Create,
-            p => p.Cartografia.Update));
+            p => p.Solicitacao.Update));
 }

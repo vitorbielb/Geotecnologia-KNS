@@ -37,7 +37,6 @@ namespace GeotecnologiaKNS.Models
         public ICollection<Propriedade>? Propriedades { get; set; }
 
         public ICollection<Solicitacao>? Solicitacoes { get; set; }
-        public ICollection<Cartografia>? Cartografias { get; set; }
 
         public ICollection<ApplicationUser>? Usuarios { get; set; }
     }
