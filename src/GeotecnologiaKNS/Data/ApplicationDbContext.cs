@@ -35,7 +35,14 @@ namespace GeotecnologiaKNS.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            var keysProperties = modelBuilder.Model.GetEntityTypes().Select(x => x.FindPrimaryKey()).SelectMany(x => x.Properties);
+            // O Where não estava aqui porque no EF 6 todo tipo mapeado tinha
+            // chave primária. A partir do EF 8 o modelo inclui tipos sem chave,
+            // e FindPrimaryKey devolve nulo neles — o que derrubava a criação do
+            // modelo inteiro com NullReferenceException.
+            var keysProperties = modelBuilder.Model.GetEntityTypes()
+                                             .Select(x => x.FindPrimaryKey())
+                                             .Where(x => x is not null)
+                                             .SelectMany(x => x!.Properties);
             foreach (var property in keysProperties)
             {
                 property.ValueGenerated = ValueGenerated.OnAdd;
