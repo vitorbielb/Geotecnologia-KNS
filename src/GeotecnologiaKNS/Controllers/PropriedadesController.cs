@@ -266,9 +266,6 @@ namespace GeotecnologiaKNS.Controllers
             return RedirectToAction("Index");
         }
 
-        // GeozoneMap e GetCitiesByUF foram removidos: o perímetro e o município
-        // passaram a vir da base do CAR, e o desenho manual foi descontinuado.
-
         private void FillProdutoresViewBag()
         {
             ViewBag.Produtores = _context.Produtores

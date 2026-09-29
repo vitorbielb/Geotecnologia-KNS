@@ -124,14 +124,6 @@ namespace GeotecnologiaKNS.Models
 
         public Validacao Validacao { get; set; } = Validacao.Pendente;
 
-        /// <summary>
-        /// Polígono desenhado à mão. Descontinuado: o perímetro vem do CAR.
-        /// A propriedade permanece mapeada apenas para não perder os dados
-        /// existentes até a limpeza de schema.
-        /// </summary>
-        [Obsolete("O perímetro passou a vir da base do CAR. Use PerimetroGeoJson.")]
-        public Geozone? Geozone { get; set; }
-
         /// <summary>Indica se o imóvel já teve o perímetro resolvido pela base do CAR.</summary>
         [NotMapped]
         public bool TemPerimetro => !string.IsNullOrWhiteSpace(PerimetroGeoJson);

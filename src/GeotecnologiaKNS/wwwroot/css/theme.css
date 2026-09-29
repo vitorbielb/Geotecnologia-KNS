@@ -711,20 +711,6 @@ textarea.form-control {
     background: rgba(244, 247, 245, .6);
 }
 
-.dataTables_wrapper .dataTables_filter input,
-.dataTables_wrapper .dataTables_length select {
-    border: 1px solid var(--kns-linha);
-    border-radius: var(--kns-raio-sm);
-    padding: 7px 12px;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: var(--kns-azul-escuro) !important;
-    border-color: var(--kns-azul-escuro) !important;
-    color: #fff !important;
-    border-radius: var(--kns-raio-sm);
-}
-
 /* ==========================================================================
    Alertas
    ========================================================================== */
@@ -1208,21 +1194,6 @@ textarea.form-control {
 :root[data-tema="escuro"] .alert-warning { color: #F0C878; }
 :root[data-tema="escuro"] .alert-danger  { color: #F8A992; }
 :root[data-tema="escuro"] .alert-info    { color: #92CDF8; }
-
-:root[data-tema="escuro"] .dataTables_wrapper,
-:root[data-tema="escuro"] .dataTables_wrapper .dataTables_info,
-:root[data-tema="escuro"] .dataTables_wrapper .dataTables_length,
-:root[data-tema="escuro"] .dataTables_wrapper .dataTables_filter,
-:root[data-tema="escuro"] .dataTables_wrapper .dataTables_paginate .paginate_button {
-    color: var(--kns-ardosia) !important;
-}
-
-:root[data-tema="escuro"] .dataTables_wrapper .dataTables_filter input,
-:root[data-tema="escuro"] .dataTables_wrapper .dataTables_length select {
-    background: var(--kns-superficie);
-    color: var(--kns-carvao);
-    border-color: var(--kns-linha);
-}
 
 :root[data-tema="escuro"] pre {
     background: var(--kns-azul-tenue);
