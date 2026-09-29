@@ -72,6 +72,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UserCanUserCreate", policy => policy.RequireOperation(x => x.User.Create));
 });
 
+// As telas de documento enviam e excluem por AJAX; sem um nome de cabeçalho
+// configurado, não haveria como mandar o token nessas chamadas.
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IIndustriaRepository, IndustriaRepository>();
 builder.Services.AddScoped<ISolicitacaoRepository, SolicitacaoRepository>();

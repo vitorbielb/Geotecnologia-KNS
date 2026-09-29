@@ -143,6 +143,7 @@ public class ProdutoresController : Controller
     }
 
     [HttpPost, ActionName("Upload")]
+    [ValidateAntiForgeryToken]
     [TenantFilter]
     public async Task<ActionResult> UploadAsync(ProdutorArquivoViewModel arquivo)
     {
@@ -166,6 +167,7 @@ public class ProdutoresController : Controller
     }
 
     [HttpPost, ActionName("DeleteFile")]
+    [ValidateAntiForgeryToken]
     public async Task<ActionResult> DeleteFileAsync(int id)
     {
         var arquivo = await _context.ProdutoresArquivos.FindAsync(id);

@@ -16,6 +16,11 @@
     <partial name="_temaScript" />
 </head>
 <body>
+    @* Token de antifalsificação para as chamadas AJAX (envio e exclusão de
+       documentos). Fica no layout, e não em cada partial de upload, porque o
+       script é um só e vale para todas as telas. *@
+    @Html.AntiForgeryToken()
+
     <div class="container-scroller">
         <partial name="_navbar"></partial>
 

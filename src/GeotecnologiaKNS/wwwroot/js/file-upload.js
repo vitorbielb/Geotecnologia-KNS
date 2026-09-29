@@ -1,6 +1,15 @@
 // Limite espelhado em ArquivoUpload.TamanhoMaximoEmBytes (servidor).
 const TAMANHO_MAXIMO_ARQUIVO = 10 * 1024 * 1024;
 
+// Cabeçalho de antifalsificação, lido do token que o layout renderiza. Vai como
+// header, e não como campo do formulário, porque a exclusão posta sem corpo —
+// assim os dois caminhos usam o mesmo mecanismo. O nome casa com o configurado
+// em Program.cs.
+function cabecalhoAntiforgery() {
+    const token = $('input[name="__RequestVerificationToken"]').first().val();
+    return token ? { 'RequestVerificationToken': token } : {};
+}
+
 function selectfile(el) {
     var file = el.parent().parent().parent().find('.file-upload-default');
     file.trigger('click');
@@ -42,6 +51,7 @@ function enviarArquivo(vinculoId) {
         type: 'POST',
         url: '../Upload',
         data: formData,
+        headers: cabecalhoAntiforgery(),
         contentType: false,
         processData: false,
         success: function (response) {
@@ -81,6 +91,7 @@ function setdeletefilemodal(el) {
         $.ajax({
             type: 'POST',
             url: '../DeleteFile?id=' + id,
+            headers: cabecalhoAntiforgery(),
             success: function (response) {
                 $(document).find('.modal-backdrop').remove();
                 $('#file-upload-content').html(response);

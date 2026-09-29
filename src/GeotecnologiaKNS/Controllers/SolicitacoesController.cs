@@ -201,7 +201,10 @@ namespace GeotecnologiaKNS.Controllers
             return View(solicitacao);
         }
         [HttpPost, ActionName("Upload")]
-
+        [ValidateAntiForgeryToken]
+        // Mesmo caso do upload de imóvel: sem o filtro o documento nasce com
+        // TenantId 0 e o filtro global o esconde de quem o enviou.
+        [TenantFilter]
         public async Task<ActionResult> UploadAsync(AnaliseArquivoViewModel arquivo)
         {
             if (!ModelState.IsValid)
@@ -224,6 +227,7 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         [HttpPost, ActionName("DeleteFile")]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteFileAsync(int id)
         {
             var arquivo = await _context.AnalisesArquivos.FindAsync(id);
