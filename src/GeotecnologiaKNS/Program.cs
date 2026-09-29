@@ -89,6 +89,14 @@ builder.Services.AddScoped<IPropriedadeCarService, PropriedadeCarService>();
 builder.Services.AddScoped<IMotorDeRegras, MotorDeRegras>();
 builder.Services.AddScoped<IPoliticaAnaliseRepository, PoliticaAnaliseRepository>();
 builder.Services.AddScoped<IAnaliseAutomaticaService, AnaliseAutomaticaService>();
+builder.Services.Configure<GeotecnologiaKNS.Infra.Email.OpcoesDeEmail>(
+    builder.Configuration.GetSection(GeotecnologiaKNS.Infra.Email.OpcoesDeEmail.SecaoDeConfiguracao));
+
+// O IEmailSender nao generico e o que a UI do Identity resolve; o generico
+// IEmailSender<TUser> e outro contrato e nao seria usado pelas paginas.
+builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,
+                              GeotecnologiaKNS.Infra.Email.RemetenteDeEmail>();
+
 builder.Services.AddScoped<IMedidorDeUso, MedidorDeUso>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 var app = builder.Build();
