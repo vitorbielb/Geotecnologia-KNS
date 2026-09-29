@@ -18,6 +18,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
     private readonly IIntersecaoService _intersecao;
     private readonly IMotorDeRegras _motor;
     private readonly IPoliticaAnaliseRepository _politicas;
+    private readonly IMedidorDeUso _medidor;
     private readonly ILogger<AnaliseAutomaticaService> _logger;
 
     public AnaliseAutomaticaService(
@@ -25,12 +26,14 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
         IIntersecaoService intersecao,
         IMotorDeRegras motor,
         IPoliticaAnaliseRepository politicas,
+        IMedidorDeUso medidor,
         ILogger<AnaliseAutomaticaService> logger)
     {
         _context = context;
         _intersecao = intersecao;
         _motor = motor;
         _politicas = politicas;
+        _medidor = medidor;
         _logger = logger;
     }
 
@@ -112,6 +115,12 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             solicitacao.Analista = "Análise automática";
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Só o que chegou ao fim é cobrável: análise que falhou não entregou
+            // resultado nenhum e seria indefensável numa fatura contestada.
+            await _medidor.RegistrarAsync(
+                analise.TenantId, TipoDeUso.AnaliseExecutada, analise.Id,
+                propriedade.CodigoCar, cancellationToken);
 
             _logger.LogInformation(
                 "Análise {AnaliseId} da solicitação {SolicitacaoId}: {Resultado} com {Ocorrencias} ocorrência(s).",

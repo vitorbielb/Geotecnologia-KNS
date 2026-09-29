@@ -9,11 +9,16 @@ namespace GeotecnologiaKNS.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IAnaliseAutomaticaService _analise;
+        private readonly IMedidorDeUso _medidor;
 
-        public SolicitacoesController(ApplicationDbContext context, IAnaliseAutomaticaService analise)
+        public SolicitacoesController(
+            ApplicationDbContext context,
+            IAnaliseAutomaticaService analise,
+            IMedidorDeUso medidor)
         {
             _context = context;
             _analise = analise;
+            _medidor = medidor;
         }
 
         // GET: Solicitacoes
@@ -73,6 +78,9 @@ namespace GeotecnologiaKNS.Controllers
                 solicitacao.DataSolicitacao = DateTime.Now;
                 _context.Add(solicitacao);
                 await _context.SaveChangesAsync();
+
+                await _medidor.RegistrarAsync(
+                    solicitacao.TenantId, TipoDeUso.SolicitacaoAberta, solicitacao.Id);
 
                 // A análise roda em seguida e define o status. Se falhar, a
                 // solicitação fica como Solicitado e o erro vai para o laudo —

@@ -31,6 +31,7 @@ namespace GeotecnologiaKNS.Data
         public DbSet<AnaliseOcorrencia> AnalisesOcorrencias { get; set; }
         public DbSet<PoliticaTenant> Politicas { get; set; }
         public DbSet<RegraTenant> Regras { get; set; }
+        public DbSet<EventoDeUso> EventosDeUso { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -105,6 +106,22 @@ namespace GeotecnologiaKNS.Data
             modelBuilder.Entity<ProdutorArquivo>().HasIndex(x => x.TenantId);
             modelBuilder.Entity<PropriedadeArquivo>().HasIndex(x => x.TenantId);
             modelBuilder.Entity<AnaliseArquivo>().HasIndex(x => x.TenantId);
+
+            // Medição segue a mesma regra dos demais dados de inquilino: cada
+            // indústria vê o próprio consumo, o administrador da aplicação vê todos.
+            modelBuilder.Entity<EventoDeUso>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            modelBuilder.Entity<EventoDeUso>()
+                .HasIndex(x => new { x.TenantId, x.Competencia });
+
+            // Restrict, e não cascade: apagar uma indústria não pode levar junto
+            // o histórico do que ela consumiu — é o lastro da fatura já emitida.
+            modelBuilder.Entity<EventoDeUso>()
+                .HasOne(e => e.Industria)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<PoliticaTenant>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);

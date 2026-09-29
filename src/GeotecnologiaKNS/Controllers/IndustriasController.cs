@@ -139,6 +139,27 @@ namespace GeotecnologiaKNS.Controllers
         private static string SomenteDigitos(string? valor) =>
             new((valor ?? string.Empty).Where(char.IsDigit).ToArray());
 
+        /// <summary>
+        /// Consumo por indústria e competência — a base de qualquer cobrança.
+        /// </summary>
+        /// <remarks>
+        /// Mede, não precifica: o que vale cada análise é decisão comercial e
+        /// não está no sistema. Aqui fica só o que foi consumido, em números
+        /// que o cliente pode conferir se contestar a fatura.
+        /// </remarks>
+        [Authorize(Policy = "UserCanTenantCreate")]
+        public async Task<IActionResult> Consumo(
+            [FromServices] IMedidorDeUso medidor,
+            CancellationToken cancellationToken)
+        {
+            // Últimos doze meses: o suficiente para fechar o mês e comparar com
+            // o anterior, sem carregar histórico que ninguém olha.
+            var doze = DateTime.UtcNow.AddMonths(-11);
+
+            return View(await medidor.ObterConsumoAsync(
+                EventoDeUso.CompetenciaDe(doze), cancellationToken));
+        }
+
         // GET: Industrias
         [Authorize(Policy = "UserCanTenantCreate")]
         public async Task<IActionResult> Index()

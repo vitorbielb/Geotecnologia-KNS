@@ -9,9 +9,14 @@ namespace GeotecnologiaKNS.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IPropriedadeCarService _carService;
+        private readonly IMedidorDeUso _medidor;
 
-        public PropriedadesController(ApplicationDbContext context, IPropriedadeCarService carService)
+        public PropriedadesController(
+            ApplicationDbContext context,
+            IPropriedadeCarService carService,
+            IMedidorDeUso medidor)
         {
+            _medidor = medidor;
             _context = context;
             _carService = carService;
         }
@@ -132,6 +137,10 @@ namespace GeotecnologiaKNS.Controllers
 
             _context.Add(propriedade);
             await _context.SaveChangesAsync(cancellationToken);
+
+            await _medidor.RegistrarAsync(
+                propriedade.TenantId, TipoDeUso.ImovelCadastrado, propriedade.Id,
+                propriedade.CodigoCar, cancellationToken);
 
             return RedirectToAction(nameof(Index));
         }

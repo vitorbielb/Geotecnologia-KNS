@@ -89,6 +89,7 @@ builder.Services.AddScoped<IPropriedadeCarService, PropriedadeCarService>();
 builder.Services.AddScoped<IMotorDeRegras, MotorDeRegras>();
 builder.Services.AddScoped<IPoliticaAnaliseRepository, PoliticaAnaliseRepository>();
 builder.Services.AddScoped<IAnaliseAutomaticaService, AnaliseAutomaticaService>();
+builder.Services.AddScoped<IMedidorDeUso, MedidorDeUso>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 var app = builder.Build();
 
