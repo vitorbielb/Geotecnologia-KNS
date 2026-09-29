@@ -131,6 +131,9 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Depois da autorização: antes disso o usuário ainda não tem identidade.
+app.UseSenhaProvisoria();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

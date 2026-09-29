@@ -1,0 +1,67 @@
+@page
+@model TrocarSenhaModel
+
+@{
+    Layout = "_NoContent";
+    ViewData["Title"] = "Defina sua senha";
+}
+
+@* Reaproveita o lado direito do login e dispensa o painel institucional: quem
+   chega aqui já entrou, e o que importa na tela é concluir a troca. *@
+<div class="kns-auth kns-auth--simples">
+
+    <main class="kns-auth__formulario">
+        <div class="kns-auth__caixa">
+
+            <div class="kns-auth__marca-form">
+                <img src="~/images/logo.png" alt="KNS Ambiental — Geotecnologia" />
+            </div>
+
+            <h2 class="kns-auth__saudacao">Defina sua senha</h2>
+            <p class="kns-auth__instrucao">
+                A senha atual foi criada por quem cadastrou seu acesso. Escolha uma
+                que só você conheça para continuar.
+            </p>
+
+            <form method="post">
+                @* Começa oculta: numa tela que abre limpa, uma tarja de erro
+                   vazia só ocupa espaço e assusta. *@
+                <div asp-validation-summary="All" class="alert alert-danger d-none" role="alert"></div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.NovaSenha" class="form-control" id="novaSenha"
+                           placeholder="Nova senha" autocomplete="new-password" />
+                    <label asp-for="Input.NovaSenha" for="novaSenha">Nova senha</label>
+                </div>
+
+                <div class="form-floating mb-4">
+                    <input asp-for="Input.Confirmacao" class="form-control" id="confirmacao"
+                           placeholder="Confirme a nova senha" autocomplete="new-password" />
+                    <label asp-for="Input.Confirmacao" for="confirmacao">Confirme a nova senha</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary kns-auth__acao">
+                    Salvar e entrar
+                </button>
+            </form>
+
+            <div class="kns-auth__selo">
+                <i class="mdi mdi-shield-key-outline"></i>
+                <span>Enquanto a senha provisória valer, ela é conhecida por mais de uma pessoa.</span>
+            </div>
+        </div>
+    </main>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var resumo = document.querySelector('.validation-summary-errors');
+            if (resumo && resumo.textContent.trim()) {
+                resumo.classList.remove('d-none');
+            }
+        })();
+    </script>
+}

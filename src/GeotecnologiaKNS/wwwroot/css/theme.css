@@ -760,6 +760,14 @@ textarea.form-control {
     background: var(--kns-superficie);
 }
 
+/* Variante de coluna única, para as telas de fora do sistema que não têm o
+   painel institucional — a troca da senha provisória, por exemplo, em que
+   quem chegou ali já entrou e só precisa concluir. */
+.kns-auth--simples {
+    grid-template-columns: 1fr;
+    background: var(--kns-fundo);
+}
+
 /* --------------------------------------------------------------------------
    Painel institucional
    Sem logo e sem fotografia: a marca já aparece ao lado, sobre o formulário.

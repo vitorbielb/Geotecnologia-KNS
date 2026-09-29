@@ -69,6 +69,10 @@ namespace GeotecnologiaKNS.Controllers
             user.SecurityStamp = Guid.NewGuid().ToString();
             user.PasswordHash = _passwordHasher.HashPassword(user, viewModel.Password);
 
+            // Senha escolhida por quem cadastra, não pelo titular: vale só até o
+            // primeiro acesso.
+            user.SenhaProvisoria = true;
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
@@ -133,6 +137,11 @@ namespace GeotecnologiaKNS.Controllers
             user.PhoneNumber = viewModel.PhoneNumber?.Trim();
             user.SecurityStamp = Guid.NewGuid().ToString();
             user.PasswordHash = _passwordHasher.HashPassword(user, viewModel.Password);
+
+            // Esta tela também redefine a senha de outra pessoa — é a reposição
+            // de acesso perdido. Vale a mesma regra do cadastro: provisória até
+            // o titular escolher a dele.
+            user.SenhaProvisoria = true;
 
             await _context.SaveChangesAsync();
 

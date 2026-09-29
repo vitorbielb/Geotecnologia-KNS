@@ -90,7 +90,11 @@ namespace GeotecnologiaKNS.Controllers
                     PhoneNumber = viewModel.AdminPhoneNumber?.Trim(),
                     EmailConfirmed = true,
                     TenantId = industria.TenantId,
-                    SecurityStamp = Guid.NewGuid().ToString()
+                    SecurityStamp = Guid.NewGuid().ToString(),
+
+                    // A senha é combinada por fora e chega conhecida por duas
+                    // pessoas; só deixa de ser provisória quando o titular a troca.
+                    SenhaProvisoria = true
                 };
 
                 usuario.PasswordHash = _passwordHasher.HashPassword(usuario, viewModel.AdminPassword);
