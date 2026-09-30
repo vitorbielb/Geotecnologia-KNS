@@ -116,6 +116,11 @@ namespace GeotecnologiaKNS.Data
 
             // Medição segue a mesma regra dos demais dados de inquilino: cada
             // indústria vê o próprio consumo, o administrador da aplicação vê todos.
+            // A fila é consultada a cada poucos segundos pelo processador; sem
+            // índice, cada consulta varreria todas as análises já feitas.
+            modelBuilder.Entity<AnaliseAutomatica>()
+                .HasIndex(x => new { x.Situacao, x.ProximaTentativaEm });
+
             modelBuilder.Entity<EventoDeUso>()
                 .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
 

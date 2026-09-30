@@ -82,10 +82,10 @@ namespace GeotecnologiaKNS.Controllers
                 await _medidor.RegistrarAsync(
                     solicitacao.TenantId, TipoDeUso.SolicitacaoAberta, solicitacao.Id);
 
-                // A análise roda em seguida e define o status. Se falhar, a
-                // solicitação fica como Solicitado e o erro vai para o laudo —
-                // nunca é liberada por omissão.
-                await _analise.ExecutarAsync(solicitacao.Id);
+                // Enfileira e devolve a tela na hora. O processador em plano de
+                // fundo cruza o perímetro e define o status; até lá a
+                // solicitação fica como Solicitado — nunca liberada por omissão.
+                await _analise.EnfileirarAsync(solicitacao.Id);
 
                 return RedirectToAction(nameof(Details), new { id = solicitacao.Id });
             }

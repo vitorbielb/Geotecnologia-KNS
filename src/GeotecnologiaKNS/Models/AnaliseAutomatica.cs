@@ -5,9 +5,24 @@ namespace GeotecnologiaKNS.Models
 {
     public enum SituacaoAnalise
     {
+        /// <summary>Na fila, ainda não processada.</summary>
         Pendente = 0,
+
         Concluida = 1,
-        Falhou = 2
+
+        /// <summary>Esgotou as tentativas; exige tratamento humano.</summary>
+        Falhou = 2,
+
+        /// <summary>
+        /// Em processamento por um trabalhador.
+        /// </summary>
+        /// <remarks>
+        /// Existe para que a tomada do item seja atômica: a transição de
+        /// Pendente para Processando é um UPDATE condicional, e quem não
+        /// conseguir mudar a linha sabe que outro já pegou. Sem ela, dois
+        /// processos cruzariam o mesmo imóvel e gravariam laudos duplicados.
+        /// </remarks>
+        Processando = 3
     }
 
     /// <summary>
@@ -84,6 +99,18 @@ namespace GeotecnologiaKNS.Models
         public string? RegrasNaoAvaliadas { get; set; }
 
         public string? Erro { get; set; }
+
+        /// <summary>Quantas vezes o processamento já foi tentado.</summary>
+        /// <remarks>
+        /// Falha de rede ou banco geoespacial fora do ar é transitória e merece
+        /// nova tentativa; CAR ausente da base não melhora repetindo. Como não
+        /// dá para distinguir com segurança, o limite de tentativas é o que
+        /// impede uma análise impossível de ocupar a fila para sempre.
+        /// </remarks>
+        public int Tentativas { get; set; }
+
+        /// <summary>Quando esta análise volta a ser elegível para processamento.</summary>
+        public DateTime? ProximaTentativaEm { get; set; }
 
         public DateTime IniciadaEm { get; set; } = DateTime.Now;
 

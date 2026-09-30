@@ -15,20 +15,20 @@ public record ResultadoImportacaoCamada(
     int Descartados);
 
 /// <summary>
-/// Carrega uma camada de referÃªncia (embargos, TI, UC, PRODES...) a partir de
-/// um shapefile publicado pelo Ã³rgÃ£o de origem.
+/// Carrega uma camada de referência (embargos, TI, UC, PRODES...) a partir de
+/// um shapefile publicado pelo órgão de origem.
 /// </summary>
 /// <remarks>
-/// Ã‰ um caminho de ingestÃ£o Ãºnico para todas as camadas de propÃ³sito: cada Ã³rgÃ£o
+/// É um caminho de ingestão único para todas as camadas de propósito: cada órgão
 /// publica seu shapefile com um esquema diferente, e manter um importador por
-/// Ã³rgÃ£o viraria seis importadores divergentes. Os atributos da origem sÃ£o
-/// preservados Ã­ntegros em jsonb, e o laudo cita o que for relevante.
+/// órgão viraria seis importadores divergentes. Os atributos da origem são
+/// preservados íntegros em jsonb, e o laudo cita o que for relevante.
 /// </remarks>
 public class CamadaShapefileImporter
 {
     private const int TamanhoLote = 2_000;
 
-    /// <summary>Campos usados como rÃ³tulo legÃ­vel, na ordem de preferÃªncia.</summary>
+    /// <summary>Campos usados como rótulo legível, na ordem de preferência.</summary>
     private static readonly string[] CamposRotulo =
     {
         "nome", "NOME", "terrai_nom", "no_uc", "NOME_UC", "nom_uc",
@@ -36,12 +36,12 @@ public class CamadaShapefileImporter
     };
 
     /// <summary>
-    /// Campos que qualificam o achado, acrescentados ao rÃ³tulo entre parÃªnteses.
+    /// Campos que qualificam o achado, acrescentados ao rótulo entre parênteses.
     /// </summary>
     /// <remarks>
-    /// A fase da terra indÃ­gena e a categoria da unidade de conservaÃ§Ã£o mudam o
-    /// que a sobreposiÃ§Ã£o significa juridicamente. Sem isso o laudo diria apenas
-    /// o nome, e "regularizada" ficaria indistinguÃ­vel de "em estudo".
+    /// A fase da terra indígena e a categoria da unidade de conservação mudam o
+    /// que a sobreposição significa juridicamente. Sem isso o laudo diria apenas
+    /// o nome, e "regularizada" ficaria indistinguível de "em estudo".
     /// </remarks>
     private static readonly string[] CamposQualificador =
     {
@@ -69,7 +69,7 @@ public class CamadaShapefileImporter
     {
         if (!File.Exists(caminhoShapefile))
         {
-            throw new FileNotFoundException("Shapefile nÃ£o encontrado.", caminhoShapefile);
+            throw new FileNotFoundException("Shapefile não encontrado.", caminhoShapefile);
         }
 
         var camada = await _context.Camadas.FirstOrDefaultAsync(x => x.Chave == chave, cancellationToken);
@@ -81,10 +81,10 @@ public class CamadaShapefileImporter
         }
         else
         {
-            // Recarga substitui a camada inteira: manter feiÃ§Ãµes da versÃ£o
-            // anterior produziria sobreposiÃ§Ãµes duplicadas no laudo.
-            // DELETE direto porque carregar milhÃµes de feiÃ§Ãµes para o
-            // ChangeTracker sÃ³ para apagÃ¡-las nÃ£o terminaria.
+            // Recarga substitui a camada inteira: manter feições da versão
+            // anterior produziria sobreposições duplicadas no laudo.
+            // DELETE direto porque carregar milhões de feições para o
+            // ChangeTracker só para apagá-las não terminaria.
             await _context.Database.ExecuteSqlRawAsync(
                 "DELETE FROM geo.feicao_referencia WHERE camada_id = {0}",
                 new object[] { camada.Id },
@@ -106,7 +106,7 @@ public class CamadaShapefileImporter
         var lote = new List<FeicaoReferencia>(TamanhoLote);
 
         // Leitura em fluxo: ReadAllFeatures materializaria o shapefile inteiro,
-        // e camadas como o PRODES Cerrado passam de dois milhÃµes de polÃ­gonos.
+        // e camadas como o PRODES Cerrado passam de dois milhões de polígonos.
         using var leitor = Shapefile.OpenRead(caminhoShapefile);
 
         foreach (var feature in leitor)
@@ -147,7 +147,7 @@ public class CamadaShapefileImporter
         await _context.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation(
-            "Camada {Chave}: {Gravados} feiÃ§Ãµes gravadas, {Descartados} descartadas de {Lidos} lidas.",
+            "Camada {Chave}: {Gravados} feições gravadas, {Descartados} descartadas de {Lidos} lidas.",
             chave, gravados, descartados, lidos);
 
         return new ResultadoImportacaoCamada(camada.Id, chave, lidos, gravados, descartados);
@@ -183,9 +183,9 @@ public class CamadaShapefileImporter
             return null;
         }
 
-        // A qualificaÃ§Ã£o muda o peso do achado: uma terra indÃ­gena regularizada
-        // e outra apenas em estudo restringem coisas diferentes, e quem lÃª o
-        // laudo precisa distinguir sem ir atrÃ¡s da base.
+        // A qualificação muda o peso do achado: uma terra indígena regularizada
+        // e outra apenas em estudo restringem coisas diferentes, e quem lê o
+        // laudo precisa distinguir sem ir atrás da base.
         var qualificador = PrimeiroPreenchido(atributos, CamposQualificador);
 
         var rotulo = qualificador is null ? nome : $"{nome} ({qualificador})";
@@ -226,8 +226,8 @@ public class CamadaShapefileImporter
         {
             var valor = atributos[nome];
 
-            // DateTime e afins viram texto: o jsonb Ã© para leitura do laudo,
-            // nÃ£o para aritmÃ©tica.
+            // DateTime e afins viram texto: o jsonb é para leitura do laudo,
+            // não para aritmética.
             dicionario[nome] = valor switch
             {
                 null => null,

@@ -1,10 +1,13 @@
+using GeotecnologiaKNS.Analises;
 using GeotecnologiaKNS.Data;
 using GeotecnologiaKNS.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace GeotecnologiaKNS.FuncionalTests
 {
@@ -39,6 +42,9 @@ namespace GeotecnologiaKNS.FuncionalTests
         /// <summary>Documento do inquilino B, para provar que A não o alcança.</summary>
         public int DocumentoDoTenantB { get; private set; }
 
+        /// <summary>Imóvel do inquilino A, para abrir solicitação.</summary>
+        public int ImovelDoTenantA { get; private set; }
+
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
@@ -56,6 +62,26 @@ namespace GeotecnologiaKNS.FuncionalTests
                     // configurada" em vez de falhar ao subir.
                     ["ConnectionStrings:Geo"] = string.Empty
                 });
+            });
+
+            // ConfigureTestServices, e não ConfigureServices: só ele roda depois
+            // das registrações do Program, que é onde o processador entra. Com o
+            // hook errado a remoção não tem efeito e o serviço continua de pé.
+            builder.ConfigureTestServices(services =>
+            {
+                // Nenhum trabalho de plano de fundo durante os testes. O
+                // processador de análises tomaria a análise enfileirada em
+                // milissegundos e o teste que verifica o enfileiramento viraria
+                // uma corrida — o que o processador faz depois tem verificação
+                // própria. Remove-se por contrato (IHostedService) e não por
+                // tipo concreto, para não depender de como o registro foi feito
+                // nem quebrar em silêncio se outro serviço entrar amanhã.
+                foreach (var background in services
+                             .Where(d => d.ServiceType == typeof(IHostedService))
+                             .ToList())
+                {
+                    services.Remove(background);
+                }
             });
         }
 
@@ -103,9 +129,33 @@ namespace GeotecnologiaKNS.FuncionalTests
 
             contexto.PropriedadesArquivos.Add(documentoDeB);
 
+            var produtor = new Produtor
+            {
+                TenantId = TenantA,
+                Nome = "Produtor de Teste",
+                Cpf = "11144477735"
+            };
+
+            contexto.Produtores.Add(produtor);
+            await contexto.SaveChangesAsync();
+
+            var imovel = new Propriedade
+            {
+                TenantId = TenantA,
+                ProdutorId = produtor.Id,
+                CodigoCar = "MT-5107925-AAAA1111BBBB2222CCCC3333DDDD4444",
+                NomePropriedade = "Fazenda de Teste",
+                Municipio = "Sorriso",
+                Bioma = "Cerrado",
+                Area = "1000"
+            };
+
+            contexto.Propriedades.Add(imovel);
+
             await contexto.SaveChangesAsync();
 
             DocumentoDoTenantB = documentoDeB.Id;
+            ImovelDoTenantA = imovel.Id;
         }
 
         private static ApplicationUser Usuario(

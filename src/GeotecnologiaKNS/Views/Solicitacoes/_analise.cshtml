@@ -32,6 +32,31 @@
             }
         </p>
 
+        @if (Model.Situacao is SituacaoAnalise.Pendente or SituacaoAnalise.Processando)
+        {
+            <div class="alert alert-info d-flex align-items-center gap-2 mb-0" id="kns-analise-andamento">
+                <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                <div>
+                    <strong>Análise em andamento.</strong>
+                    O perímetro está sendo cruzado com as camadas de referência.
+                    @if (Model.Tentativas > 1)
+                    {
+                        <text>Tentativa @Model.Tentativas.</text>
+                    }
+                    Esta página se atualiza sozinha quando terminar.
+                </div>
+            </div>
+
+            @* Recarrega em vez de consultar um endpoint de estado: são poucos
+               segundos de espera e uma tela só, e um endpoint de sondagem seria
+               mais superfície para manter do que o problema justifica. *@
+            <script>
+                setTimeout(function () { window.location.reload(); }, 4000);
+            </script>
+
+            return;
+        }
+
         @* Cobertura parcial vem antes de tudo: um laudo sem ocorrências se lê
            como aprovação, e é exatamente aí que a omissão engana. *@
         @if (Model.Situacao == SituacaoAnalise.Concluida && !Model.CoberturaCompleta)
