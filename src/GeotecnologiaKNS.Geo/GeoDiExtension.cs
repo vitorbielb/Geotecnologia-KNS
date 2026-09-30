@@ -34,6 +34,7 @@ public static class GeoDiExtension
         services.AddScoped<SicarShapefileImporter>();
         services.AddScoped<CamadaShapefileImporter>();
         services.AddScoped<EmbargoIbamaImporter>();
+        services.AddScoped<CamadaGeoJsonImporter>();
 
         return services;
     }

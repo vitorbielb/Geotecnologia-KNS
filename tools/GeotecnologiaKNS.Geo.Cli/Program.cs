@@ -82,6 +82,9 @@ try
         case "importar-camada":
             return await ImportarCamadaAsync(scope.ServiceProvider, configuration);
 
+        case "importar-geojson":
+            return await ImportarGeoJsonAsync(scope.ServiceProvider, configuration);
+
         case "importar-embargo":
             return await ImportarEmbargoAsync(scope.ServiceProvider, configuration);
 
@@ -106,6 +109,8 @@ try
             Console.Error.WriteLine("  consultar --car <codigo>");
             Console.Error.WriteLine("  importar-camada --arquivo <caminho.shp> --chave <chave> --nome <nome>");
             Console.Error.WriteLine("                  --tipo <tipo> --origem <origem> [--ano <ano>]");
+            Console.Error.WriteLine("  importar-geojson --arquivo <arq.geojson> --chave <chave> --nome <nome>");
+            Console.Error.WriteLine("                   --tipo <tipo> --origem <origem> [--ano <ano>]");
             Console.Error.WriteLine("  importar-embargo --arquivo <termo_de_embargo.csv>");
             Console.Error.WriteLine("  camadas");
             Console.Error.WriteLine("  cruzar --car <codigo>");
@@ -695,6 +700,46 @@ static async Task<int> ImportarEmbargoAsync(IServiceProvider provider, IConfigur
     Console.WriteLine($"  Sem geometria  : {resultado.SemGeometria:N0}  (termo sem area delimitada)");
     Console.WriteLine($"  Invalidos      : {resultado.Invalidos:N0}  (WKT que nao pode ser lido)");
     Console.WriteLine($"  Tempo          : {relogio.Elapsed.TotalSeconds:N1}s");
+
+    return 0;
+}
+
+static async Task<int> ImportarGeoJsonAsync(IServiceProvider provider, IConfiguration configuration)
+{
+    var arquivo = configuration["arquivo"];
+    var chave = configuration["chave"];
+    var nome = configuration["nome"];
+    var origem = configuration["origem"];
+    var tipoTexto = configuration["tipo"];
+
+    if (string.IsNullOrWhiteSpace(arquivo) || string.IsNullOrWhiteSpace(chave) ||
+        string.IsNullOrWhiteSpace(nome) || string.IsNullOrWhiteSpace(origem) ||
+        string.IsNullOrWhiteSpace(tipoTexto))
+    {
+        Console.Error.WriteLine("Informe --arquivo, --chave, --nome, --tipo e --origem.");
+        Console.Error.WriteLine("Tipos: " + string.Join(", ", Enum.GetNames<TipoCamada>()));
+        return 1;
+    }
+
+    if (!Enum.TryParse<TipoCamada>(tipoTexto, ignoreCase: true, out var tipo))
+    {
+        Console.Error.WriteLine($"Tipo '{tipoTexto}' desconhecido.");
+        return 1;
+    }
+
+    int? ano = int.TryParse(configuration["ano"], out var anoLido) ? anoLido : null;
+
+    var importer = provider.GetRequiredService<CamadaGeoJsonImporter>();
+    var relogio = System.Diagnostics.Stopwatch.StartNew();
+
+    var resultado = await importer.ImportarAsync(arquivo, chave, nome, tipo, origem, ano);
+
+    relogio.Stop();
+
+    Console.WriteLine(
+        $"Camada '{resultado.Chave}' (id {resultado.CamadaId}): " +
+        $"{resultado.Gravados:N0} feicoes gravadas, {resultado.Descartados:N0} descartadas " +
+        $"de {resultado.Lidos:N0} lidas em {relogio.Elapsed.TotalSeconds:N1}s.");
 
     return 0;
 }

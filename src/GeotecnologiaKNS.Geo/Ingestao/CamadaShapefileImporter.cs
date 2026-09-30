@@ -31,7 +31,7 @@ public class CamadaShapefileImporter
     /// <summary>Campos usados como rótulo legível, na ordem de preferência.</summary>
     private static readonly string[] CamposRotulo =
     {
-        "nome", "NOME", "terrai_nom", "no_uc", "NOME_UC", "nom_uc",
+        "nome", "NOME", "terrai_nom", "no_uc", "NOME_UC", "nom_uc", "nome_proje",
         "num_tad", "NUM_TAD", "des_infrac", "cod_imovel", "municipio", "MUNICIPIO", "municipality", "MUNICIPALITY"
     };
 

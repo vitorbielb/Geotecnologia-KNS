@@ -26,9 +26,9 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- camadas
 | DES-001 | DesmatamentoConsolidado | PRODES / TerraBrasilis | carregada |
 | TI-001 | TerraIndigena | FUNAI Geoserver | carregada |
 | ALE-001 | AlertaDesmatamento | DETER / TerraBrasilis | carregada |
-| UC-001 | UnidadeConservacao | CNUC/MMA | **pendente** |
+| UC-001 | UnidadeConservacao | CNUC/MMA | carregada |
+| ASS-001 | AssentamentoRural | INCRA | carregada |
 | QUI-001 | TerritorioQuilombola | INCRA | **pendente** |
-| ASS-001 | AssentamentoRural | INCRA | **pendente** |
 | OUT-001 | OutroPerimetro | definido pela indústria | — |
 
 ---
@@ -131,3 +131,76 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
 A recarga substitui a camada inteira: feição que saiu da fonte desaparece do
 sistema, e nada é duplicado. Laudos já emitidos não mudam — eles guardam o
 retrato das camadas e das regras usadas na execução.
+
+---
+
+## Unidades de conservação (CNUC/MMA)
+
+O CNUC não publica shapefile: o portal é uma aplicação JavaScript e o download
+sai do backend em GeoJSON, gerado por `ogr2ogr` sobre um MapServer interno.
+
+```bash
+curl -X POST "https://cnuc-backend.mma.gov.br/api/v1/downloadGeo" \
+  -H "Content-Type: application/json" \
+  -d '{"map":"/var/www/storage/app/mapfiles/ucs.map","name":"ucs","typename":"ucs_selected","ucIds":"null","format":"GeoJSON"}' \
+  -o ucs.zip
+unzip ucs.zip
+
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-geojson \
+  --arquivo ucs.GeoJSON \
+  --chave unidade-conservacao-cnuc \
+  --nome "Unidades de Conservação" \
+  --tipo UnidadeConservacao \
+  --origem "MMA — CNUC (ucs_selected)"
+```
+
+- O campo `format` **é obrigatório**. Sem ele o backend devolve 500 com o erro
+  do `ogr2ogr` (`Unable to find driver`).
+- `ESRI Shapefile` é recusado; só `GeoJSON` funciona.
+- O arquivo tem 227 MB, por isso a importação é em fluxo — carregá-lo como
+  texto passaria de 450 MB em memória só para começar.
+- O rótulo inclui a categoria de manejo: "PARQUE ESTADUAL SUMAÚMA (Parque)".
+
+Última carga de referência: 3.509 unidades, nenhuma descartada, em 18s.
+
+---
+
+## Projetos de assentamento (INCRA)
+
+```bash
+curl -L -o assentamentos.zip \
+  "https://certificacao.incra.gov.br/csv_shp/zip/Assentamento%20Brasil.zip"
+unzip assentamentos.zip
+
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
+  --arquivo "Assentamento Brasil.shp" \
+  --chave assentamento-incra \
+  --nome "Projetos de Assentamento" \
+  --tipo AssentamentoRural \
+  --origem "INCRA — Acervo Fundiário (Assentamento Brasil)"
+```
+
+Última carga de referência: 8.215 projetos, 1 descartado por geometria inválida.
+
+---
+
+## Territórios quilombolas — ainda sem rota
+
+Única regra do protocolo que continua sem camada, e é de severidade BLOQUEIO.
+O que foi tentado e não funcionou:
+
+- `certificacao.incra.gov.br/csv_shp/export_shp.py` exige login;
+- a listagem de `csv_shp/zip/` devolve 403, e os nomes prováveis do arquivo
+  (`Quilombola Brasil.zip` e variações) devolvem 404 — diferente do
+  `Assentamento Brasil.zip`, que existe;
+- `acervofundiario.incra.gov.br` não expõe WFS, i3Geo nem GeoServer nos
+  caminhos usuais;
+- a API do `dados.gov.br` exige chave.
+
+Caminhos que restam: pedir o arquivo ao INCRA, obter credencial do portal de
+certificação, ou inspecionar o visualizador do Acervo Fundiário com um
+navegador de verdade — ele provavelmente carrega a camada por alguma chamada
+que não aparece no HTML inicial.
+
+Enquanto isso, o laudo diz explicitamente que QUI-001 não foi avaliada, e
+nenhum imóvel é liberado sem essa verificação.

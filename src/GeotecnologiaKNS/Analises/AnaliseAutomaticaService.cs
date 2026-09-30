@@ -129,7 +129,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             analise.RegrasNaoAvaliadas = avaliacao.NaoAvaliadas.Count == 0
                 ? null
                 : string.Join(Environment.NewLine, avaliacao.NaoAvaliadas.Select(
-                    r => $"{r.CodigoRegra} â€” {r.Descricao}"));
+                    r => $"{r.CodigoRegra} — {r.Descricao}"));
             analise.Situacao = SituacaoAnalise.Concluida;
             analise.ConcluidaEm = DateTime.Now;
 
@@ -147,7 +147,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             }).ToList();
 
             // O veredito da análise vira o status da solicitação. O analista
-            // continua podendo sobrescrever pela tela de análise â€” a automação
+            // continua podendo sobrescrever pela tela de análise — a automação
             // decide o caso comum, não tira a palavra final de quem responde.
             solicitacao.Status = avaliacao.Status;
 
@@ -229,7 +229,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
         // laudos duplicados.
         //
         // READPAST pula linhas que outra transação já travou, em vez de esperar
-        // por elas â€” é o que permite mais de um trabalhador sem enfileirar um
+        // por elas — é o que permite mais de um trabalhador sem enfileirar um
         // atrás do outro.
         const string sql = @"
             UPDATE TOP (1) AnalisesAutomaticas WITH (ROWLOCK, READPAST)
@@ -242,7 +242,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
 
         // Tipo e valor declarados separadamente de propósito. SituacaoAnalise.
         // Pendente vale zero, e new SqlParameter(nome, 0) casa com a sobrecarga
-        // (string, SqlDbType) em vez da de valor â€” o parâmetro nasceria sem
+        // (string, SqlDbType) em vez da de valor — o parâmetro nasceria sem
         // valor e tipado como bigint. O banco recusa com "parameter not
         // supplied", e a fila para sem nunca processar nada.
         var ids = await _context.Database
@@ -267,8 +267,8 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
         {
             texto.AppendLine(
                 $"{camada.Nome} ({camada.Origem})" +
-                (camada.AnoReferencia.HasValue ? $" â€” ano {camada.AnoReferencia}" : string.Empty) +
-                $" â€” {camada.TotalFeicoes} feições, atualizada em " +
+                (camada.AnoReferencia.HasValue ? $" — ano {camada.AnoReferencia}" : string.Empty) +
+                $" — {camada.TotalFeicoes} feições, atualizada em " +
                 (camada.AtualizadaEm?.ToString("dd/MM/yyyy") ?? "data não registrada"));
         }
 
