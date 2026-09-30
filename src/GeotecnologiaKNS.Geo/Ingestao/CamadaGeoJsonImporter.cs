@@ -86,7 +86,7 @@ public class CamadaGeoJsonImporter
                 continue;
             }
 
-            var geometria = Normalizar(feicao?.Geometry);
+            var geometria = Geometrias.Normalizar(feicao?.Geometry);
 
             if (geometria is null)
             {
@@ -156,27 +156,6 @@ public class CamadaGeoJsonImporter
 
         await _context.SaveChangesAsync(cancellationToken);
         return camada;
-    }
-
-    private static Geometry? Normalizar(Geometry? geometria)
-    {
-        if (geometria is null || geometria.IsEmpty)
-        {
-            return null;
-        }
-
-        if (!geometria.IsValid)
-        {
-            geometria = geometria.Buffer(0);
-
-            if (geometria.IsEmpty || !geometria.IsValid)
-            {
-                return null;
-            }
-        }
-
-        geometria.SRID = GeoDbContext.Srid;
-        return geometria;
     }
 
     private static string? ExtrairRotulo(IAttributesTable? atributos)

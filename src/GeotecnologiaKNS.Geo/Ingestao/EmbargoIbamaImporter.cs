@@ -194,23 +194,7 @@ public class EmbargoIbamaImporter
             return null;
         }
 
-        if (geometria.IsEmpty)
-        {
-            return null;
-        }
-
-        if (!geometria.IsValid)
-        {
-            geometria = geometria.Buffer(0);
-
-            if (geometria.IsEmpty || !geometria.IsValid)
-            {
-                return null;
-            }
-        }
-
-        geometria.SRID = GeoDbContext.Srid;
-        return geometria;
+        return Geometrias.Normalizar(geometria);
     }
 
     private static string Campo(IReadOnlyList<string> registro, int indice) =>

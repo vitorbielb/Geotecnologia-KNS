@@ -31,7 +31,7 @@ public class CamadaShapefileImporter
     /// <summary>Campos usados como rótulo legível, na ordem de preferência.</summary>
     private static readonly string[] CamposRotulo =
     {
-        "nome", "NOME", "terrai_nom", "no_uc", "NOME_UC", "nom_uc", "nome_proje",
+        "nome", "NOME", "terrai_nom", "no_uc", "NOME_UC", "nom_uc", "nome_proje", "nm_tq",
         "num_tad", "NUM_TAD", "des_infrac", "cod_imovel", "municipio", "MUNICIPIO", "municipality", "MUNICIPALITY"
     };
 
@@ -45,7 +45,7 @@ public class CamadaShapefileImporter
     /// </remarks>
     private static readonly string[] CamposQualificador =
     {
-        "fase_ti", "FASE_TI", "categoria", "CATEGORIA", "situacao", "SITUACAO",
+        "fase_ti", "FASE_TI", "categoria", "CATEGORIA", "situacao", "SITUACAO", "status", "STATUS",
         "grupo", "GRUPO", "classe", "CLASSE", "classname", "CLASSNAME"
     };
 
@@ -114,7 +114,7 @@ public class CamadaShapefileImporter
             cancellationToken.ThrowIfCancellationRequested();
             lidos++;
 
-            var geometria = Normalizar(feature.Geometry);
+            var geometria = Geometrias.Normalizar(feature.Geometry);
 
             if (geometria is null)
             {
@@ -151,27 +151,6 @@ public class CamadaShapefileImporter
             chave, gravados, descartados, lidos);
 
         return new ResultadoImportacaoCamada(camada.Id, chave, lidos, gravados, descartados);
-    }
-
-    private static Geometry? Normalizar(Geometry? geometria)
-    {
-        if (geometria is null || geometria.IsEmpty)
-        {
-            return null;
-        }
-
-        if (!geometria.IsValid)
-        {
-            geometria = geometria.Buffer(0);
-
-            if (geometria.IsEmpty || !geometria.IsValid)
-            {
-                return null;
-            }
-        }
-
-        geometria.SRID = GeoDbContext.Srid;
-        return geometria;
     }
 
     private static string? ExtrairRotulo(NetTopologySuite.Features.IAttributesTable atributos)

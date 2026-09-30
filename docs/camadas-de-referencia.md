@@ -28,7 +28,7 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- camadas
 | ALE-001 | AlertaDesmatamento | DETER / TerraBrasilis | carregada |
 | UC-001 | UnidadeConservacao | CNUC/MMA | carregada |
 | ASS-001 | AssentamentoRural | INCRA | carregada |
-| QUI-001 | TerritorioQuilombola | INCRA | **pendente** |
+| QUI-001 | TerritorioQuilombola | IBGE | carregada |
 | OUT-001 | OutroPerimetro | definido pela indústria | — |
 
 ---
@@ -184,23 +184,42 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
 
 ---
 
-## Territórios quilombolas — ainda sem rota
+## Territórios quilombolas (IBGE)
 
-Única regra do protocolo que continua sem camada, e é de severidade BLOQUEIO.
-O que foi tentado e não funcionou:
+```bash
+curl -L -G -o quilombolas.zip "https://geoservicos.ibge.gov.br/geoserver/CGMAT/ows" \
+  --data-urlencode "service=WFS" --data-urlencode "version=1.0.0" \
+  --data-urlencode "request=GetFeature" \
+  --data-urlencode "typeName=CGMAT:qg_2022_620_territorioquilombola__v02" \
+  --data-urlencode "outputFormat=SHAPE-ZIP"
+unzip quilombolas.zip
 
-- `certificacao.incra.gov.br/csv_shp/export_shp.py` exige login;
-- a listagem de `csv_shp/zip/` devolve 403, e os nomes prováveis do arquivo
-  (`Quilombola Brasil.zip` e variações) devolvem 404 — diferente do
-  `Assentamento Brasil.zip`, que existe;
-- `acervofundiario.incra.gov.br` não expõe WFS, i3Geo nem GeoServer nos
-  caminhos usuais;
-- a API do `dados.gov.br` exige chave.
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
+  --arquivo qg_2022_620_territorioquilombola__v02Polygon.shp \
+  --chave quilombola-ibge \
+  --nome "Territórios Quilombolas" \
+  --tipo TerritorioQuilombola \
+  --origem "IBGE — Território Quilombola 2022" \
+  --ano 2022
+```
 
-Caminhos que restam: pedir o arquivo ao INCRA, obter credencial do portal de
-certificação, ou inspecionar o visualizador do Acervo Fundiário com um
-navegador de verdade — ele provavelmente carrega a camada por alguma chamada
-que não aparece no HTML inicial.
+- A fonte é o **IBGE**, não o INCRA. Todas as rotas do INCRA que tentei exigem
+  login: o `export_shp.py` pede credencial, a listagem de `csv_shp/zip/` devolve
+  403, os nomes prováveis do arquivo dão 404, e o visualizador do Acervo
+  Fundiário redireciona para `login.php` — confirmado abrindo a página num
+  navegador de verdade e lendo o registro de rede.
+- O arquivo vem em **3D**. O PostGIS aqui tem coluna 2D e recusava a carga
+  inteira com "Geometry has Z dimension but column does not"; a preparação de
+  geometria passou a achatar o Z.
+- O rótulo inclui a situação: "Mel da Pedreira (TITULADO)". Território titulado
+  e em processo de titulação restringem coisas diferentes.
 
-Enquanto isso, o laudo diz explicitamente que QUI-001 não foi avaliada, e
-nenhum imóvel é liberado sem essa verificação.
+Última carga de referência: 495 territórios, nenhum descartado.
+
+---
+
+## O que ainda não tem camada
+
+Só `OUT-001`, e por definição: é a regra coringa, para perímetros restritivos
+que a própria indústria definir. Sem um cadastro desses, ela fica sem base — e
+o laudo continua dizendo isso em vez de tratar como atendida.
