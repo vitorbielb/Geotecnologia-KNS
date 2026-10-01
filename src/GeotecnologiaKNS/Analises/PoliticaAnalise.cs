@@ -145,6 +145,15 @@ public class PoliticaAnalise
             },
             new()
             {
+                Codigo = "TRB-001",
+                Descricao = "Cadastro de Empregadores (trabalho análogo à escravidão)",
+                Restricao = TipoRestricao.TrabalhoEscravo,
+                Severidade = Severidade.Bloqueio,
+                Fundamento = "Portaria Interministerial MTE/MDHC/MIR nº 18/2024. " +
+                             "Compromissos de cadeia produtiva vedam a aquisição."
+            },
+            new()
+            {
                 Codigo = "TI-001",
                 Descricao = "Sobreposição com Terra Indígena",
                 Tipo = TipoCamada.TerraIndigena,

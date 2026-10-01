@@ -34,7 +34,8 @@ namespace GeotecnologiaKNS.UnitTests.Analises
                 "Fulano de Tal", "627420", "Maués", "AM", "10/02/2024", comGeometria);
 
         private static ConsultaPorDocumento Consulta(params AchadoPorDocumento[] achados) =>
-            new("00000836230", achados, new[] { TipoRestricao.EmbargoAmbiental });
+            new("00000836230", achados,
+                new[] { TipoRestricao.EmbargoAmbiental, TipoRestricao.TrabalhoEscravo });
 
         [Fact]
         public void Avaliar_ImovelLimpoComProdutorEmbargado_DeveBloquear()
@@ -59,6 +60,27 @@ namespace GeotecnologiaKNS.UnitTests.Analises
             resultado.Parecer.Should().Contain("Independe da localização do imóvel");
             resultado.Parecer.Should().NotContain("Sobreposição: 0,00 ha");
             resultado.Parecer.Should().Contain("627420");
+        }
+
+        [Fact]
+        public void Avaliar_ProdutorNoCadastroDeEmpregadores_DeveBloquear()
+        {
+            var trabalhoEscravo = new AchadoPorDocumento(
+                "41732445000224", TipoRestricao.TrabalhoEscravo, "MTE — Cadastro de Empregadores",
+                "ALTO FORTE FLORESTAS LTDA", "Ação fiscal 2025 — item 36", "CARAÍ", "MG",
+                "06/10/2025", false);
+
+            var consulta = new ConsultaPorDocumento(
+                "41732445000224",
+                new[] { trabalhoEscravo },
+                new[] { TipoRestricao.EmbargoAmbiental, TipoRestricao.TrabalhoEscravo });
+
+            var resultado = new MotorDeRegras().Avaliar(
+                ImovelLimpo(), PoliticaAnalise.Padrao(), consulta);
+
+            resultado.Status.Should().Be(Status.Bloqueado);
+            resultado.Achados.Should().ContainSingle(a => a.CodigoRegra == "TRB-001");
+            resultado.Parecer.Should().Contain("ALTO FORTE FLORESTAS LTDA");
         }
 
         [Fact]

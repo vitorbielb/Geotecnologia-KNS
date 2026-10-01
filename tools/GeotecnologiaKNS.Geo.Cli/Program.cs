@@ -82,6 +82,9 @@ try
         case "importar-camada":
             return await ImportarCamadaAsync(scope.ServiceProvider, configuration);
 
+        case "importar-cadastro-empregadores":
+            return await ImportarCadastroAsync(scope.ServiceProvider, configuration);
+
         case "importar-geojson":
             return await ImportarGeoJsonAsync(scope.ServiceProvider, configuration);
 
@@ -111,6 +114,7 @@ try
             Console.Error.WriteLine("                  --tipo <tipo> --origem <origem> [--ano <ano>]");
             Console.Error.WriteLine("  importar-geojson --arquivo <arq.geojson> --chave <chave> --nome <nome>");
             Console.Error.WriteLine("                   --tipo <tipo> --origem <origem> [--ano <ano>]");
+            Console.Error.WriteLine("  importar-cadastro-empregadores --arquivo <cadastro.txt>");
             Console.Error.WriteLine("  importar-embargo --arquivo <termo_de_embargo.csv>");
             Console.Error.WriteLine("  camadas");
             Console.Error.WriteLine("  cruzar --car <codigo>");
@@ -741,6 +745,31 @@ static async Task<int> ImportarGeoJsonAsync(IServiceProvider provider, IConfigur
         $"Camada '{resultado.Chave}' (id {resultado.CamadaId}): " +
         $"{resultado.Gravados:N0} feicoes gravadas, {resultado.Descartados:N0} descartadas " +
         $"de {resultado.Lidos:N0} lidas em {relogio.Elapsed.TotalSeconds:N1}s.");
+
+    return 0;
+}
+
+static async Task<int> ImportarCadastroAsync(IServiceProvider provider, IConfiguration configuration)
+{
+    var arquivo = configuration["arquivo"];
+
+    if (string.IsNullOrWhiteSpace(arquivo))
+    {
+        Console.Error.WriteLine("Informe --arquivo com o texto extraido do Cadastro de Empregadores.");
+        Console.Error.WriteLine("O MTE publica so em PDF. Converta antes:");
+        Console.Error.WriteLine("  pdftotext -layout cadastro_de_empregadores.pdf cadastro.txt");
+        Console.Error.WriteLine("  (o PDF vem em Latin1; converta o texto para UTF-8 antes de importar)");
+        return 1;
+    }
+
+    var importer = provider.GetRequiredService<CadastroEmpregadoresImporter>();
+    var resultado = await importer.ImportarAsync(arquivo);
+
+    Console.WriteLine("Cadastro de Empregadores:");
+    Console.WriteLine($"  Linhas lidas    : {resultado.Linhas:N0}");
+    Console.WriteLine($"  Registros       : {resultado.Registros:N0}");
+    Console.WriteLine($"  Gravados        : {resultado.Gravados:N0}");
+    Console.WriteLine($"  Sem documento   : {resultado.SemDocumento:N0}  (se subir, o layout do PDF mudou)");
 
     return 0;
 }

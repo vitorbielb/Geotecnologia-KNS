@@ -239,3 +239,43 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
 Só `OUT-001`, e por definição: é a regra coringa, para perímetros restritivos
 que a própria indústria definir. Sem um cadastro desses, ela fica sem base — e
 o laudo continua dizendo isso em vez de tratar como atendida.
+
+---
+
+## Cadastro de Empregadores (MTE) — lista restritiva por documento
+
+A "lista suja" do trabalho análogo à escravidão. Não é camada geográfica: entra
+em `geo.restricao_documento` e é consultada pela regra TRB-001.
+
+O MTE publica **só em PDF** — tentei `.csv`, `.xlsx` e `.ods` no mesmo caminho e
+todos devolvem 403. Por isso a importação recebe o texto já extraído:
+
+```bash
+curl -L -o cadastro.pdf \
+  "https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/inspecao-do-trabalho/areas-de-atuacao/cadastro_de_empregadores.pdf"
+
+# -table, e não -layout: ver a armadilha abaixo
+pdftotext -table cadastro.pdf cadastro.txt
+iconv -f ISO-8859-1 -t UTF-8 cadastro.txt > cadastro-utf8.txt
+
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- \
+  importar-cadastro-empregadores --arquivo cadastro-utf8.txt
+```
+
+### A armadilha do `-layout`
+
+Com `pdftotext -layout`, o nome do empregador que quebra em duas linhas sai
+intercalado com o registro seguinte: a continuação do item 35 aparece na linha
+que **começa com "36"**. O importador atribuía então o CNPJ de uma empresa ao
+registro de outra — num cadastro de trabalho escravo.
+
+Foi assim que apareceu: `ALTENHOFEN (SC)` gravado como "item 36 — MG". O modo
+`-table` mantém cada registro na própria linha e resolve. **Não troque de volta
+para `-layout`.**
+
+O importador relata quantos registros ficaram sem documento legível. Com
+`-table` esse número é zero; se subir numa carga futura, o layout do PDF mudou
+e a extração precisa ser revista antes de confiar no resultado.
+
+Última carga de referência: 575 registros, 563 pessoas distintas, nenhum sem
+documento.
