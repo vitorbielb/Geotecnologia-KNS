@@ -699,6 +699,7 @@ static async Task<int> ImportarEmbargoAsync(IServiceProvider provider, IConfigur
     Console.WriteLine($"  Cancelados     : {resultado.Cancelados:N0}  (embargo desfeito pelo IBAMA)");
     Console.WriteLine($"  Sem geometria  : {resultado.SemGeometria:N0}  (termo sem area delimitada)");
     Console.WriteLine($"  Invalidos      : {resultado.Invalidos:N0}  (WKT que nao pode ser lido)");
+    Console.WriteLine($"  Documentos     : {resultado.Documentos:N0}  (lista restritiva por CPF/CNPJ)");
     Console.WriteLine($"  Tempo          : {relogio.Elapsed.TotalSeconds:N1}s");
 
     return 0;

@@ -17,6 +17,13 @@
         GeotecnologiaKNS.Geo.Entities.TipoCamada.OutroPerimetro => "Outro perímetro",
         _ => tipo.ToString()
     };
+
+    string NomeRestricao(GeotecnologiaKNS.Geo.Entities.TipoRestricao tipo) => tipo switch
+    {
+        GeotecnologiaKNS.Geo.Entities.TipoRestricao.EmbargoAmbiental => "Embargo em nome do produtor",
+        GeotecnologiaKNS.Geo.Entities.TipoRestricao.TrabalhoEscravo => "Cadastro de Empregadores",
+        _ => tipo.ToString()
+    };
 }
 
 <div class="kns-cabecalho">
@@ -98,7 +105,21 @@
                                         <small class="text-muted">@regra.Fundamento</small>
                                     }
                                 </td>
-                                <td>@NomeTipo(regra.Tipo)</td>
+                                @* Regra por documento não examina camada: mostrar
+                                   "Embargo ambiental" na coluna de tipo faria
+                                   parecer a mesma coisa que a EMB-001. *@
+                                <td>
+                                    @if (regra.Restricao.HasValue)
+                                    {
+                                        <span>@NomeRestricao(regra.Restricao.Value)</span>
+                                        <br />
+                                        <small class="text-muted">por CPF/CNPJ</small>
+                                    }
+                                    else
+                                    {
+                                        @NomeTipo(regra.Tipo)
+                                    }
+                                </td>
                                 <td>
                                     <select name="regras[@i].Severidade" class="form-control form-control-sm"
                                             disabled="@(!personalizada)">

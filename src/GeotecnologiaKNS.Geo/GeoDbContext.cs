@@ -31,6 +31,8 @@ public class GeoDbContext : DbContext
 
     public DbSet<FeicaoReferencia> Feicoes => Set<FeicaoReferencia>();
 
+    public DbSet<RestricaoDocumento> RestricoesPorDocumento => Set<RestricaoDocumento>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -62,6 +64,28 @@ public class GeoDbContext : DbContext
                   .WithMany(x => x.Imoveis)
                   .HasForeignKey(x => x.CargaId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<RestricaoDocumento>(entity =>
+        {
+            entity.ToTable("restricao_documento");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Id).HasColumnName("id");
+            entity.Property(x => x.Documento).HasColumnName("documento").HasMaxLength(14).IsRequired();
+            entity.Property(x => x.NomeTitular).HasColumnName("nome_titular").HasMaxLength(250);
+            entity.Property(x => x.Tipo).HasColumnName("tipo").HasConversion<int>();
+            entity.Property(x => x.Origem).HasColumnName("origem").HasMaxLength(200).IsRequired();
+            entity.Property(x => x.Referencia).HasColumnName("referencia").HasMaxLength(60);
+            entity.Property(x => x.Municipio).HasColumnName("municipio").HasMaxLength(150);
+            entity.Property(x => x.Uf).HasColumnName("uf").HasMaxLength(2);
+            entity.Property(x => x.DataRestricao).HasColumnName("data_restricao").HasMaxLength(40);
+            entity.Property(x => x.TemGeometria).HasColumnName("tem_geometria");
+            entity.Property(x => x.CarregadoEm).HasColumnName("carregado_em");
+
+            // A consulta e sempre por documento exato; sem indice, cada analise
+            // varreria as cem mil linhas da lista.
+            entity.HasIndex(x => new { x.Documento, x.Tipo }).HasDatabaseName("ix_restricao_documento");
         });
 
         modelBuilder.Entity<CoberturaMunicipio>(entity =>

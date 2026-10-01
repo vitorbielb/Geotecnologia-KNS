@@ -35,13 +35,36 @@ namespace GeotecnologiaKNS.UnitTests.Analises
         /// cobertura parcial tem testes próprios, mais abaixo.
         /// </summary>
         private static IReadOnlyList<TipoCamada> TodosOsTipos =>
-            PoliticaAnalise.Padrao().Regras.Select(r => r.Tipo).Distinct().ToList();
+            PoliticaAnalise.Padrao().Regras
+                .Where(r => !r.EhPorDocumento)
+                .Select(r => r.Tipo)
+                .Distinct()
+                .ToList();
+
+        /// <summary>
+        /// Produtor consultado nas listas restritivas e sem nada encontrado.
+        /// </summary>
+        /// <remarks>
+        /// Preciso aqui porque os testes desta classe medem as regras
+        /// geográficas, e sem a consulta a regra por documento ficaria "não
+        /// avaliada" — nenhum deles chegaria a LIBERADO, por motivo alheio ao
+        /// que estão verificando.
+        /// </remarks>
+        private static ConsultaPorDocumento ProdutorLimpo =>
+            new("00000836230",
+                Array.Empty<AchadoPorDocumento>(),
+                PoliticaAnalise.Padrao().Regras
+                    .Where(r => r.EhPorDocumento)
+                    .Select(r => r.Restricao!.Value)
+                    .Distinct()
+                    .ToList());
 
         private static ResultadoCruzamento Cruzamento(params Sobreposicao[] sobreposicoes) =>
             new(Car, AreaImovelHa: 1000, sobreposicoes, DateTime.UtcNow, TodosOsTipos);
 
         private static ResultadoAvaliacao Avaliar(params Sobreposicao[] sobreposicoes) =>
-            new MotorDeRegras().Avaliar(Cruzamento(sobreposicoes), PoliticaAnalise.Padrao());
+            new MotorDeRegras().Avaliar(
+                Cruzamento(sobreposicoes), PoliticaAnalise.Padrao(), ProdutorLimpo);
 
         [Fact]
         public void Avaliar_SemSobreposicao_DeveLiberar()

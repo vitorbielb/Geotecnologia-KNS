@@ -47,14 +47,34 @@ public record ResultadoAvaliacao(
     public bool CoberturaCompleta => NaoAvaliadas.Count == 0;
 }
 
+/// <summary>
+/// O que a consulta às listas restritivas devolveu para um produtor.
+/// </summary>
+/// <param name="Documento">CPF ou CNPJ consultado, ou null se não havia.</param>
+/// <param name="TiposDisponiveis">
+/// Listas que estavam carregadas. Sem isto, "nada encontrado" ficaria
+/// indistinguível de "não havia onde procurar" — o mesmo cuidado que vale para
+/// as camadas.
+/// </param>
+public record ConsultaPorDocumento(
+    string? Documento,
+    IReadOnlyList<AchadoPorDocumento> Achados,
+    IReadOnlyList<TipoRestricao> TiposDisponiveis);
+
 public interface IMotorDeRegras
 {
-    ResultadoAvaliacao Avaliar(ResultadoCruzamento cruzamento, PoliticaAnalise politica);
+    ResultadoAvaliacao Avaliar(
+        ResultadoCruzamento cruzamento,
+        PoliticaAnalise politica,
+        ConsultaPorDocumento? documento = null);
 }
 
 public class MotorDeRegras : IMotorDeRegras
 {
-    public ResultadoAvaliacao Avaliar(ResultadoCruzamento cruzamento, PoliticaAnalise politica)
+    public ResultadoAvaliacao Avaliar(
+        ResultadoCruzamento cruzamento,
+        PoliticaAnalise politica,
+        ConsultaPorDocumento? documento = null)
     {
         ArgumentNullException.ThrowIfNull(cruzamento);
         ArgumentNullException.ThrowIfNull(politica);
@@ -63,7 +83,7 @@ public class MotorDeRegras : IMotorDeRegras
 
         foreach (var sobreposicao in cruzamento.Sobreposicoes)
         {
-            foreach (var regra in politica.Regras.Where(r => r.Satisfeita(sobreposicao)))
+            foreach (var regra in politica.Regras.Where(r => !r.EhPorDocumento && r.Satisfeita(sobreposicao)))
             {
                 achados.Add(new Achado(
                     regra.Codigo,
@@ -78,6 +98,8 @@ public class MotorDeRegras : IMotorDeRegras
             }
         }
 
+        achados.AddRange(AvaliarPorDocumento(politica, documento));
+
         // Ordena por gravidade e, dentro dela, pela área — o laudo precisa abrir
         // com o achado que decide o veredito.
         achados = achados
@@ -85,7 +107,7 @@ public class MotorDeRegras : IMotorDeRegras
             .ThenByDescending(a => a.AreaSobrepostaHa)
             .ToList();
 
-        var naoAvaliadas = LevantarNaoAvaliadas(cruzamento, politica);
+        var naoAvaliadas = LevantarNaoAvaliadas(cruzamento, politica, documento);
         var status = DeterminarStatus(achados, naoAvaliadas);
 
         return new ResultadoAvaliacao(
@@ -97,16 +119,93 @@ public class MotorDeRegras : IMotorDeRegras
     }
 
     /// <summary>
-    /// Regras cujo tipo de camada não estava carregado no momento do cruzamento.
+    /// Produz um achado para cada restrição encontrada em nome do produtor.
+    /// </summary>
+    /// <remarks>
+    /// Cada registro vira um achado próprio, como acontece com as
+    /// sobreposições: o agrupamento por regra no laudo já junta o que for do
+    /// mesmo tipo, e manter um por um preserva o número do ato para quem
+    /// precisar conferir na origem.
+    /// </remarks>
+    private static IEnumerable<Achado> AvaliarPorDocumento(
+        PoliticaAnalise politica, ConsultaPorDocumento? documento)
+    {
+        if (documento is null || documento.Achados.Count == 0)
+        {
+            yield break;
+        }
+
+        foreach (var regra in politica.Regras.Where(r => r.EhPorDocumento))
+        {
+            foreach (var achado in documento.Achados.Where(a => a.Tipo == regra.Restricao))
+            {
+                // Área e percentual ficam em zero: a restrição recai sobre a
+                // pessoa, não sobre um pedaço do imóvel. O laudo trata esse
+                // caso à parte justamente por isso.
+                yield return new Achado(
+                    regra.Codigo,
+                    regra.Descricao,
+                    regra.Severidade,
+                    achado.Origem,
+                    achado.Origem,
+                    DescreverAchado(achado),
+                    AreaSobrepostaHa: 0,
+                    PercentualDoImovel: 0,
+                    regra.Fundamento);
+            }
+        }
+    }
+
+    private static string DescreverAchado(AchadoPorDocumento achado)
+    {
+        var texto = new StringBuilder();
+
+        texto.Append(string.IsNullOrWhiteSpace(achado.Referencia)
+            ? "sem referência"
+            : achado.Referencia);
+
+        if (!string.IsNullOrWhiteSpace(achado.NomeTitular))
+        {
+            texto.Append(" — ").Append(achado.NomeTitular);
+        }
+
+        if (!string.IsNullOrWhiteSpace(achado.Municipio))
+        {
+            texto.Append(" — ").Append(achado.Municipio);
+
+            if (!string.IsNullOrWhiteSpace(achado.Uf))
+            {
+                texto.Append('/').Append(achado.Uf);
+            }
+        }
+
+        // Marca o que já apareceu no cruzamento, para o laudo não dar a
+        // impressão de duas restrições onde há uma.
+        if (achado.TemGeometria)
+        {
+            texto.Append(" (com área delimitada)");
+        }
+
+        return texto.ToString();
+    }
+
+    /// <summary>
+    /// Regras sem base para consulta: camada não carregada, ou lista restritiva
+    /// ausente, ou produtor sem documento informado.
     /// </summary>
     private static List<RegraNaoAvaliada> LevantarNaoAvaliadas(
         ResultadoCruzamento cruzamento,
-        PoliticaAnalise politica)
+        PoliticaAnalise politica,
+        ConsultaPorDocumento? documento)
     {
         var verificados = cruzamento.TiposVerificados.ToHashSet();
+        var listas = documento?.TiposDisponiveis.ToHashSet() ?? new HashSet<TipoRestricao>();
+        var temDocumento = !string.IsNullOrWhiteSpace(documento?.Documento);
 
         return politica.Regras
-            .Where(r => !verificados.Contains(r.Tipo))
+            .Where(r => r.EhPorDocumento
+                ? !temDocumento || !listas.Contains(r.Restricao!.Value)
+                : !verificados.Contains(r.Tipo))
             .Select(r => new RegraNaoAvaliada(r.Codigo, r.Descricao, r.Tipo, r.Severidade))
             .OrderByDescending(r => r.SeveridadePrevista)
             .ThenBy(r => r.CodigoRegra, StringComparer.Ordinal)
@@ -271,15 +370,32 @@ public class MotorDeRegras : IMotorDeRegras
         {
             texto.AppendLine();
             texto.AppendLine($"[{grupo.Severidade.ToString().ToUpperInvariant()}] {grupo.CodigoRegra} — {grupo.Descricao}");
-            texto.AppendLine($"  Camada: {grupo.CamadaNome} ({grupo.Origem})");
-            texto.AppendLine(
-                $"  Sobreposição: {Formatar(grupo.AreaTotalHa)} ha " +
-                $"({Formatar(grupo.PercentualTotal)}% do imóvel) em {grupo.Quantidade} polígono(s)");
+
+            // Achado por documento não tem área: escrever "0,00 ha (0,00% do
+            // imóvel)" faria parecer restrição irrelevante, quando é o
+            // contrário — ela não depende de o imóvel tocar coisa alguma.
+            var porDocumento = grupo.AreaTotalHa == 0 && grupo.PercentualTotal == 0;
+
+            if (porDocumento)
+            {
+                texto.AppendLine($"  Fonte: {grupo.Origem}");
+                texto.AppendLine(
+                    $"  Registros em nome do produtor: {grupo.Quantidade}. " +
+                    "Independe da localização do imóvel.");
+            }
+            else
+            {
+                texto.AppendLine($"  Camada: {grupo.CamadaNome} ({grupo.Origem})");
+                texto.AppendLine(
+                    $"  Sobreposição: {Formatar(grupo.AreaTotalHa)} ha " +
+                    $"({Formatar(grupo.PercentualTotal)}% do imóvel) em {grupo.Quantidade} polígono(s)");
+            }
 
             if (grupo.Rotulos.Count > 0)
             {
                 var reticencias = grupo.Quantidade > grupo.Rotulos.Count ? ", ..." : string.Empty;
-                texto.AppendLine($"  Feições: {string.Join(", ", grupo.Rotulos)}{reticencias}");
+                var titulo = porDocumento ? "Atos" : "Feições";
+                texto.AppendLine($"  {titulo}: {string.Join(", ", grupo.Rotulos)}{reticencias}");
             }
 
             if (!string.IsNullOrWhiteSpace(grupo.Fundamento))

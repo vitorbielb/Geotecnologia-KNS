@@ -59,6 +59,22 @@ Observações que custaram tempo para descobrir:
 
 Última carga de referência: 57.843 polígonos de 116.564 registros, em 32s.
 
+### Lista restritiva por CPF/CNPJ
+
+O mesmo arquivo alimenta uma segunda estrutura: `geo.restricao_documento`,
+consultada pela regra EMB-002 durante a análise.
+
+Ela existe porque **quase metade dos termos do IBAMA não tem área delimitada** —
+cerca de 50 mil embargos que nenhum cruzamento de polígono encontra. E resolve o
+caso que a geografia nunca resolveria: o produtor cujo imóvel está limpo, mas
+que responde por embargo em outra fazenda.
+
+Última carga: 100.691 registros, 81.179 pessoas distintas, 49.901 sem área.
+
+Termos lavrados contra autuado não identificado vêm com documento 00000000000;
+esses são recusados na normalização, senão qualquer produtor cadastrado com
+documento de preenchimento casaria com dezenas de embargos alheios.
+
 ---
 
 ## Terras indígenas (FUNAI)

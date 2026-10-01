@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using GeotecnologiaKNS.Geo.Entities;
+using GeotecnologiaKNS.Geo.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
@@ -9,6 +10,7 @@ using NetTopologySuite.IO;
 namespace GeotecnologiaKNS.Geo.Ingestao;
 
 public record ResultadoImportacaoEmbargo(
+    int Documentos,
     int CamadaId,
     int Lidos,
     int Cancelados,
@@ -32,6 +34,8 @@ public class EmbargoIbamaImporter
     private const int TamanhoLote = 2_000;
 
     public const string Chave = "embargo-ibama";
+
+    private const string OrigemDaBase = "IBAMA — Termos de embargo";
 
     private readonly GeoDbContext _context;
     private readonly ILogger<EmbargoIbamaImporter> _logger;
@@ -79,6 +83,8 @@ public class EmbargoIbamaImporter
         var invalidos = 0;
         var gravados = 0;
         var lote = new List<FeicaoReferencia>(TamanhoLote);
+        var loteDocumentos = new List<RestricaoDocumento>(TamanhoLote);
+        var documentos = 0;
 
         while (leitor.LerRegistro() is { } registro)
         {
@@ -100,14 +106,45 @@ public class EmbargoIbamaImporter
             }
 
             var textoGeometria = Campo(registro, iGeom);
+            var geometria = string.IsNullOrWhiteSpace(textoGeometria)
+                ? null
+                : Interpretar(wkt, textoGeometria);
+
+            // A lista por documento é alimentada mesmo sem área delimitada, e é
+            // justamente aí que ela importa: quase metade dos termos do IBAMA
+            // não tem polígono. Esses embargos existem, recaem sobre uma
+            // pessoa, e nenhum cruzamento geográfico jamais os encontraria.
+            var documento = RestricaoDocumentoService.Normalizar(Campo(registro, iCpfCnpj));
+
+            if (documento is not null)
+            {
+                loteDocumentos.Add(new RestricaoDocumento
+                {
+                    Documento = documento,
+                    NomeTitular = Truncar(Campo(registro, iNome), 250),
+                    Tipo = TipoRestricao.EmbargoAmbiental,
+                    Origem = OrigemDaBase,
+                    Referencia = Truncar(Campo(registro, iTad), 60),
+                    Municipio = Truncar(Campo(registro, iMunicipio), 150),
+                    Uf = Truncar(Campo(registro, iUf), 2),
+                    DataRestricao = Truncar(Campo(registro, iData), 40),
+                    TemGeometria = geometria is not null
+                });
+
+                documentos++;
+            }
+
+            if (loteDocumentos.Count >= TamanhoLote)
+            {
+                await GravarDocumentosAsync(loteDocumentos, cancellationToken);
+                loteDocumentos.Clear();
+            }
 
             if (string.IsNullOrWhiteSpace(textoGeometria))
             {
                 semGeometria++;
                 continue;
             }
-
-            var geometria = Interpretar(wkt, textoGeometria);
 
             if (geometria is null)
             {
@@ -136,6 +173,11 @@ public class EmbargoIbamaImporter
             gravados += await GravarLoteAsync(lote, cancellationToken);
         }
 
+        if (loteDocumentos.Count > 0)
+        {
+            await GravarDocumentosAsync(loteDocumentos, cancellationToken);
+        }
+
         camada.TotalFeicoes = gravados;
         camada.AtualizadaEm = DateTime.UtcNow;
         _context.Camadas.Update(camada);
@@ -147,7 +189,7 @@ public class EmbargoIbamaImporter
             gravados, lidos, cancelados, semGeometria, invalidos);
 
         return new ResultadoImportacaoEmbargo(
-            camada.Id, lidos, cancelados, semGeometria, invalidos, gravados);
+            documentos, camada.Id, lidos, cancelados, semGeometria, invalidos, gravados);
     }
 
     private async Task<CamadaReferencia> PrepararCamadaAsync(CancellationToken cancellationToken)
@@ -166,6 +208,13 @@ public class EmbargoIbamaImporter
             await _context.Database.ExecuteSqlRawAsync(
                 "DELETE FROM geo.feicao_referencia WHERE camada_id = {0}",
                 new object[] { camada.Id },
+                cancellationToken);
+
+            // A lista por documento vem do mesmo arquivo e precisa ser trocada
+            // junto: embargo revogado tem de sumir dos dois lugares.
+            await _context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM geo.restricao_documento WHERE tipo = {0}",
+                new object[] { (int)TipoRestricao.EmbargoAmbiental },
                 cancellationToken);
         }
 
@@ -254,6 +303,24 @@ public class EmbargoIbamaImporter
         }
 
         return JsonSerializer.Serialize(atributos);
+    }
+
+    private async Task GravarDocumentosAsync(
+        List<RestricaoDocumento> lote, CancellationToken cancellationToken)
+    {
+        _context.RestricoesPorDocumento.AddRange(lote);
+        await _context.SaveChangesAsync(cancellationToken);
+        _context.ChangeTracker.Clear();
+    }
+
+    private static string? Truncar(string? valor, int tamanho)
+    {
+        if (string.IsNullOrWhiteSpace(valor))
+        {
+            return null;
+        }
+
+        return valor.Length <= tamanho ? valor : valor[..tamanho];
     }
 
     private async Task<int> GravarLoteAsync(List<FeicaoReferencia> lote, CancellationToken cancellationToken)

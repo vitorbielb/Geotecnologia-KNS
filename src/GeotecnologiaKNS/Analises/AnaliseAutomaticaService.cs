@@ -34,6 +34,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
     private readonly IIntersecaoService _intersecao;
     private readonly IMotorDeRegras _motor;
     private readonly IPoliticaAnaliseRepository _politicas;
+    private readonly IRestricaoDocumentoService _restricoes;
     private readonly IMedidorDeUso _medidor;
     private readonly ILogger<AnaliseAutomaticaService> _logger;
 
@@ -42,6 +43,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
         IIntersecaoService intersecao,
         IMotorDeRegras motor,
         IPoliticaAnaliseRepository politicas,
+        IRestricaoDocumentoService restricoes,
         IMedidorDeUso medidor,
         ILogger<AnaliseAutomaticaService> logger)
     {
@@ -49,6 +51,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
         _intersecao = intersecao;
         _motor = motor;
         _politicas = politicas;
+        _restricoes = restricoes;
         _medidor = medidor;
         _logger = logger;
     }
@@ -91,7 +94,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             ?? throw new InvalidOperationException($"Análise {analiseId} não encontrada.");
 
         var solicitacao = await _context.Solicitacao
-            .Include(x => x.Propriedade)
+            .Include(x => x.Propriedade!).ThenInclude(p => p.Produtor)
             .FirstOrDefaultAsync(x => x.Id == analise.SolicitacaoId, cancellationToken)
             ?? throw new InvalidOperationException($"Solicitação {analise.SolicitacaoId} não encontrada.");
 
@@ -119,7 +122,13 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             }
 
             var cruzamento = await _intersecao.CruzarPorCarAsync(propriedade.CodigoCar, cancellationToken);
-            var avaliacao = _motor.Avaliar(cruzamento, politica);
+
+            // O documento do produtor, não o do imóvel: a restrição recai sobre
+            // a pessoa e acompanha quem ela é, não onde está a fazenda.
+            var documento = await ConsultarDocumentoAsync(
+                propriedade.Produtor?.Cpf, cancellationToken);
+
+            var avaliacao = _motor.Avaliar(cruzamento, politica, documento);
 
             analise.AreaImovelHa = cruzamento.AreaImovelHa;
             analise.Resultado = avaliacao.Status;
@@ -256,6 +265,25 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             .ToListAsync(cancellationToken);
 
         return ids.Count > 0 ? ids[0] : null;
+    }
+
+    /// <summary>
+    /// Consulta as listas restritivas pelo documento do produtor.
+    /// </summary>
+    /// <remarks>
+    /// Devolve o resultado mesmo quando não há documento ou nada é encontrado,
+    /// porque o motor precisa distinguir "consultado e limpo" de "não havia o
+    /// que consultar" — produtor sem CPF cadastrado não pode contar como
+    /// verificado.
+    /// </remarks>
+    private async Task<ConsultaPorDocumento> ConsultarDocumentoAsync(
+        string? documento, CancellationToken cancellationToken)
+    {
+        var tipos = await _restricoes.ObterTiposDisponiveisAsync(cancellationToken);
+        var achados = await _restricoes.ConsultarAsync(documento, cancellationToken);
+
+        return new ConsultaPorDocumento(
+            RestricaoDocumentoService.Normalizar(documento), achados, tipos);
     }
 
     private async Task<string> DescreverCamadasAsync(CancellationToken cancellationToken)

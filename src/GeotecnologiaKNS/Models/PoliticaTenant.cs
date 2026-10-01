@@ -62,6 +62,13 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Tipo de camada")]
         public TipoCamada Tipo { get; set; }
 
+        /// <summary>
+        /// Quando preenchido, a regra examina lista restritiva por CPF/CNPJ em
+        /// vez de camada geográfica.
+        /// </summary>
+        [Display(Name = "Lista restritiva")]
+        public TipoRestricao? Restricao { get; set; }
+
         /// <summary>0 informativo, 1 alerta, 2 bloqueio.</summary>
         [Display(Name = "Severidade")]
         public int Severidade { get; set; }

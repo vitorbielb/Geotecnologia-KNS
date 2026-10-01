@@ -32,6 +32,24 @@ public class RegraAnalise
 
     public TipoCamada Tipo { get; set; }
 
+    /// <summary>
+    /// Quando preenchido, a regra examina uma lista restritiva por CPF/CNPJ em
+    /// vez de sobreposição geográfica.
+    /// </summary>
+    /// <remarks>
+    /// Mora na mesma entidade de propósito. São duas perguntas diferentes — "o
+    /// imóvel toca uma área restrita?" e "a pessoa responde por restrição?" —,
+    /// mas ambas são regras de conformidade que a indústria calibra do mesmo
+    /// jeito: código, descrição, severidade e fundamento. Separar em duas
+    /// hierarquias duplicaria a tela de política, a persistência e o laudo para
+    /// ganhar pouco. Quando a regra é por documento, Tipo e os limiares de área
+    /// não se aplicam.
+    /// </remarks>
+    public TipoRestricao? Restricao { get; set; }
+
+    /// <summary>Indica se esta regra examina lista restritiva, e não camada.</summary>
+    public bool EhPorDocumento => Restricao.HasValue;
+
     public Severidade Severidade { get; set; }
 
     /// <summary>Área mínima sobreposta, em hectares, para a regra disparar.</summary>
@@ -111,6 +129,19 @@ public class PoliticaAnalise
                 Tipo = TipoCamada.EmbargoAmbiental,
                 Severidade = Severidade.Bloqueio,
                 Fundamento = "Área embargada por infração ambiental; aquisição vedada."
+            },
+            new()
+            {
+                // Pega o que a geografia não alcança, e são dois casos: o
+                // embargo sem área delimitada — quase metade dos termos do
+                // IBAMA — e o produtor cujo imóvel está limpo mas que responde
+                // por embargo em outra fazenda. Para quem compra, é a mesma
+                // pessoa.
+                Codigo = "EMB-002",
+                Descricao = "Embargo ambiental em nome do produtor",
+                Restricao = TipoRestricao.EmbargoAmbiental,
+                Severidade = Severidade.Bloqueio,
+                Fundamento = "Autuado com termo de embargo vigente pelo IBAMA."
             },
             new()
             {
