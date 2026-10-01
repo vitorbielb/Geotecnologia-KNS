@@ -37,6 +37,9 @@ public class EmbargoIbamaImporter
 
     private const string OrigemDaBase = "IBAMA — Termos de embargo";
 
+    /// <summary>O IBAMA publica diariamente; recarregar semanalmente basta.</summary>
+    private const int PeriodicidadeDias = 7;
+
     private readonly GeoDbContext _context;
     private readonly ILogger<EmbargoIbamaImporter> _logger;
 
@@ -75,6 +78,24 @@ public class EmbargoIbamaImporter
         var iImovel = leitor.IndiceDe("NOME_IMOVEL");
 
         // SRID é aplicado depois da leitura, em Interpretar.
+        var troca = new TrocaDeCamada(_context, _logger);
+        await troca.LimparTentativaAnteriorAsync(camada, cancellationToken);
+
+        // O arquivo alimenta duas estruturas, e as duas trocam versionadas pelo
+        // mesmo motivo: a lista por documento é o único caminho para os embargos
+        // sem área delimitada, que são quase metade do total.
+        var trocaDaLista = new TrocaDeListaRestritiva(_context, _logger);
+
+        var lista = await trocaDaLista.PrepararAsync(
+            TipoRestricao.EmbargoAmbiental,
+            "Termos de embargo por CPF/CNPJ",
+            OrigemDaBase,
+            PeriodicidadeDias,
+            cancellationToken);
+
+        var versao = TrocaDeCamada.ProximaVersao(camada);
+        var versaoDaLista = TrocaDeListaRestritiva.ProximaVersao(lista);
+
         var wkt = new WKTReader();
 
         var lidos = 0;
@@ -128,7 +149,8 @@ public class EmbargoIbamaImporter
                     Municipio = Truncar(Campo(registro, iMunicipio), 150),
                     Uf = Truncar(Campo(registro, iUf), 2),
                     DataRestricao = Truncar(Campo(registro, iData), 40),
-                    TemGeometria = geometria is not null
+                    TemGeometria = geometria is not null,
+                    Versao = versaoDaLista
                 });
 
                 documentos++;
@@ -155,6 +177,7 @@ public class EmbargoIbamaImporter
             lote.Add(new FeicaoReferencia
             {
                 CamadaId = camada.Id,
+                Versao = versao,
                 Geometria = geometria,
                 Rotulo = MontarRotulo(registro, iTad, iMunicipio, iUf),
                 AtributosJson = SerializarAtributos(
@@ -178,10 +201,30 @@ public class EmbargoIbamaImporter
             await GravarDocumentosAsync(loteDocumentos, cancellationToken);
         }
 
-        camada.TotalFeicoes = gravados;
-        camada.AtualizadaEm = DateTime.UtcNow;
-        _context.Camadas.Update(camada);
-        await _context.SaveChangesAsync(cancellationToken);
+        // As duas trocas são conferidas antes de qualquer uma ser publicada.
+        // Publicar uma e recusar a outra deixaria a camada e a lista falando de
+        // arquivos diferentes — e, como EMB-001 e EMB-002 se apoiam uma na outra
+        // para não contar o mesmo embargo duas vezes, o laudo ficaria incoerente
+        // consigo mesmo.
+        var vereditoDaCamada = GuardaDeCarga.Avaliar(camada.TotalFeicoes, gravados);
+        var vereditoDaLista = GuardaDeCarga.Avaliar(lista.TotalRegistros, documentos);
+
+        if (vereditoDaCamada != MotivoDaRecusa.Nenhum || vereditoDaLista != MotivoDaRecusa.Nenhum)
+        {
+            await troca.DescartarPendenteAsync(camada, cancellationToken);
+            await trocaDaLista.DescartarPendenteAsync(lista, cancellationToken);
+
+            var recusada = vereditoDaCamada != MotivoDaRecusa.Nenhum
+                ? new ResultadoDaTroca(false, vereditoDaCamada, camada.TotalFeicoes, gravados)
+                : new ResultadoDaTroca(false, vereditoDaLista, lista.TotalRegistros, documentos, "registros");
+
+            _logger.LogError("Recarga dos embargos recusada: {Explicacao}", recusada.Explicacao);
+
+            throw new InvalidOperationException(recusada.Explicacao);
+        }
+
+        await troca.PublicarAsync(camada, gravados, cancellationToken);
+        await trocaDaLista.PublicarAsync(lista, documentos, cancellationToken);
 
         _logger.LogInformation(
             "Embargos do IBAMA: {Gravados} gravados de {Lidos} lidos " +
@@ -201,28 +244,10 @@ public class EmbargoIbamaImporter
             camada = new CamadaReferencia { Chave = Chave };
             _context.Camadas.Add(camada);
         }
-        else
-        {
-            // Recarga substitui a camada inteira: embargo revogado precisa sumir,
-            // e manter a versão anterior duplicaria sobreposições no laudo.
-            await _context.Database.ExecuteSqlRawAsync(
-                "DELETE FROM geo.feicao_referencia WHERE camada_id = {0}",
-                new object[] { camada.Id },
-                cancellationToken);
-
-            // A lista por documento vem do mesmo arquivo e precisa ser trocada
-            // junto: embargo revogado tem de sumir dos dois lugares.
-            await _context.Database.ExecuteSqlRawAsync(
-                "DELETE FROM geo.restricao_documento WHERE tipo = {0}",
-                new object[] { (int)TipoRestricao.EmbargoAmbiental },
-                cancellationToken);
-        }
-
         camada.Nome = "Termos de embargo";
         camada.Tipo = TipoCamada.EmbargoAmbiental;
         camada.Origem = "IBAMA — Dados Abertos (termo_de_embargo)";
         camada.Ativa = true;
-        camada.AtualizadaEm = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
         return camada;

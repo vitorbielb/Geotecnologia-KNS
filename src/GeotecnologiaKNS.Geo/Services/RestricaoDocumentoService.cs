@@ -76,24 +76,35 @@ public class RestricaoDocumentoService : IRestricaoDocumentoService
             return Array.Empty<AchadoPorDocumento>();
         }
 
-        return await _context.RestricoesPorDocumento
-            .AsNoTracking()
-            .Where(x => x.Documento == normalizado)
-            .OrderBy(x => x.Tipo)
-            .ThenBy(x => x.Referencia)
-            .Select(x => new AchadoPorDocumento(
-                x.Documento, x.Tipo, x.Origem, x.NomeTitular, x.Referencia,
-                x.Municipio, x.Uf, x.DataRestricao, x.TemGeometria))
-            .ToListAsync(cancellationToken);
+        // A junção pela versão publicada é o que torna a recarga invisível para
+        // quem consulta: enquanto a carga nova é gravada ao lado, esta consulta
+        // continua enxergando a lista que está no ar, inteira.
+        var achados =
+            from restricao in _context.RestricoesPorDocumento.AsNoTracking()
+            join lista in _context.ListasRestritivas.AsNoTracking()
+                on restricao.Tipo equals lista.Tipo
+            where restricao.Documento == normalizado
+               && restricao.Versao == lista.VersaoAtual
+            orderby restricao.Tipo, restricao.Referencia
+            select new AchadoPorDocumento(
+                restricao.Documento, restricao.Tipo, restricao.Origem, restricao.NomeTitular,
+                restricao.Referencia, restricao.Municipio, restricao.Uf,
+                restricao.DataRestricao, restricao.TemGeometria);
+
+        return await achados.ToListAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<TipoRestricao>> ObterTiposDisponiveisAsync(
         CancellationToken cancellationToken = default)
     {
-        return await _context.RestricoesPorDocumento
+        // Lida do registro da lista, não das cem mil linhas: uma lista cuja
+        // última carga foi recusada fica com zero registros publicados, e aí ela
+        // não está disponível — dizer o contrário marcaria a regra como
+        // avaliada sem nada contra o que avaliar.
+        return await _context.ListasRestritivas
             .AsNoTracking()
+            .Where(x => x.TotalRegistros > 0)
             .Select(x => x.Tipo)
-            .Distinct()
             .ToListAsync(cancellationToken);
     }
 }

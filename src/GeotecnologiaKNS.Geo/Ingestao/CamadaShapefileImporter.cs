@@ -79,26 +79,18 @@ public class CamadaShapefileImporter
             camada = new CamadaReferencia { Chave = chave };
             _context.Camadas.Add(camada);
         }
-        else
-        {
-            // Recarga substitui a camada inteira: manter feições da versão
-            // anterior produziria sobreposições duplicadas no laudo.
-            // DELETE direto porque carregar milhões de feições para o
-            // ChangeTracker só para apagá-las não terminaria.
-            await _context.Database.ExecuteSqlRawAsync(
-                "DELETE FROM geo.feicao_referencia WHERE camada_id = {0}",
-                new object[] { camada.Id },
-                cancellationToken);
-        }
-
         camada.Nome = nome;
         camada.Tipo = tipo;
         camada.Origem = origem;
         camada.AnoReferencia = anoReferencia;
         camada.Ativa = true;
-        camada.AtualizadaEm = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        var troca = new TrocaDeCamada(_context, _logger);
+        await troca.LimparTentativaAnteriorAsync(camada, cancellationToken);
+
+        var versao = TrocaDeCamada.ProximaVersao(camada);
 
         var lidos = 0;
         var descartados = 0;
@@ -125,6 +117,7 @@ public class CamadaShapefileImporter
             lote.Add(new FeicaoReferencia
             {
                 CamadaId = camada.Id,
+                Versao = versao,
                 Geometria = geometria,
                 Rotulo = ExtrairRotulo(feature.Attributes),
                 AtributosJson = SerializarAtributos(feature.Attributes)
@@ -142,9 +135,12 @@ public class CamadaShapefileImporter
             gravados += await GravarLoteAsync(lote, cancellationToken);
         }
 
-        camada.TotalFeicoes = gravados;
-        _context.Camadas.Update(camada);
-        await _context.SaveChangesAsync(cancellationToken);
+        var publicacao = await troca.PublicarAsync(camada, gravados, cancellationToken);
+
+        if (!publicacao.Aceita)
+        {
+            throw new InvalidOperationException(publicacao.Explicacao);
+        }
 
         _logger.LogInformation(
             "Camada {Chave}: {Gravados} feições gravadas, {Descartados} descartadas de {Lidos} lidas.",

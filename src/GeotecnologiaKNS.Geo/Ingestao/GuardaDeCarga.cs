@@ -1,0 +1,79 @@
+namespace GeotecnologiaKNS.Geo.Ingestao;
+
+/// <summary>
+/// Motivo pelo qual uma recarga foi recusada.
+/// </summary>
+public enum MotivoDaRecusa
+{
+    Nenhum = 0,
+
+    /// <summary>A carga não produziu registro algum.</summary>
+    Vazia = 1,
+
+    /// <summary>A carga perdeu parte grande do que havia antes.</summary>
+    EncolheuDemais = 2
+}
+
+public record ResultadoDaTroca(
+    bool Aceita,
+    MotivoDaRecusa Motivo,
+    int Antes,
+    int Depois,
+    string Unidade = "feições")
+{
+    public string Explicacao => Motivo switch
+    {
+        MotivoDaRecusa.Vazia =>
+            $"A carga não produziu {Unidade} alguma. A versão anterior foi mantida.",
+
+        MotivoDaRecusa.EncolheuDemais =>
+            $"A carga trouxe {Depois:N0} {Unidade} contra {Antes:N0} da versão " +
+            "anterior. Uma queda dessa ordem costuma ser arquivo truncado na origem, " +
+            "não redução real. A versão anterior foi mantida.",
+
+        _ => $"{Depois:N0} {Unidade} ({Antes:N0} antes)."
+    };
+}
+
+/// <summary>
+/// A conferência que decide se uma carga nova pode substituir a que está no ar.
+/// </summary>
+/// <remarks>
+/// Vale igualmente para camada geográfica e para lista restritiva por documento,
+/// porque o estrago é o mesmo: se a origem publicar um arquivo truncado e a
+/// carga for aceita sem conferência, o sistema passa a liberar o que deveria
+/// bloquear — e, numa recarga desassistida, ninguém percebe até alguém
+/// contestar um laudo.
+/// </remarks>
+public static class GuardaDeCarga
+{
+    /// <summary>
+    /// Fração do tamanho anterior abaixo da qual a carga é recusada.
+    /// </summary>
+    /// <remarks>
+    /// Metade é folgado de propósito. Base de referência não encolhe pela
+    /// metade de uma semana para outra por motivo legítimo: embargo revogado e
+    /// unidade de conservação extinta são dezenas, não dezenas de milhares.
+    /// Recusar e manter o que havia é sempre mais seguro que aceitar e liberar
+    /// fornecedor que não foi verificado.
+    /// </remarks>
+    public const double FracaoMinima = 0.5;
+
+    public static MotivoDaRecusa Avaliar(int antes, int depois)
+    {
+        if (depois == 0)
+        {
+            return MotivoDaRecusa.Vazia;
+        }
+
+        // Primeira carga não tem com o que comparar.
+        if (antes == 0)
+        {
+            return MotivoDaRecusa.Nenhum;
+        }
+
+        return depois < antes * FracaoMinima
+            ? MotivoDaRecusa.EncolheuDemais
+            : MotivoDaRecusa.Nenhum;
+    }
+}

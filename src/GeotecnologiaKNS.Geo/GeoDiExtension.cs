@@ -37,6 +37,7 @@ public static class GeoDiExtension
         services.AddScoped<CamadaGeoJsonImporter>();
         services.AddScoped<CadastroEmpregadoresImporter>();
         services.AddScoped<IRestricaoDocumentoService, RestricaoDocumentoService>();
+        services.AddScoped<RecarregadorDeCamadas>();
 
         return services;
     }

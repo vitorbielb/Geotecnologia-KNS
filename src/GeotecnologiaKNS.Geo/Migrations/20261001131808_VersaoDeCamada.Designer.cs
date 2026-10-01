@@ -3,6 +3,7 @@ using System;
 using GeotecnologiaKNS.Geo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GeotecnologiaKNS.Geo.Migrations
 {
     [DbContext(typeof(GeoDbContext))]
-    partial class GeoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261001131808_VersaoDeCamada")]
+    partial class VersaoDeCamada
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -347,45 +350,6 @@ namespace GeotecnologiaKNS.Geo.Migrations
                     b.ToTable("lacuna_cobertura", "geo");
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Geo.Entities.ListaRestritiva", b =>
-                {
-                    b.Property<int>("Tipo")
-                        .HasColumnType("integer")
-                        .HasColumnName("tipo");
-
-                    b.Property<DateTime?>("AtualizadaEm")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("atualizada_em");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("nome");
-
-                    b.Property<string>("Origem")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("origem");
-
-                    b.Property<int?>("PeriodicidadeDias")
-                        .HasColumnType("integer")
-                        .HasColumnName("periodicidade_dias");
-
-                    b.Property<int>("TotalRegistros")
-                        .HasColumnType("integer")
-                        .HasColumnName("total_registros");
-
-                    b.Property<int>("VersaoAtual")
-                        .HasColumnType("integer")
-                        .HasColumnName("versao_atual");
-
-                    b.HasKey("Tipo");
-
-                    b.ToTable("lista_restritiva", "geo");
-                });
-
             modelBuilder.Entity("GeotecnologiaKNS.Geo.Entities.RestricaoDocumento", b =>
                 {
                     b.Property<long>("Id")
@@ -444,13 +408,9 @@ namespace GeotecnologiaKNS.Geo.Migrations
                         .HasColumnType("character varying(2)")
                         .HasColumnName("uf");
 
-                    b.Property<int>("Versao")
-                        .HasColumnType("integer")
-                        .HasColumnName("versao");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("Documento", "Tipo", "Versao")
+                    b.HasIndex("Documento", "Tipo")
                         .HasDatabaseName("ix_restricao_documento");
 
                     b.ToTable("restricao_documento", "geo");

@@ -94,6 +94,9 @@ try
         case "camadas":
             return await ListarCamadasAsync(scope.ServiceProvider);
 
+        case "recarregar":
+            return await RecarregarAsync(scope.ServiceProvider, configuration, args);
+
         case "cruzar":
             return await CruzarAsync(scope.ServiceProvider, configuration);
 
@@ -117,6 +120,7 @@ try
             Console.Error.WriteLine("  importar-cadastro-empregadores --arquivo <cadastro.txt>");
             Console.Error.WriteLine("  importar-embargo --arquivo <termo_de_embargo.csv>");
             Console.Error.WriteLine("  camadas");
+            Console.Error.WriteLine("  recarregar [--chave <chave>] [--todas]");
             Console.Error.WriteLine("  cruzar --car <codigo>");
             Console.Error.WriteLine("  simular-car --car <codigo> [--area-ha 1000]");
             Console.Error.WriteLine("  cobertura");
@@ -465,6 +469,40 @@ static async Task<int> DiagnosticarAsync(IServiceProvider provider, string conne
         Console.WriteLine("Camadas de análise  : não puderam ser consultadas");
     }
 
+    // 5. Sobras de carga não publicada
+    //
+    // A troca versionada grava a carga nova ao lado da que está no ar. Se o
+    // processo morrer no meio, aquelas linhas ficam ocupando espaço sem nunca
+    // entrar em análise alguma. A próxima carga as limpa sozinha — mas enquanto
+    // isso não acontece, é melhor que apareçam aqui do que crescerem em
+    // silêncio num banco que ninguém olha.
+    try
+    {
+        var feicoesPendentes = await contexto.Feicoes
+            .Join(contexto.Camadas, f => f.CamadaId, c => c.Id, (f, c) => new { f.Versao, c.VersaoAtual })
+            .CountAsync(x => x.Versao != x.VersaoAtual);
+
+        var documentosPendentes = await contexto.RestricoesPorDocumento
+            .Join(contexto.ListasRestritivas, r => r.Tipo, l => l.Tipo, (r, l) => new { r.Versao, l.VersaoAtual })
+            .CountAsync(x => x.Versao != x.VersaoAtual);
+
+        if (feicoesPendentes == 0 && documentosPendentes == 0)
+        {
+            Console.WriteLine("Cargas pendentes    : nenhuma");
+        }
+        else
+        {
+            Console.WriteLine(
+                $"Cargas pendentes    : {feicoesPendentes:N0} feições e {documentosPendentes:N0} registros " +
+                "de carga não publicada");
+            Console.WriteLine("  Nada disso entra em análise. A próxima recarga da camada limpa.");
+        }
+    }
+    catch
+    {
+        Console.WriteLine("Cargas pendentes    : não puderam ser consultadas");
+    }
+
     Console.WriteLine(new string('-', 52));
     Console.WriteLine(problemas == 0
         ? "Tudo pronto para cadastrar imóveis pelo CAR."
@@ -603,22 +641,158 @@ static async Task<int> ImportarCamadaAsync(IServiceProvider provider, IConfigura
 
 static async Task<int> ListarCamadasAsync(IServiceProvider provider)
 {
-    var camadas = await provider.GetRequiredService<IIntersecaoService>().ObterCamadasAtivasAsync();
+    // Sincroniza antes de listar: a periodicidade mora no catálogo, e uma
+    // camada sem prazo gravado apareceria como "sem prazo" só porque ninguém
+    // rodou a recarga ainda.
+    await provider.GetRequiredService<RecarregadorDeCamadas>().SincronizarCatalogoAsync();
+
+    var contexto = provider.GetRequiredService<GeoDbContext>();
+
+    var camadas = await contexto.Camadas.AsNoTracking()
+        .OrderBy(x => x.Tipo).ThenBy(x => x.Nome).ToListAsync();
 
     if (camadas.Count == 0)
     {
-        Console.WriteLine("Nenhuma camada ativa. Use 'importar-camada' para carregar.");
+        Console.WriteLine("Nenhuma camada carregada. Use 'recarregar --todas' para baixar das origens.");
         return 0;
     }
 
-    Console.WriteLine($"{"CHAVE",-24} {"TIPO",-24} {"FEIÇÕES",8}  NOME");
+    Console.WriteLine($"{"CHAVE",-26} {"TIPO",-24} {"FEIÇÕES",9}  {"ATUALIZADA",-14} SITUAÇÃO");
 
     foreach (var camada in camadas)
     {
-        Console.WriteLine($"{camada.Chave,-24} {camada.Tipo,-24} {camada.TotalFeicoes,8}  {camada.Nome}");
+        Console.WriteLine(
+            $"{camada.Chave,-26} {camada.Tipo,-24} {camada.TotalFeicoes,9:N0}  " +
+            $"{Quando(camada.AtualizadaEm),-14} {Situacao(camada.AtualizadaEm, camada.PeriodicidadeDias)}");
+    }
+
+    var listas = await contexto.ListasRestritivas.AsNoTracking().OrderBy(x => x.Tipo).ToListAsync();
+
+    if (listas.Count > 0)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"{"LISTA POR DOCUMENTO",-26} {"",-24} {"REGISTROS",9}  {"ATUALIZADA",-14} SITUAÇÃO");
+
+        foreach (var lista in listas)
+        {
+            Console.WriteLine(
+                $"{lista.Tipo,-26} {"",-24} {lista.TotalRegistros,9:N0}  " +
+                $"{Quando(lista.AtualizadaEm),-14} {Situacao(lista.AtualizadaEm, lista.PeriodicidadeDias)}");
+        }
     }
 
     return 0;
+}
+
+static string Quando(DateTime? data)
+{
+    if (data is null)
+    {
+        return "nunca";
+    }
+
+    var dias = (int)(DateTime.UtcNow - data.Value).TotalDays;
+
+    return dias switch
+    {
+        <= 0 => "hoje",
+        1 => "ontem",
+        _ => $"há {dias} dias"
+    };
+}
+
+static string Situacao(DateTime? atualizada, int? periodicidade)
+{
+    if (periodicidade is null)
+    {
+        return "sem prazo definido";
+    }
+
+    if (atualizada is null)
+    {
+        return "NUNCA CARREGADA";
+    }
+
+    var dias = (int)Math.Ceiling((atualizada.Value.AddDays(periodicidade.Value) - DateTime.UtcNow).TotalDays);
+
+    return dias < 0 ? $"VENCIDA há {-dias} dias" : $"vence em {dias} dias";
+}
+
+static async Task<int> RecarregarAsync(
+    IServiceProvider provider, IConfiguration configuration, string[] argumentos)
+{
+    var recarregador = provider.GetRequiredService<RecarregadorDeCamadas>();
+    await recarregador.SincronizarCatalogoAsync();
+
+    var chave = configuration["chave"];
+
+    // Lido de args, e não da configuração: o provedor de linha de comando do
+    // .NET só reconhece "--chave valor", e descarta em silêncio uma opção
+    // solta como --todas. Descobri isso com a recarga respondendo "nenhuma
+    // camada vencida" a um comando que pedia todas.
+    var todas = argumentos.Contains("--todas", StringComparer.OrdinalIgnoreCase);
+
+    IReadOnlyList<FonteDeCamada> fontes;
+
+    if (!string.IsNullOrWhiteSpace(chave))
+    {
+        var fonte = CatalogoDeFontes.PorChave(chave);
+
+        if (fonte is null)
+        {
+            Console.Error.WriteLine($"Não conheço a camada '{chave}'. Conhecidas: " +
+                string.Join(", ", CatalogoDeFontes.Todas.Select(x => x.Chave)));
+            return 1;
+        }
+
+        fontes = new[] { fonte };
+    }
+    else if (todas)
+    {
+        fontes = CatalogoDeFontes.Todas;
+    }
+    else
+    {
+        fontes = await recarregador.ObterVencidasAsync();
+
+        if (fontes.Count == 0)
+        {
+            Console.WriteLine("Nenhuma camada vencida. Use --todas para recarregar mesmo assim.");
+            return 0;
+        }
+    }
+
+    var falhas = 0;
+
+    foreach (var fonte in fontes)
+    {
+        Console.WriteLine($"→ {fonte.Chave}");
+
+        var resultado = await recarregador.RecarregarAsync(fonte);
+
+        Console.WriteLine(resultado.Sucesso
+            ? $"  ok em {resultado.Duracao.TotalSeconds:N0}s — {resultado.Mensagem}"
+            : $"  FALHOU — {resultado.Mensagem}");
+
+        if (!resultado.Sucesso)
+        {
+            falhas++;
+        }
+    }
+
+    // O MTE vem em PDF e depende de pdftotext, então fica de fora da recarga
+    // automática. Calar sobre isso daria a impressão de que a recarga cobre
+    // tudo, e a lista de trabalho análogo a escravo envelheceria em silêncio.
+    foreach (var lista in await recarregador.ObterListasVencidasAsync())
+    {
+        Console.WriteLine();
+        Console.WriteLine($"! {lista.Nome} está vencida e não tem recarga automática.");
+        Console.WriteLine("  Veja docs/camadas-de-referencia.md para atualizá-la.");
+    }
+
+    // Saída diferente de zero para o agendador do sistema enxergar a falha; sem
+    // isso, uma recarga que não aconteceu passa por recarga bem-sucedida.
+    return falhas == 0 ? 0 : 1;
 }
 
 static async Task<int> CruzarAsync(IServiceProvider provider, IConfiguration configuration)

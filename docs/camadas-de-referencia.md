@@ -94,6 +94,13 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
 
 - O `maxFeatures` **é obrigatório**: sem ele o nginx da FUNAI devolve 403. O
   valor 5000 cobre a base inteira, que tem 665 polígonos.
+- **A origem é intermitente.** Em 01/10/2026 todo `GetFeature` passou a
+  devolver 403 — com `maxFeatures`, sem ele, em `/ows` e em `/wfs`, tanto
+  em SHAPE-ZIP quanto em GeoJSON — enquanto o `GetCapabilities` no mesmo
+  servidor continuava respondendo 200. Dois dias antes a carga tinha funcionado.
+  É bloqueio do nginx deles, não erro de requisição. Quando acontece, a camada
+  simplesmente continua na versão anterior e a recarga tenta de novo na próxima
+  conferência; a falha aparece no registro, não no laudo.
 - O arquivo vem em SIRGAS 2000 (EPSG 4674). Para o Brasil a diferença para
   WGS 84 é centimétrica e irrelevante na escala de um imóvel rural.
 - O rótulo inclui a fase (`Regularizada`, `Declarada`, `Em Estudo`...), porque
@@ -135,18 +142,106 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
 
 ---
 
-## Periodicidade sugerida
+## Recarga automática
 
-| Camada | Frequência da fonte | Recarga sugerida |
+As camadas se recarregam sozinhas. A aplicação confere de hora em hora quais
+passaram do prazo e baixa só essas, direto da origem. Nada precisa ser agendado
+no sistema operacional.
+
+Isso existe porque o modo de falhar de um sistema desses não é parar: é
+continuar funcionando com dados velhos. A base de embargos de hoje vira a base
+de dezembro, todo termo lavrado nesse meio-tempo passa despercebido, e o laudo
+segue dizendo "nenhuma sobreposição encontrada" com a mesma confiança de
+sempre. Nenhum erro aparece em lugar nenhum.
+
+| Camada | Frequência da origem | Recarga |
 |---|---|---|
-| Embargos IBAMA | diária | semanal |
+| Embargos IBAMA (área e documento) | diária | semanal |
 | DETER | quase diária | semanal |
-| PRODES | anual | anual |
 | Terras indígenas | esporádica | trimestral |
+| Unidades de conservação | esporádica | trimestral |
+| Assentamentos | esporádica | trimestral |
+| Territórios quilombolas | esporádica | semestral |
+| PRODES | anual | anual |
+| Cadastro de Empregadores (MTE) | a cada poucos meses | mensal |
+
+De onde vem cada uma e de quanto em quanto tempo está em
+`src/GeotecnologiaKNS.Geo/Ingestao/CatalogoDeFontes.cs`, não aqui: um endereço
+que só existe no runbook só é usado quando alguém lembra de abrir o runbook.
+
+Para ver a idade do que está carregado:
+
+```bash
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- camadas
+```
+
+```
+CHAVE                      TIPO                       FEIÇÕES  ATUALIZADA     SITUAÇÃO
+embargo-ibama              EmbargoAmbiental            57.843  hoje           vence em 7 dias
+deter-amazonia             AlertaDesmatamento          20.541  há 2 dias      vence em 5 dias
+```
+
+Para forçar na mão — uma camada, as vencidas, ou todas:
+
+```bash
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- recarregar --chave embargo-ibama
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- recarregar
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- recarregar --todas
+```
+
+O comando devolve código de saída diferente de zero quando alguma origem falha,
+para quem preferir agendar por fora. Nesse caso, desligue o serviço interno com
+`Camadas:RecargaAutomatica = false` — em desenvolvimento ele já vem desligado,
+senão cada subida da aplicação baixaria 209 MB do IBAMA.
+
+### O que impede a recarga de estragar a base
+
+Recarga desassistida só é segura por causa de três coisas que vêm antes dela.
+
+**Troca versionada.** A carga nova é gravada ao lado da que está no ar, com o
+número de versão seguinte, e a análise continua enxergando a antiga. Só no fim,
+depois de conferida, a camada passa a apontar para a nova. Uma quebra no meio
+— rede caindo, processo morto, banco reiniciado — não deixa a camada pela
+metade, e camada pela metade é pior que camada ausente: ela *parece* carregada.
+
+**Conferência de tamanho.** Uma carga que vem vazia, ou com menos da metade do
+que havia antes, é recusada e a anterior é mantida. Metade é folgado de
+propósito: embargo revogado e unidade de conservação extinta são dezenas, não
+dezenas de milhares. Sem isso, um CSV truncado na origem apagaria 57 mil
+embargos bons, gravaria duzentos no lugar, e todo imóvel passaria a ser
+liberado.
+
+**Trava no PostgreSQL.** Duas recargas da mesma camada ao mesmo tempo — o
+serviço interno e alguém na linha de comando — gravariam as duas na mesma versão
+seguinte, e a contagem final sairia somada: passaria pela conferência sem
+ninguém notar.
+
+As duas estruturas que saem do arquivo do IBAMA — a camada geográfica e a lista
+por CPF/CNPJ — são conferidas juntas e trocadas juntas. Publicar uma e recusar a
+outra deixaria EMB-001 e EMB-002 falando de arquivos diferentes, e elas se
+apoiam uma na outra para não contar o mesmo embargo duas vezes.
+
+Quando uma recarga é recusada, o registro diz o que aconteceu e o que ficou no
+ar:
+
+```
+A carga trouxe 2 feições contra 57.843 da versão anterior. Uma queda dessa ordem
+costuma ser arquivo truncado na origem, não redução real. A versão anterior foi
+mantida.
+```
+
+Sobras de uma carga que não chegou a ser publicada aparecem no `diagnostico` e
+são limpas pela recarga seguinte. Elas não entram em análise nenhuma.
 
 A recarga substitui a camada inteira: feição que saiu da fonte desaparece do
 sistema, e nada é duplicado. Laudos já emitidos não mudam — eles guardam o
 retrato das camadas e das regras usadas na execução.
+
+### PRODES e o ano de referência
+
+Recarregar `prodes-amazonia-2024` traz a revisão de 2024, não o ano seguinte.
+Isso é de propósito: trocar o ano por baixo mudaria o significado dos laudos já
+emitidos. Um ano novo é camada nova, com entrada própria no catálogo.
 
 ---
 
@@ -243,6 +338,13 @@ o laudo continua dizendo isso em vez de tratar como atendida.
 ---
 
 ## Cadastro de Empregadores (MTE) — lista restritiva por documento
+
+> **Esta é a única fonte que ainda depende de alguém.** O MTE publica em PDF, e
+> lê-lo exige o `pdftotext` instalado na máquina — uma dependência externa que
+> preferi não pendurar na aplicação sem combinar antes. A lista tem prazo de
+> trinta dias como as outras: quando vence, aparece como vencida em `camadas`,
+> o `recarregar` avisa, e a aplicação registra um aviso a cada conferência.
+> Ela não envelhece em silêncio — só não se atualiza sozinha.
 
 A "lista suja" do trabalho análogo à escravidão. Não é camada geográfica: entra
 em `geo.restricao_documento` e é consultada pela regra TRB-001.

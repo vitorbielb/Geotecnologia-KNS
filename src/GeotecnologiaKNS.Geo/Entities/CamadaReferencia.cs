@@ -68,6 +68,35 @@ public class CamadaReferencia
 
     public int TotalFeicoes { get; set; }
 
+    /// <summary>Versão das feições que a análise enxerga.</summary>
+    /// <remarks>
+    /// A recarga grava a versão seguinte ao lado da atual e só troca este
+    /// número no fim, depois de conferir que o resultado é íntegro. Sem isso a
+    /// carga apagaria a camada antes de saber se a nova presta, e uma quebra no
+    /// meio deixaria a análise rodando contra dados pela metade — dizendo
+    /// "liberado" sobre o que não chegou a ser verificado.
+    /// </remarks>
+    public int VersaoAtual { get; set; }
+
+    /// <summary>
+    /// De quantos em quantos dias a fonte deve ser recarregada.
+    /// </summary>
+    /// <remarks>
+    /// Embargos e alertas mudam quase diariamente; PRODES sai uma vez por ano.
+    /// Sem isso, ninguém sabe que uma camada envelheceu — e camada velha não
+    /// avisa, só deixa de encontrar o que passou a existir.
+    /// </remarks>
+    public int? PeriodicidadeDias { get; set; }
+
+    /// <summary>Quando a camada deveria ser recarregada.</summary>
+    public DateTime? VenceEm =>
+        PeriodicidadeDias.HasValue && AtualizadaEm.HasValue
+            ? AtualizadaEm.Value.AddDays(PeriodicidadeDias.Value)
+            : null;
+
+    /// <summary>Indica se a camada passou do prazo de recarga.</summary>
+    public bool Vencida => VenceEm.HasValue && VenceEm.Value < DateTime.UtcNow;
+
     public List<FeicaoReferencia> Feicoes { get; set; } = new();
 }
 
@@ -92,4 +121,7 @@ public class FeicaoReferencia
 
     /// <summary>Rótulo legível para o laudo, extraído dos atributos na ingestão.</summary>
     public string? Rotulo { get; set; }
+
+    /// <summary>Versão da carga a que esta feição pertence.</summary>
+    public int Versao { get; set; }
 }

@@ -68,9 +68,14 @@ public class IntersecaoService : IIntersecaoService
         // O que foi consultado importa tanto quanto o que foi encontrado: sem
         // esta lista, "nenhuma sobreposição" fica indistinguível de "não havia
         // base para consultar".
+        //
+        // Sem feição publicada a camada não conta. O caso é concreto: uma
+        // primeira carga recusada deixa a camada cadastrada e vazia, e sem este
+        // filtro o tipo dela entraria aqui — a regra se diria avaliada, e o
+        // laudo liberaria o imóvel por omissão.
         var tiposVerificados = await _context.Camadas
             .AsNoTracking()
-            .Where(x => x.Ativa)
+            .Where(x => x.Ativa && x.TotalFeicoes > 0)
             .Select(x => x.Tipo)
             .Distinct()
             .ToListAsync(cancellationToken);
@@ -134,6 +139,7 @@ public class IntersecaoService : IIntersecaoService
               ON ST_Intersects(f.geometria, i.perimetro)
             JOIN geo.camada_referencia c
               ON c.id = f.camada_id
+             AND f.versao = c.versao_atual
             WHERE i.codigo_car = @codigo
               AND c.ativa
               AND ST_IsValid(f.geometria)

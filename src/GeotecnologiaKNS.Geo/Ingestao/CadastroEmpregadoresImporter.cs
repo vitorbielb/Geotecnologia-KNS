@@ -33,6 +33,12 @@ public partial class CadastroEmpregadoresImporter
     public const string Origem = "MTE — Cadastro de Empregadores";
 
     /// <summary>
+    /// A portaria manda atualizar o cadastro semestralmente, mas a publicação
+    /// na prática sai a cada poucos meses; conferir mensalmente custa um PDF.
+    /// </summary>
+    public const int PeriodicidadeDias = 30;
+
+    /// <summary>
     /// Início de um registro: número sequencial, ano da ação fiscal e UF.
     /// </summary>
     /// <remarks>
@@ -74,13 +80,20 @@ public partial class CadastroEmpregadoresImporter
 
         // Recarga substitui a lista inteira: nome que saiu do cadastro — por
         // decisão judicial ou pelo decurso dos dois anos — não pode continuar
-        // bloqueando quem já se regularizou.
-        await _context.Database.ExecuteSqlRawAsync(
-            "DELETE FROM geo.restricao_documento WHERE tipo = {0}",
-            new object[] { (int)TipoRestricao.TrabalhoEscravo },
+        // bloqueando quem já se regularizou. A lista velha só é descartada
+        // depois que a nova for conferida, senão um PDF truncado na origem
+        // apagaria a verificação e a regra TRB-001 passaria a liberar todo mundo
+        // enquanto continua se declarando avaliada.
+        var troca = new TrocaDeListaRestritiva(_context, _logger);
+
+        var lista = await troca.PrepararAsync(
+            TipoRestricao.TrabalhoEscravo,
+            "Cadastro de Empregadores",
+            Origem,
+            PeriodicidadeDias,
             cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        var versao = TrocaDeListaRestritiva.ProximaVersao(lista);
 
         var linhas = 0;
         var registros = 0;
@@ -122,7 +135,7 @@ public partial class CadastroEmpregadoresImporter
                 continue;
             }
 
-            registros += Fechar(atual, nomeCompleto, lote, ref semDocumento);
+            registros += Fechar(atual, nomeCompleto, lote, versao, ref semDocumento);
             atual.Clear();
             nomeCompleto.Clear();
             atual.Append(linha.Trim());
@@ -137,11 +150,18 @@ public partial class CadastroEmpregadoresImporter
             }
         }
 
-        registros += Fechar(atual, nomeCompleto, lote, ref semDocumento);
+        registros += Fechar(atual, nomeCompleto, lote, versao, ref semDocumento);
 
         if (lote.Count > 0)
         {
             gravados += await GravarLoteAsync(lote, cancellationToken);
+        }
+
+        var publicacao = await troca.PublicarAsync(lista, gravados, cancellationToken);
+
+        if (!publicacao.Aceita)
+        {
+            throw new InvalidOperationException(publicacao.Explicacao);
         }
 
         _logger.LogInformation(
@@ -158,7 +178,7 @@ public partial class CadastroEmpregadoresImporter
     /// </summary>
     private static int Fechar(
         StringBuilder acumulado, StringBuilder continuacaoDoNome,
-        List<RestricaoDocumento> lote, ref int semDocumento)
+        List<RestricaoDocumento> lote, int versao, ref int semDocumento)
     {
         if (acumulado.Length == 0)
         {
@@ -211,7 +231,8 @@ public partial class CadastroEmpregadoresImporter
             Municipio = Limitar(ExtrairMunicipio(texto), 150),
             Uf = inicio.Groups["uf"].Value,
             DataRestricao = ExtrairInclusao(texto),
-            TemGeometria = false
+            TemGeometria = false,
+            Versao = versao
         });
 
         return 1;

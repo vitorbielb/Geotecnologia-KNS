@@ -60,6 +60,11 @@ public class CamadaGeoJsonImporter
 
         var camada = await PrepararCamadaAsync(chave, nome, tipo, origem, anoReferencia, cancellationToken);
 
+        var troca = new TrocaDeCamada(_context, _logger);
+        await troca.LimparTentativaAnteriorAsync(camada, cancellationToken);
+
+        var versao = TrocaDeCamada.ProximaVersao(camada);
+
         var leitorGeoJson = new GeoJsonReader();
         var lidos = 0;
         var descartados = 0;
@@ -97,6 +102,7 @@ public class CamadaGeoJsonImporter
             lote.Add(new FeicaoReferencia
             {
                 CamadaId = camada.Id,
+                Versao = versao,
                 Geometria = geometria,
                 Rotulo = ExtrairRotulo(feicao!.Attributes),
                 AtributosJson = SerializarAtributos(feicao.Attributes)
@@ -114,10 +120,12 @@ public class CamadaGeoJsonImporter
             gravados += await GravarLoteAsync(lote, cancellationToken);
         }
 
-        camada.TotalFeicoes = gravados;
-        camada.AtualizadaEm = DateTime.UtcNow;
-        _context.Camadas.Update(camada);
-        await _context.SaveChangesAsync(cancellationToken);
+        var publicacao = await troca.PublicarAsync(camada, gravados, cancellationToken);
+
+        if (!publicacao.Aceita)
+        {
+            throw new InvalidOperationException(publicacao.Explicacao);
+        }
 
         _logger.LogInformation(
             "Camada {Chave}: {Gravados} feições gravadas, {Descartados} descartadas de {Lidos} lidas.",
@@ -136,15 +144,6 @@ public class CamadaGeoJsonImporter
         {
             camada = new CamadaReferencia { Chave = chave };
             _context.Camadas.Add(camada);
-        }
-        else
-        {
-            // Recarga substitui a camada inteira; manter a anterior duplicaria
-            // sobreposições no laudo.
-            await _context.Database.ExecuteSqlRawAsync(
-                "DELETE FROM geo.feicao_referencia WHERE camada_id = {0}",
-                new object[] { camada.Id },
-                cancellationToken);
         }
 
         camada.Nome = nome;

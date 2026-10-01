@@ -90,6 +90,7 @@ builder.Services.AddScoped<IMotorDeRegras, MotorDeRegras>();
 builder.Services.AddScoped<IPoliticaAnaliseRepository, PoliticaAnaliseRepository>();
 builder.Services.AddScoped<IAnaliseAutomaticaService, AnaliseAutomaticaService>();
 builder.Services.AddHostedService<ProcessadorDeAnalises>();
+builder.Services.AddHostedService<AtualizadorDeCamadas>();
 builder.Services.Configure<GeotecnologiaKNS.Infra.Email.OpcoesDeEmail>(
     builder.Configuration.GetSection(GeotecnologiaKNS.Infra.Email.OpcoesDeEmail.SecaoDeConfiguracao));
 

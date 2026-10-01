@@ -65,5 +65,8 @@ public class RestricaoDocumento
     /// </remarks>
     public bool TemGeometria { get; set; }
 
+    /// <summary>Versão da carga a que este registro pertence.</summary>
+    public int Versao { get; set; }
+
     public DateTime CarregadoEm { get; set; } = DateTime.UtcNow;
 }
