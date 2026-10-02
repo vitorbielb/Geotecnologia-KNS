@@ -46,6 +46,15 @@ public class AppClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationU
             claimsIdentity.AddClaim(new Claim(type: "industria_logo", value: logoPath));// imagem da empresa
         }
 
+        // Vai como claim, e não consultado a cada requisição: o middleware que
+        // barra a navegação precisa desta informação em toda página, e ir ao
+        // banco toda vez seria uma consulta por clique. Ao trocar a senha, o
+        // RefreshSignInAsync regenera as claims e esta some.
+        if (user.SenhaProvisoria)
+        {
+            claimsIdentity.AddClaim(new Claim(type: SenhaProvisoria, value: "true"));
+        }
+
         await AddRoleClaims(user, claimsIdentity);
 
         return principal;

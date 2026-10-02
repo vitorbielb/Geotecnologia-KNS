@@ -1,0 +1,1254 @@
+/* ==========================================================================
+   KNS Geotecnologia — camada de tema
+   --------------------------------------------------------------------------
+   Carregada DEPOIS de style.css. O template de origem tem 622 KB e é vendor;
+   reescrevê-lo custaria semanas e quebraria telas que hoje funcionam. Esta
+   camada redefine apenas o que dá identidade: cor, tipografia, superfícies,
+   estados e os poucos componentes que o produto usa de verdade.
+
+   Direção: verde de vegetação para o que é ambiental, grafite industrial para
+   o chassi, e cores de estado inequívocas — num sistema que bloqueia compra,
+   a diferença entre liberado e bloqueado precisa ser lida de relance.
+   ========================================================================== */
+
+:root {
+    /* Marca — azuis extraídos da logo institucional da KNS.
+       #0E91EF é o azure dominante; #03C2ED é o ciano de acento;
+       #127CC3 é o azul mais fechado usado nas sombras do traçado. */
+    --kns-azul: #0E91EF;
+    --kns-azul-ciano: #03C2ED;
+    --kns-azul-escuro: #127CC3;
+    --kns-azul-profundo: #0A5C96;
+    --kns-azul-noite: #0B2A3F;
+    --kns-azul-claro: #E8F4FE;
+    --kns-azul-tenue: #F4FAFF;
+
+    /* Chassi — neutros com leve viés frio, para conversar com o azul */
+    --kns-grafite: #123047;
+    --kns-carvao: #1E3A4F;
+    --kns-ardosia: #4A6275;
+    --kns-neutro: #6C8394;
+    --kns-linha: #DDE7EF;
+    --kns-fundo: #F3F7FB;
+    --kns-superficie: #FFFFFF;
+
+    /* Estados — o vocabulário de veredito do sistema.
+       Mantidos fora da família azul de propósito: num sistema que veda
+       compra, o veredito não pode se confundir com a cor da marca. */
+    --kns-liberado: #1F9D57;
+    --kns-liberado-fundo: #E6F6ED;
+    --kns-alerta: #C98A00;
+    --kns-alerta-fundo: #FCF4E0;
+    --kns-bloqueado: #C7442F;
+    --kns-bloqueado-fundo: #FBEBE8;
+    --kns-solicitado: #0E91EF;
+    --kns-solicitado-fundo: #E8F4FE;
+
+    --kns-raio: 12px;
+    --kns-raio-sm: 8px;
+    --kns-sombra: 0 1px 2px rgba(18, 48, 71, .04), 0 8px 24px rgba(18, 48, 71, .06);
+    --kns-sombra-alta: 0 2px 4px rgba(18, 48, 71, .06), 0 16px 40px rgba(18, 48, 71, .10);
+    --kns-transicao: 160ms cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+body {
+    background: var(--kns-fundo);
+    color: var(--kns-carvao);
+    font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--kns-grafite);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+a {
+    color: var(--kns-azul-escuro);
+    text-decoration: none;
+    transition: color var(--kns-transicao);
+}
+
+a:hover {
+    color: var(--kns-azul);
+}
+
+/* Foco visível: o sistema é operado por teclado em mesa de análise. */
+a:focus-visible,
+button:focus-visible,
+.form-control:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--kns-azul);
+    outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Navbar
+   ========================================================================== */
+
+.navbar {
+    background: var(--kns-superficie) !important;
+    border-bottom: 1px solid var(--kns-linha);
+    box-shadow: 0 1px 2px rgba(18, 48, 71, .04);
+    height: 66px;
+}
+
+.navbar .navbar-brand-wrapper {
+    background: var(--kns-superficie) !important;
+    /* O template também põe uma borda inferior cinza fixa aqui; ela cortava a
+       marca do resto da barra com um traço claro no tema escuro. */
+    border-bottom: 0;
+    border-right: 1px solid var(--kns-linha);
+    width: 248px;
+    height: 66px;
+}
+
+.navbar .navbar-brand-wrapper .navbar-brand img {
+    max-height: 40px;
+    width: auto;
+}
+
+/* Menu recolhido: a mesma logo completa, apenas reduzida.
+   Proporcao do arquivo e 2.8:1, entao limitar pela altura e o que cabe. */
+.navbar .navbar-brand-wrapper .brand-logo-mini img {
+    max-height: 24px;
+    width: auto;
+}
+
+.navbar .navbar-menu-wrapper {
+    background: var(--kns-superficie) !important;
+    /* Terceira borda cinza fixa do template, esta cruzando toda a largura sob
+       a barra superior. Não precisa existir: a barra usa a cor de superfície e
+       o conteúdo, a de fundo — a diferença de tom já separa os dois, nos dois
+       temas. */
+    border-bottom: 0;
+    height: 66px;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.navbar .navbar-menu-wrapper .navbar-toggler {
+    color: var(--kns-ardosia);
+}
+
+/* Contexto do tenant: quem está operando, e por qual indústria. */
+.kns-tenant {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 14px 6px 6px;
+    border: 1px solid var(--kns-linha);
+    border-radius: 999px;
+    background: var(--kns-fundo);
+    margin-right: 14px;
+}
+
+.kns-tenant__logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--kns-azul-claro);
+}
+
+.kns-tenant__rotulo {
+    font-size: 10px;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: var(--kns-neutro);
+    line-height: 1.1;
+}
+
+.kns-tenant__nome {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--kns-grafite);
+    line-height: 1.2;
+}
+
+.navbar .nav-profile-name {
+    color: var(--kns-carvao);
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   Sidebar
+   --------------------------------------------------------------------------
+   Superfície clara, na mesma família do resto da interface. A versão escura
+   anterior criava um bloco pesado à esquerda que competia com o conteúdo —
+   num painel de análise, o que deve puxar o olho é o veredito, não o menu.
+   A navegação recua para o segundo plano e só o item ativo tem peso.
+   ========================================================================== */
+
+.sidebar {
+    background: var(--kns-superficie);
+    width: 248px;
+    border: none;
+    border-right: 1px solid var(--kns-linha);
+    padding: 16px 0 24px;
+}
+
+.sidebar .nav {
+    padding: 0;
+}
+
+.sidebar .nav .nav-item {
+    padding: 0 12px;
+    margin-bottom: 1px;
+}
+
+/* O template risca uma divisória sob cada item do menu, num cinza fixo
+   (#f3f3f3) que ele nunca revê. No claro ela some no branco do painel; no
+   escuro vira um traço branco atravessando a barra inteira, item a item. A
+   separação aqui já vem do espaçamento e da pílula do item ativo, então a
+   divisória sai — o seletor repete o do template para ter o mesmo peso. */
+.sidebar .nav:not(.sub-menu) > .nav-item {
+    border-bottom: 0;
+}
+
+.sidebar .nav .nav-item .nav-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    color: var(--kns-ardosia);
+    background: transparent;
+    border-radius: 10px;
+    padding: 10px 14px;
+    height: auto;
+    white-space: nowrap;
+    transition: background var(--kns-transicao), color var(--kns-transicao);
+}
+
+.sidebar .nav .nav-item .nav-link .menu-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: inherit;
+    line-height: 1.3;
+}
+
+.sidebar .nav .nav-item .nav-link i.menu-icon,
+.sidebar .nav .nav-item .nav-link .menu-icon {
+    color: var(--kns-neutro);
+    font-size: 19px;
+    width: 22px;
+    margin-right: 12px;
+    text-align: center;
+    line-height: 1;
+    transition: color var(--kns-transicao);
+}
+
+/* A seta do submenu vai para a direita e gira ao abrir. */
+.sidebar .nav .nav-item .nav-link .menu-arrow {
+    margin-left: auto;
+    font-size: 15px;
+    color: var(--kns-neutro);
+    transition: transform var(--kns-transicao);
+}
+
+.sidebar .nav .nav-item .nav-link .menu-arrow:before {
+    content: '\F035D'; /* mdi-chevron-down */
+    font-family: 'Material Design Icons';
+}
+
+.sidebar .nav .nav-item .nav-link[aria-expanded="true"] .menu-arrow {
+    transform: rotate(180deg);
+}
+
+.sidebar .nav .nav-item .nav-link:hover {
+    background: var(--kns-fundo);
+    color: var(--kns-grafite);
+}
+
+.sidebar .nav .nav-item .nav-link:hover .menu-icon {
+    color: var(--kns-azul);
+}
+
+/* Item ativo: fundo azul tênue, texto e ícone na cor da marca, e uma barra
+   à esquerda que dá a localização mesmo em leitura periférica. */
+.sidebar .nav .nav-item > .nav-link.active {
+    background: var(--kns-azul-claro);
+    color: var(--kns-azul-escuro);
+    font-weight: 600;
+}
+
+.sidebar .nav .nav-item > .nav-link.active .menu-title {
+    font-weight: 600;
+}
+
+.sidebar .nav .nav-item > .nav-link.active .menu-icon {
+    color: var(--kns-azul);
+}
+
+.sidebar .nav .nav-item > .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 22px;
+    border-radius: 0 3px 3px 0;
+    background: var(--kns-azul);
+}
+
+/* Submenu */
+.sidebar .nav .sub-menu {
+    padding: 2px 0 6px;
+    margin: 2px 0 2px 26px;
+    border-left: 1px solid var(--kns-linha);
+}
+
+.sidebar .nav .sub-menu .nav-item {
+    padding: 0 0 0 4px;
+    margin-bottom: 0;
+}
+
+.sidebar .nav .sub-menu .nav-item .nav-link {
+    font-size: 13px;
+    font-weight: 400;
+    padding: 8px 12px;
+    color: var(--kns-neutro);
+    border-radius: 8px;
+}
+
+.sidebar .nav .sub-menu .nav-item .nav-link:hover {
+    color: var(--kns-grafite);
+    background: var(--kns-fundo);
+}
+
+.sidebar .nav .sub-menu .nav-item .nav-link.active {
+    color: var(--kns-azul-escuro);
+    background: var(--kns-azul-claro);
+    font-weight: 600;
+}
+
+/* Rótulo de seção: separa os grupos sem o peso de uma linha divisória. */
+.sidebar .kns-secao {
+    padding: 20px 26px 7px;
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #9AAFBF;
+    font-weight: 700;
+    list-style: none;
+}
+
+.sidebar .kns-secao:first-of-type {
+    padding-top: 12px;
+}
+
+/* Quando o menu está minimizado, rótulos de seção viram um traço. */
+.sidebar-icon-only .sidebar .kns-secao {
+    font-size: 0;
+    padding: 12px 20px 6px;
+}
+
+.sidebar-icon-only .sidebar .kns-secao::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--kns-linha);
+}
+
+.sidebar-icon-only .sidebar .nav .nav-item .nav-link .menu-icon {
+    margin-right: 0;
+}
+
+.page-body-wrapper {
+    background: var(--kns-fundo);
+}
+
+.main-panel {
+    background: var(--kns-fundo);
+}
+
+.content-wrapper {
+    background: transparent;
+    padding: 26px 28px;
+}
+
+/* ==========================================================================
+   Cartões
+   ========================================================================== */
+
+.card {
+    background: var(--kns-superficie);
+    border: 1px solid var(--kns-linha);
+    border-radius: var(--kns-raio);
+    box-shadow: var(--kns-sombra);
+    transition: box-shadow var(--kns-transicao);
+}
+
+.card:hover {
+    box-shadow: var(--kns-sombra-alta);
+}
+
+.card .card-body {
+    padding: 22px 24px;
+}
+
+.card .card-title {
+    color: var(--kns-grafite);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+    text-transform: none;
+}
+
+/* Cabeçalho de página com trilha e ação. */
+.kns-cabecalho {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.kns-cabecalho__titulo {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--kns-grafite);
+    margin: 0;
+}
+
+.kns-cabecalho__sub {
+    color: var(--kns-neutro);
+    margin: 4px 0 0;
+    font-size: 13.5px;
+}
+
+.kns-trilha {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--kns-neutro);
+}
+
+.kns-trilha__atual {
+    color: var(--kns-azul-escuro);
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Indicadores de veredito
+   ========================================================================== */
+
+.kns-indicadores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.kns-indicador {
+    background: var(--kns-superficie);
+    border: 1px solid var(--kns-linha);
+    border-radius: var(--kns-raio);
+    padding: 18px 20px;
+    box-shadow: var(--kns-sombra);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Faixa lateral colorida: identifica o estado antes de o número ser lido. */
+.kns-indicador::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--kns-neutro);
+}
+
+.kns-indicador--liberado::before { background: var(--kns-liberado); }
+.kns-indicador--alerta::before { background: var(--kns-alerta); }
+.kns-indicador--bloqueado::before { background: var(--kns-bloqueado); }
+.kns-indicador--solicitado::before { background: var(--kns-solicitado); }
+
+.kns-indicador__rotulo {
+    font-size: 11px;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: var(--kns-neutro);
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.kns-indicador__valor {
+    font-size: 30px;
+    font-weight: 700;
+    color: var(--kns-grafite);
+    line-height: 1.1;
+}
+
+.kns-indicador__nota {
+    font-size: 12px;
+    color: var(--kns-neutro);
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   Estados — badges e os botões de status herdados
+   ========================================================================== */
+
+.status-btn,
+.btn.status-btn {
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border: 1px solid transparent;
+    pointer-events: none;
+}
+
+/* O código usa btn-success/warning/danger/primary para os quatro estados. */
+.btn-success, .btn.status-btn.btn-success, a.btn-success {
+    background: var(--kns-liberado-fundo) !important;
+    border-color: rgba(31, 157, 87, .28) !important;
+    color: var(--kns-liberado) !important;
+}
+
+.btn-warning, .btn.status-btn.btn-warning, a.btn-warning {
+    background: var(--kns-alerta-fundo) !important;
+    border-color: rgba(201, 138, 0, .3) !important;
+    color: #8A6100 !important;
+}
+
+.btn-danger.status-btn, a.btn-danger.status-btn {
+    background: var(--kns-bloqueado-fundo) !important;
+    border-color: rgba(199, 68, 47, .28) !important;
+    color: var(--kns-bloqueado) !important;
+}
+
+.btn-primary.status-btn, a.btn-primary.status-btn {
+    background: var(--kns-solicitado-fundo) !important;
+    border-color: rgba(43, 108, 176, .28) !important;
+    color: var(--kns-solicitado) !important;
+}
+
+.btn-secondary.status-btn, a.btn-secondary.status-btn {
+    background: var(--kns-fundo) !important;
+    border-color: var(--kns-linha) !important;
+    color: var(--kns-ardosia) !important;
+}
+
+.badge.bg-danger { background: var(--kns-bloqueado) !important; }
+.badge.bg-warning { background: var(--kns-alerta) !important; color: #fff !important; }
+.badge.bg-secondary { background: var(--kns-neutro) !important; }
+
+/* ==========================================================================
+   Botões
+   ========================================================================== */
+
+.btn {
+    border-radius: var(--kns-raio-sm);
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0;
+    padding: 9px 18px;
+    transition: background var(--kns-transicao), box-shadow var(--kns-transicao), transform var(--kns-transicao);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary:not(.status-btn),
+.btn.gradient-button {
+    background: var(--kns-azul-escuro) !important;
+    border-color: var(--kns-azul-escuro) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 1px 2px rgba(18, 124, 195, .25);
+}
+
+.btn-primary:not(.status-btn):hover,
+.btn.gradient-button:hover {
+    background: var(--kns-azul) !important;
+    border-color: var(--kns-azul) !important;
+}
+
+.btn-secondary:not(.status-btn) {
+    background: var(--kns-superficie) !important;
+    border: 1px solid var(--kns-linha) !important;
+    color: var(--kns-ardosia) !important;
+}
+
+.btn-secondary:not(.status-btn):hover {
+    background: var(--kns-fundo) !important;
+    color: var(--kns-grafite) !important;
+}
+
+.btn-danger:not(.status-btn) {
+    background: var(--kns-bloqueado) !important;
+    border-color: var(--kns-bloqueado) !important;
+}
+
+.btn[disabled], .btn:disabled {
+    opacity: .5;
+    box-shadow: none;
+}
+
+/* ==========================================================================
+   Formulários
+   ========================================================================== */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+label, .control-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--kns-neutro);
+    margin-bottom: 6px;
+}
+
+.form-control,
+select.form-control,
+textarea.form-control {
+    border: 1px solid var(--kns-linha);
+    border-radius: var(--kns-raio-sm);
+    background: var(--kns-superficie);
+    color: var(--kns-grafite);
+    font-size: 14px;
+    padding: 10px 14px;
+    height: auto;
+    transition: border-color var(--kns-transicao), box-shadow var(--kns-transicao);
+}
+
+.form-control:focus {
+    border-color: var(--kns-azul);
+    box-shadow: 0 0 0 3px rgba(14, 145, 239, .14);
+    background: var(--kns-superficie);
+}
+
+.form-control::placeholder {
+    color: #9FB0A8;
+}
+
+/* Campo derivado da base pública: visivelmente não-editável, sem parecer erro. */
+.form-control:disabled,
+.form-control[readonly],
+.disabled-field {
+    background: var(--kns-fundo) !important;
+    color: var(--kns-ardosia) !important;
+    border-style: dashed !important;
+    cursor: not-allowed;
+}
+
+.text-danger, .error-message {
+    color: var(--kns-bloqueado) !important;
+    font-size: 12.5px;
+}
+
+.input-group .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Mesmo caso das divisórias do menu: o traço em que as abas se apoiam vinha
+   de um cinza fixo (#ebedf2) e aparecia branco no tema escuro. Aqui a linha
+   é necessária — as abas precisam de base —, então passa a usar o token. */
+.nav-tabs {
+    border-bottom: 1px solid var(--kns-linha);
+}
+
+/* ==========================================================================
+   Tabelas
+   ========================================================================== */
+
+.table {
+    color: var(--kns-carvao);
+    border-color: var(--kns-linha);
+}
+
+.table thead th {
+    background: var(--kns-fundo);
+    color: var(--kns-neutro);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--kns-linha) !important;
+    border-top: none !important;
+    padding: 13px 16px;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    padding: 14px 16px;
+    border-top: 1px solid var(--kns-linha) !important;
+    vertical-align: middle;
+    font-size: 13.5px;
+}
+
+.table tbody tr {
+    transition: background var(--kns-transicao);
+}
+
+.table tbody tr:hover {
+    background: var(--kns-azul-claro);
+}
+
+.table-row {
+    cursor: pointer;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: rgba(244, 247, 245, .6);
+}
+
+/* ==========================================================================
+   Alertas
+   ========================================================================== */
+
+.alert {
+    border-radius: var(--kns-raio-sm);
+    border: 1px solid transparent;
+    font-size: 13.5px;
+    padding: 13px 16px;
+}
+
+.alert-success { background: var(--kns-liberado-fundo); border-color: rgba(31,157,87,.25); color: #14683A; }
+.alert-warning { background: var(--kns-alerta-fundo); border-color: rgba(201,138,0,.28); color: #7A5600; }
+.alert-danger  { background: var(--kns-bloqueado-fundo); border-color: rgba(199,68,47,.25); color: #94301F; }
+.alert-info    { background: var(--kns-solicitado-fundo); border-color: rgba(43,108,176,.22); color: #23527C; }
+
+/* ==========================================================================
+   Mapa
+   ========================================================================== */
+
+.kns-mapa {
+    border-radius: var(--kns-raio-sm);
+    overflow: hidden;
+    border: 1px solid var(--kns-linha);
+}
+
+/* ==========================================================================
+   Rodapé
+   ========================================================================== */
+
+.footer {
+    background: transparent;
+    border-top: 1px solid var(--kns-linha);
+    color: var(--kns-neutro);
+    font-size: 12.5px;
+    padding: 18px 28px;
+}
+
+/* ==========================================================================
+   Autenticação — tela sem imagem, identidade construída em CSS
+   ========================================================================== */
+
+.kns-auth {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1.05fr .95fr;
+    background: var(--kns-superficie);
+}
+
+/* Variante de coluna única, para as telas de fora do sistema que não têm o
+   painel institucional — a troca da senha provisória, por exemplo, em que
+   quem chegou ali já entrou e só precisa concluir. */
+.kns-auth--simples {
+    grid-template-columns: 1fr;
+    background: var(--kns-fundo);
+}
+
+/* --------------------------------------------------------------------------
+   Painel institucional
+   Sem logo e sem fotografia: a marca já aparece ao lado, sobre o formulário.
+   O que ocupa este lado é uma ilustração do próprio trabalho do sistema —
+   um perímetro de imóvel com seus vértices e uma sobreposição destacada.
+   -------------------------------------------------------------------------- */
+
+.kns-auth__institucional {
+    position: relative;
+    isolation: isolate;
+    background:
+        radial-gradient(820px 620px at 82% 8%, rgba(3, 194, 237, .22), transparent 58%),
+        radial-gradient(760px 560px at 16% 92%, rgba(14, 145, 239, .26), transparent 60%),
+        linear-gradient(155deg, #061826 0%, #0A3252 52%, #0C4D7E 100%);
+    color: #E6F1FA;
+    padding: 60px 62px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 34px;
+    overflow: hidden;
+}
+
+/* Malha de coordenadas, esmaecida nas bordas para não virar moldura. */
+.kns-auth__institucional::before {
+    content: '';
+    position: absolute;
+    inset: -10%;
+    z-index: -2;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+    background-size: 52px 52px;
+    mask-image: radial-gradient(circle at 60% 45%, #000 28%, transparent 76%);
+    -webkit-mask-image: radial-gradient(circle at 60% 45%, #000 28%, transparent 76%);
+}
+
+/* Brilho suave atrás da ilustração, para dar profundidade ao fundo chapado. */
+.kns-auth__institucional::after {
+    content: '';
+    position: absolute;
+    z-index: -2;
+    width: 560px;
+    height: 560px;
+    right: -150px;
+    top: 12%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(3, 194, 237, .20), transparent 62%);
+    filter: blur(14px);
+}
+
+/* --- Ilustração --- */
+
+.kns-auth__cena {
+    position: absolute;
+    z-index: -1;
+    right: -70px;
+    top: 50%;
+    transform: translateY(-46%);
+    width: 620px;
+    max-width: 92%;
+    height: auto;
+    opacity: .5;
+    pointer-events: none;
+}
+
+.kns-auth__vertices circle {
+    fill: #9FE8FF;
+    stroke: rgba(6, 24, 38, .85);
+    stroke-width: 2;
+}
+
+/* Varredura: sugere a análise correndo sobre o imóvel. Discreta de propósito —
+   é pano de fundo de uma tela de login, não uma animação de destaque. */
+.kns-auth__varredura {
+    stroke: rgba(159, 232, 255, .55);
+    stroke-width: 1.6;
+    stroke-dasharray: 3 7;
+    animation: kns-varre 7s linear infinite;
+}
+
+@keyframes kns-varre {
+    0%   { transform: translateY(44px); opacity: 0; }
+    12%  { opacity: 1; }
+    88%  { opacity: 1; }
+    100% { transform: translateY(410px); opacity: 0; }
+}
+
+/* --- Conteúdo --- */
+
+.kns-auth__conteudo {
+    position: relative;
+    max-width: 30rem;
+}
+
+.kns-auth__etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 15px 7px 12px;
+    border: 1px solid rgba(159, 232, 255, .28);
+    border-radius: 999px;
+    background: rgba(8, 40, 64, .55);
+    backdrop-filter: blur(6px);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: #A9E2FB;
+    margin-bottom: 26px;
+}
+
+.kns-auth__etiqueta i {
+    font-size: 15px;
+    color: #5FD8FF;
+}
+
+.kns-auth__titulo {
+    font-size: clamp(30px, 3.1vw, 42px);
+    line-height: 1.14;
+    font-weight: 600;
+    color: #FFFFFF;
+    letter-spacing: -0.025em;
+    margin: 0 0 18px;
+}
+
+.kns-auth__titulo em {
+    font-style: normal;
+    color: #5FD8FF;
+}
+
+.kns-auth__texto {
+    color: rgba(230, 241, 250, .76);
+    font-size: 15px;
+    line-height: 1.68;
+    margin: 0;
+}
+
+/* --- Cartões --- */
+
+.kns-auth__cartoes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.kns-auth__cartao {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 15px 16px;
+    border: 1px solid rgba(159, 232, 255, .16);
+    border-radius: 14px;
+    background: rgba(8, 36, 58, .48);
+    backdrop-filter: blur(8px);
+    transition: border-color var(--kns-transicao), background var(--kns-transicao), transform var(--kns-transicao);
+}
+
+.kns-auth__cartao:hover {
+    border-color: rgba(159, 232, 255, .34);
+    background: rgba(10, 46, 74, .62);
+    transform: translateY(-2px);
+}
+
+.kns-auth__cartao i {
+    font-size: 19px;
+    color: #5FD8FF;
+    margin-bottom: 4px;
+}
+
+.kns-auth__cartao strong {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #FFFFFF;
+    letter-spacing: -0.005em;
+}
+
+.kns-auth__cartao span {
+    font-size: 12px;
+    color: rgba(230, 241, 250, .58);
+    line-height: 1.45;
+}
+
+.kns-auth__rodape {
+    position: relative;
+    font-size: 12px;
+    color: rgba(230, 241, 250, .45);
+    margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kns-auth__varredura {
+        animation: none;
+        opacity: .35;
+    }
+}
+
+/* Painel do formulário */
+.kns-auth__formulario {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+}
+
+.kns-auth__caixa {
+    width: 100%;
+    max-width: 392px;
+}
+
+.kns-auth__marca-form {
+    margin-bottom: 30px;
+}
+
+.kns-auth__marca-form img {
+    width: 188px;
+    height: auto;
+    display: block;
+}
+
+.kns-auth__saudacao {
+    font-size: 25px;
+    font-weight: 600;
+    color: var(--kns-grafite);
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+}
+
+.kns-auth__instrucao {
+    color: var(--kns-neutro);
+    font-size: 14px;
+    margin: 0 0 28px;
+}
+
+.kns-auth .form-floating > label {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--kns-neutro);
+    padding-left: 14px;
+}
+
+.kns-auth .form-floating > .form-control {
+    height: 56px;
+    padding: 18px 14px 6px;
+}
+
+.kns-auth__acao {
+    width: 100%;
+    padding: 13px 18px;
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+}
+
+.kns-auth__links {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+    font-size: 13px;
+}
+
+.kns-auth__selo {
+    margin-top: 34px;
+    padding-top: 20px;
+    border-top: 1px solid var(--kns-linha);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--kns-neutro);
+    font-size: 12.5px;
+}
+
+.kns-auth__selo i {
+    color: var(--kns-azul);
+    font-size: 17px;
+}
+
+@media (max-width: 991px) {
+    .kns-auth {
+        grid-template-columns: 1fr;
+    }
+
+    .kns-auth__institucional {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   Responsivo
+   ========================================================================== */
+
+@media (max-width: 991px) {
+    .content-wrapper {
+        padding: 18px 16px;
+    }
+
+    .navbar .navbar-brand-wrapper {
+        width: auto;
+    }
+
+    .kns-tenant__rotulo,
+    .kns-tenant__nome {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   Preferência de movimento reduzido
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}
+
+/* ==========================================================================
+   Tema escuro
+   --------------------------------------------------------------------------
+   Quase tudo vem da troca dos tokens: a camada de tema já usa variáveis para
+   superfície, linha, fundo e texto, então redefini-las alcança cartões,
+   tabelas, formulários, navbar e sidebar de uma vez.
+
+   O que precisa de regra própria é o que veio do template vendor com cor
+   fixa — menus suspensos, modais, alertas e os controles do DataTables.
+
+   O escuro é azulado, não neutro: puxa para o mesmo azul da marca, em vez de
+   um cinza que brigaria com ela.
+   ========================================================================== */
+
+:root {
+    color-scheme: light;
+}
+
+:root[data-tema="escuro"] {
+    color-scheme: dark;
+
+    /* Texto: a escala clara inverte de ponta a ponta */
+    --kns-grafite: #EAF2F8;
+    --kns-carvao: #D2E0EC;
+    --kns-ardosia: #A6BCCC;
+    --kns-neutro: #8098AC;
+
+    /* Superfícies */
+    --kns-linha: #1D3243;
+    --kns-fundo: #0A1621;
+    --kns-superficie: #11232F;
+
+    /* Tonalidade de realce (item ativo, linha sob o cursor) */
+    --kns-azul-claro: #14293B;
+    --kns-azul-tenue: #0E1F2C;
+
+    /* A marca clareia um pouco: o azul médio perde contraste no escuro */
+    --kns-azul: #3BA5F2;
+    --kns-azul-escuro: #2E93E0;
+
+    /* Estados: frente mais clara, fundo como véu translúcido */
+    --kns-liberado: #4CC98A;
+    --kns-liberado-fundo: rgba(31, 157, 87, .16);
+    --kns-alerta: #E3AE3F;
+    --kns-alerta-fundo: rgba(201, 138, 0, .17);
+    --kns-bloqueado: #F08466;
+    --kns-bloqueado-fundo: rgba(199, 68, 47, .17);
+    --kns-solicitado: #5FB8F5;
+    --kns-solicitado-fundo: rgba(14, 145, 239, .16);
+
+    /* No escuro a sombra some; a separação passa a vir da borda */
+    --kns-sombra: 0 1px 2px rgba(0, 0, 0, .34), 0 8px 24px rgba(0, 0, 0, .28);
+    --kns-sombra-alta: 0 2px 6px rgba(0, 0, 0, .40), 0 18px 44px rgba(0, 0, 0, .36);
+}
+
+/* --- Ajustes de componentes do template --- */
+
+:root[data-tema="escuro"] .navbar,
+:root[data-tema="escuro"] .navbar .navbar-brand-wrapper,
+:root[data-tema="escuro"] .navbar .navbar-menu-wrapper {
+    background: var(--kns-superficie) !important;
+}
+
+:root[data-tema="escuro"] .sidebar {
+    background: var(--kns-superficie);
+}
+
+/* Rede de segurança: as classes utilitárias de borda do template pintam com
+   #f3f3f3 e com !important. Onde alguma tela as usar, a cor passa a ser a do
+   tema em vez de um risco claro. */
+:root[data-tema="escuro"] .border,
+:root[data-tema="escuro"] .border-top,
+:root[data-tema="escuro"] .border-right,
+:root[data-tema="escuro"] .border-bottom,
+:root[data-tema="escuro"] .border-left {
+    border-color: var(--kns-linha) !important;
+}
+
+:root[data-tema="escuro"] .dropdown-menu,
+:root[data-tema="escuro"] .modal-content {
+    background: var(--kns-superficie);
+    border: 1px solid var(--kns-linha);
+    color: var(--kns-carvao);
+}
+
+:root[data-tema="escuro"] .dropdown-item {
+    color: var(--kns-carvao);
+}
+
+:root[data-tema="escuro"] .dropdown-item:hover,
+:root[data-tema="escuro"] .dropdown-item:focus {
+    background: var(--kns-azul-claro);
+    color: var(--kns-grafite);
+}
+
+:root[data-tema="escuro"] .dropdown-divider,
+:root[data-tema="escuro"] .modal-header,
+:root[data-tema="escuro"] .modal-footer {
+    border-color: var(--kns-linha);
+}
+
+:root[data-tema="escuro"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(1.6);
+}
+
+:root[data-tema="escuro"] .table-striped tbody tr:nth-of-type(odd) {
+    background: rgba(255, 255, 255, .022);
+}
+
+:root[data-tema="escuro"] .alert-success { color: #7FE0AC; }
+:root[data-tema="escuro"] .alert-warning { color: #F0C878; }
+:root[data-tema="escuro"] .alert-danger  { color: #F8A992; }
+:root[data-tema="escuro"] .alert-info    { color: #92CDF8; }
+
+:root[data-tema="escuro"] pre {
+    background: var(--kns-azul-tenue);
+    color: var(--kns-ardosia);
+    border-radius: var(--kns-raio-sm);
+    padding: 12px 14px;
+}
+
+/* O lado do formulário do login acompanha o tema; o painel institucional já
+   é escuro nos dois, então fica como está. */
+:root[data-tema="escuro"] .kns-auth {
+    background: var(--kns-superficie);
+}
+
+/* ==========================================================================
+   Botão de alternância
+   ========================================================================== */
+
+.kns-tema {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin-right: 12px;
+    border: 1px solid var(--kns-linha);
+    border-radius: 10px;
+    background: var(--kns-fundo);
+    color: var(--kns-ardosia);
+    cursor: pointer;
+    transition: background var(--kns-transicao), color var(--kns-transicao), border-color var(--kns-transicao);
+}
+
+.kns-tema:hover {
+    background: var(--kns-azul-claro);
+    border-color: var(--kns-azul);
+    color: var(--kns-azul);
+}
+
+.kns-tema i {
+    font-size: 19px;
+    line-height: 1;
+}
+
+/* Um ícone por tema: o mostrado é o do modo para onde o clique leva. */
+.kns-tema .kns-tema__escuro { display: inline-block; }
+.kns-tema .kns-tema__claro { display: none; }
+
+:root[data-tema="escuro"] .kns-tema .kns-tema__escuro { display: none; }
+:root[data-tema="escuro"] .kns-tema .kns-tema__claro { display: inline-block; }

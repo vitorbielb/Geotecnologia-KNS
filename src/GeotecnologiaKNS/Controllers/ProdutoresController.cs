@@ -7,10 +7,17 @@ namespace GeotecnologiaKNS.Controllers;
 public class ProdutoresController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IArmazenamentoDeArquivos _arquivos;
+    private readonly IUserContext _userContext;
 
-    public ProdutoresController(ApplicationDbContext dbcontext)
+    public ProdutoresController(
+        ApplicationDbContext dbcontext,
+        IArmazenamentoDeArquivos arquivos,
+        IUserContext userContext)
     {
         _context = dbcontext;
+        _arquivos = arquivos;
+        _userContext = userContext;
     }
 
     // GET: Produtores
@@ -143,6 +150,8 @@ public class ProdutoresController : Controller
     }
 
     [HttpPost, ActionName("Upload")]
+    [ValidateAntiForgeryToken]
+    [TenantFilter]
     public async Task<ActionResult> UploadAsync(ProdutorArquivoViewModel arquivo)
     {
         if (!ModelState.IsValid)
@@ -156,7 +165,10 @@ public class ProdutoresController : Controller
 
         produtor.Documentos ??= new List<ProdutorArquivo>();
 
-        produtor.Documentos.Add(arquivo.Model);
+        var documento = arquivo.Model;
+        await AnexoDeDocumento.PrepararAsync(documento, _arquivos, _userContext.TenantId ?? 0);
+
+        produtor.Documentos.Add(documento);
         _context.Produtores.Update(produtor);
 
         await _context.SaveChangesAsync();
@@ -165,13 +177,17 @@ public class ProdutoresController : Controller
     }
 
     [HttpPost, ActionName("DeleteFile")]
+    [ValidateAntiForgeryToken]
     public async Task<ActionResult> DeleteFileAsync(int id)
     {
         var arquivo = await _context.ProdutoresArquivos.FindAsync(id);
 
         if (arquivo == null)
         {
-            return Problem();
+            // NotFound e não Problem: o documento pode simplesmente não existir, ou
+                // pertencer a outra indústria e ser filtrado. Nenhum dos dois é erro
+                // do servidor, e devolver 500 ainda poluiria o monitoramento.
+                return NotFound();
         }
 
         var produtor = await _context.Produtores
@@ -180,6 +196,10 @@ public class ProdutoresController : Controller
 
         _context.ProdutoresArquivos.Remove(arquivo);
         await _context.SaveChangesAsync();
+
+        // Depois do commit: se o conteúdo sumisse antes e a transação falhasse,
+        // sobraria linha apontando para arquivo inexistente.
+        await AnexoDeDocumento.DescartarAsync(arquivo, _arquivos);
 
         return View("_file-list", produtor);
     }
@@ -191,9 +211,12 @@ public class ProdutoresController : Controller
 
         if (arquivo == null)
         {
-            return Problem();
+            // NotFound e não Problem: o documento pode simplesmente não existir, ou
+                // pertencer a outra indústria e ser filtrado. Nenhum dos dois é erro
+                // do servidor, e devolver 500 ainda poluiria o monitoramento.
+                return NotFound();
         }
 
-        return File(arquivo.Dados, arquivo.ContentType);
+        return await AnexoDeDocumento.ResponderAsync(arquivo, _arquivos);
     }
 }

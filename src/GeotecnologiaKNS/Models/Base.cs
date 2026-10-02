@@ -18,10 +18,6 @@
     {
         public Propriedade Propriedade { get; }
     }
-    public interface ICartografiasInfo : IPropriedadeInfo
-    {
-        public Cartografia Cartografia { get; }
-    }
     public interface IPrimaryKeyInfo<T>
     {
         public T Id { get; set; }

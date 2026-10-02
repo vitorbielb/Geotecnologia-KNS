@@ -8,10 +8,24 @@ namespace GeotecnologiaKNS.Controllers
     public class PropriedadesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPropriedadeCarService _carService;
+        private readonly IMedidorDeUso _medidor;
 
-        public PropriedadesController(ApplicationDbContext context)
+        private readonly IArmazenamentoDeArquivos _arquivos;
+        private readonly IUserContext _userContext;
+
+        public PropriedadesController(
+            ApplicationDbContext context,
+            IPropriedadeCarService carService,
+            IMedidorDeUso medidor,
+            IArmazenamentoDeArquivos arquivos,
+            IUserContext userContext)
         {
+            _medidor = medidor;
             _context = context;
+            _carService = carService;
+            _arquivos = arquivos;
+            _userContext = userContext;
         }
 
         // GET: Propriedades
@@ -34,7 +48,7 @@ namespace GeotecnologiaKNS.Controllers
         // GET: Propriedades/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            FillProdutoresUnidadesFederativasViewBag();
+            FillProdutoresViewBag();
 
             if (id == null || _context.Propriedades == null)
             {
@@ -43,8 +57,6 @@ namespace GeotecnologiaKNS.Controllers
 
             var propriedade = await _context.Propriedades
                 .Include(p => p.Documentos)
-                .Include(p => p.Geozone)
-                .Include (d => d.Cartografia)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (propriedade == null)
@@ -52,32 +64,212 @@ namespace GeotecnologiaKNS.Controllers
                 return NotFound();
             }
 
+            ViewBag.CadeiaIndireta = await _context.FornecedoresIndiretos
+                .AsNoTracking()
+                .Where(x => x.PropriedadeId == propriedade.Id)
+                .OrderBy(x => x.CodigoCar)
+                .ToListAsync();
+
             return View(propriedade);
+        }
+
+        /// <summary>
+        /// Declara um imóvel que forneceu animais a este fornecedor direto.
+        /// </summary>
+        /// <remarks>
+        /// Declarado, e não descoberto: quem conhece a cadeia é o próprio
+        /// fornecedor, e a prova documental é a GTA do órgão estadual. O laudo
+        /// registra que a verificação alcança só o que foi informado.
+        /// </remarks>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [TenantFilter]
+        public async Task<IActionResult> AdicionarFornecedorIndireto(
+            FornecedorIndireto fornecedor, CancellationToken cancellationToken)
+        {
+            var normalizado = GeotecnologiaKNS.Geo.CodigoCar.Normalizar(fornecedor.CodigoCar);
+
+            if (normalizado is null)
+            {
+                TempData["Erro"] = "O número do CAR informado não é válido.";
+                return RedirectToAction(nameof(Details), new { id = fornecedor.PropriedadeId });
+            }
+
+            var propriedade = await _context.Propriedades
+                .FirstOrDefaultAsync(x => x.Id == fornecedor.PropriedadeId, cancellationToken);
+
+            if (propriedade is null)
+            {
+                return NotFound();
+            }
+
+            // O próprio imóvel como fornecedor de si mesmo duplicaria todos os
+            // achados dele no laudo, como se fossem da cadeia.
+            if (string.Equals(normalizado, propriedade.CodigoCar, StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Erro"] = "O imóvel não pode ser fornecedor indireto de si mesmo.";
+                return RedirectToAction(nameof(Details), new { id = fornecedor.PropriedadeId });
+            }
+
+            var jaExiste = await _context.FornecedoresIndiretos.AnyAsync(
+                x => x.PropriedadeId == fornecedor.PropriedadeId && x.CodigoCar == normalizado,
+                cancellationToken);
+
+            if (jaExiste)
+            {
+                TempData["Erro"] = "Este fornecedor indireto já está declarado para o imóvel.";
+                return RedirectToAction(nameof(Details), new { id = fornecedor.PropriedadeId });
+            }
+
+            fornecedor.CodigoCar = normalizado;
+            fornecedor.DeclaradoEm = DateTime.Now;
+
+            _context.FornecedoresIndiretos.Add(fornecedor);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            TempData["Sucesso"] = "Fornecedor indireto declarado. Ele entra na próxima análise do imóvel.";
+
+            return RedirectToAction(nameof(Details), new { id = fornecedor.PropriedadeId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoverFornecedorIndireto(
+            int id, CancellationToken cancellationToken)
+        {
+            // O filtro global por indústria já impede alcançar o de outra; a
+            // busca pelo Id sozinho seria suficiente, mas depender disso em
+            // silêncio é frágil demais para um dado que separa concorrentes.
+            var fornecedor = await _context.FornecedoresIndiretos
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (fornecedor is null)
+            {
+                return NotFound();
+            }
+
+            var propriedadeId = fornecedor.PropriedadeId;
+
+            _context.FornecedoresIndiretos.Remove(fornecedor);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            TempData["Sucesso"] = "Fornecedor indireto removido.";
+
+            return RedirectToAction(nameof(Details), new { id = propriedadeId });
         }
 
         // GET: Propriedades/Create
         public IActionResult Create()
         {
-            FillProdutoresUnidadesFederativasViewBag();
+            FillProdutoresViewBag();
             return View();
+        }
+
+        /// <summary>
+        /// Consulta o CAR na base pública e devolve o que será gravado, para que
+        /// o usuário confira antes de salvar.
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> ConsultarCar(string? codigoCar, CancellationToken cancellationToken)
+        {
+            var consulta = await _carService.ConsultarAsync(codigoCar, cancellationToken);
+
+            if (!consulta.Sucesso)
+            {
+                return Ok(new { sucesso = false, mensagem = consulta.Mensagem });
+            }
+
+            var imovel = consulta.Imovel!;
+
+            return Ok(new
+            {
+                sucesso = true,
+                mensagem = consulta.Mensagem,
+                codigoCar = imovel.CodigoCar,
+                municipio = imovel.Municipio,
+                uf = imovel.Uf,
+                situacao = imovel.Situacao,
+                areaHa = imovel.AreaHa,
+                areaCalculadaHa = imovel.AreaCalculadaHa,
+                centroLat = imovel.CentroLat,
+                centroLng = imovel.CentroLng,
+                origem = imovel.Origem,
+                baseCarregadaEm = imovel.BaseCarregadaEm,
+                perimetro = imovel.PerimetroGeoJson
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [TenantFilter]
-        public async Task<IActionResult> Create(Propriedade propriedade)
+        public async Task<IActionResult> Create(Propriedade propriedade, CancellationToken cancellationToken)
         {
-            propriedade.Produtor = _context.Produtores.Find(propriedade.Id)!;
+            // Campos derivados não vêm do formulário; não podem bloquear a validação.
+            ModelState.Remove(nameof(Propriedade.Produtor));
+            ModelState.Remove(nameof(Propriedade.Municipio));
+            ModelState.Remove(nameof(Propriedade.Area));
 
-            if (ModelState.IsValid)
+            if (!await _context.Produtores.AnyAsync(x => x.Id == propriedade.ProdutorId, cancellationToken))
             {
-                _context.Add(propriedade);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError(nameof(Propriedade.ProdutorId), "Produtor não encontrado.");
             }
 
-            FillProdutoresUnidadesFederativasViewBag();
-            return View(propriedade);
+            var consulta = await _carService.ConsultarAsync(propriedade.CodigoCar, cancellationToken);
+
+            if (!consulta.Sucesso)
+            {
+                ModelState.AddModelError(nameof(Propriedade.CodigoCar), consulta.Mensagem);
+            }
+            else if (await _context.Propriedades.AnyAsync(x => x.CodigoCar == consulta.Imovel!.CodigoCar, cancellationToken))
+            {
+                ModelState.AddModelError(nameof(Propriedade.CodigoCar), "Este CAR já está cadastrado.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                FillProdutoresViewBag();
+                return View(propriedade);
+            }
+
+            _carService.Aplicar(propriedade, consulta.Imovel!);
+
+            _context.Add(propriedade);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _medidor.RegistrarAsync(
+                propriedade.TenantId, TipoDeUso.ImovelCadastrado, propriedade.Id,
+                propriedade.CodigoCar, cancellationToken);
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        /// <summary>
+        /// Recarrega os dados do imóvel a partir da versão corrente da base do CAR.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AtualizarPeloCar(int id, CancellationToken cancellationToken)
+        {
+            var propriedade = await _context.Propriedades.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (propriedade is null)
+            {
+                return NotFound();
+            }
+
+            var consulta = await _carService.ConsultarAsync(propriedade.CodigoCar, cancellationToken);
+
+            if (!consulta.Sucesso)
+            {
+                TempData["Erro"] = consulta.Mensagem;
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            _carService.Aplicar(propriedade, consulta.Imovel!);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            TempData["Sucesso"] = "Dados atualizados a partir da base do CAR.";
+            return RedirectToAction(nameof(Details), new { id });
         }
         [Authorize(Policy = "UserCanUpdateSolicitacoes")]
         public async Task<IActionResult> Edit(int? id)
@@ -87,7 +279,7 @@ namespace GeotecnologiaKNS.Controllers
                   x => x.ToString(),
                   x => (int)x,
                   options => options.Placeholder = "Selecione...");
-            FillProdutoresUnidadesFederativasViewBag();
+            FillProdutoresViewBag();
 
             if (id == null || _context.Propriedades == null)
             {
@@ -108,34 +300,48 @@ namespace GeotecnologiaKNS.Controllers
 
 
         // POST: Propriedades/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [TenantFilter]
-        public async Task<IActionResult> Edit([Bind("Id,NomePropriedade,TipoPropriedade,CicloProducao,Area,AreaUtil,Latitude,Longitude,OrigemCoordenadas,Bioma,UnidadeFederativa,Municipio,Industria,TipoCadastroRural,Matricula,CadastroAmbientalRural,LicencaAmbiental,Ccir,Incra,ProdutorId,Validacao,Outros")] Models.Propriedade propriedade)
+        public async Task<IActionResult> Edit(Propriedade propriedade, CancellationToken cancellationToken)
         {
-            if (ModelState.IsValid)
+            ModelState.Remove(nameof(Propriedade.Produtor));
+            ModelState.Remove(nameof(Propriedade.Municipio));
+            ModelState.Remove(nameof(Propriedade.Area));
+            ModelState.Remove(nameof(Propriedade.CodigoCar));
+
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(propriedade);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PropriedadeExists(propriedade.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction("Analise", "Propriedades");
+                FillProdutoresViewBag();
+                return View(propriedade);
             }
-            return View(propriedade);
+
+            // Carrega e atualiza campo a campo. Um _context.Update com a entidade
+            // vinda do formulário apagaria o perímetro e a procedência do CAR,
+            // que não trafegam pelo form.
+            var persistida = await _context.Propriedades
+                .FirstOrDefaultAsync(x => x.Id == propriedade.Id, cancellationToken);
+
+            if (persistida is null)
+            {
+                return NotFound();
+            }
+
+            // Nome em branco na edição significa "manter o que está lá", não apagar.
+            if (!string.IsNullOrWhiteSpace(propriedade.NomePropriedade))
+            {
+                persistida.NomePropriedade = propriedade.NomePropriedade.Trim();
+            }
+            persistida.ProdutorId = propriedade.ProdutorId;
+            persistida.TipoPropriedade = propriedade.TipoPropriedade;
+            persistida.CicloProducao = propriedade.CicloProducao;
+            persistida.AreaUtil = propriedade.AreaUtil;
+            persistida.TipoCadastroRural = propriedade.TipoCadastroRural;
+            persistida.Validacao = propriedade.Validacao;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return RedirectToAction("Analise", "Propriedades");
         }
 
         // GET: Propriedades/Delete/5
@@ -167,26 +373,8 @@ namespace GeotecnologiaKNS.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult GeozoneMap(GeozoneViewModel model)
+        private void FillProdutoresViewBag()
         {
-            return View(model);
-        }
-
-        public ActionResult GetCitiesByUF(Estados uf)
-        {
-            return Json(UnidadesFederativasExtension.GetCities(uf));
-        }
-
-        private bool PropriedadeExists(int id)
-        {
-
-            return (_context.Propriedades?.Any(e => e.Id == id)).GetValueOrDefault();
-
-        }
-
-        private void FillProdutoresUnidadesFederativasViewBag()
-        {
-            ViewBag.UnidadesFederativas = UnidadesFederativasExtension.GetUnidadesFederativas();
             ViewBag.Produtores = _context.Produtores
                 .ToSelectListItems(
                     x => x.Nome,
@@ -200,6 +388,11 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         [HttpPost, ActionName("Upload")]
+        [ValidateAntiForgeryToken]
+        // Sem o filtro, o documento era gravado com TenantId 0 e o filtro global
+        // o escondia da própria indústria: subia, sumia da lista e ninguém
+        // entendia por quê.
+        [TenantFilter]
         public async Task<ActionResult> UploadAsync(PropriedadeArquivoViewModel arquivo)
         {
             if (!ModelState.IsValid)
@@ -213,7 +406,10 @@ namespace GeotecnologiaKNS.Controllers
 
             propriedade.Documentos ??= new List<PropriedadeArquivo>();
 
-            propriedade.Documentos.Add(arquivo.Model);
+            var documento = arquivo.Model;
+            await AnexoDeDocumento.PrepararAsync(documento, _arquivos, _userContext.TenantId ?? 0);
+
+            propriedade.Documentos.Add(documento);
             _context.Propriedades.Update(propriedade);
 
             await _context.SaveChangesAsync();
@@ -222,13 +418,17 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         [HttpPost, ActionName("DeleteFile")]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteFileAsync(int id)
         {
             var arquivo = await _context.PropriedadesArquivos.FindAsync(id);
 
             if (arquivo == null)
             {
-                return Problem();
+                // NotFound e não Problem: o documento pode simplesmente não existir, ou
+                // pertencer a outra indústria e ser filtrado. Nenhum dos dois é erro
+                // do servidor, e devolver 500 ainda poluiria o monitoramento.
+                return NotFound();
             }
 
             var produtor = await _context.Propriedades
@@ -237,6 +437,8 @@ namespace GeotecnologiaKNS.Controllers
 
             _context.PropriedadesArquivos.Remove(arquivo);
             await _context.SaveChangesAsync();
+
+            await AnexoDeDocumento.DescartarAsync(arquivo, _arquivos);
 
             return View("_file-list", produtor);
         }
@@ -248,10 +450,13 @@ namespace GeotecnologiaKNS.Controllers
 
             if (arquivo == null)
             {
-                return Problem();
+                // NotFound e não Problem: o documento pode simplesmente não existir, ou
+                // pertencer a outra indústria e ser filtrado. Nenhum dos dois é erro
+                // do servidor, e devolver 500 ainda poluiria o monitoramento.
+                return NotFound();
             }
 
-            return File(arquivo.Dados, arquivo.ContentType);
+            return await AnexoDeDocumento.ResponderAsync(arquivo, _arquivos);
         }
     }
 }

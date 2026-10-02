@@ -8,10 +8,24 @@ namespace GeotecnologiaKNS.Controllers
     public class SolicitacoesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAnaliseAutomaticaService _analise;
+        private readonly IMedidorDeUso _medidor;
 
-        public SolicitacoesController(ApplicationDbContext context)
+        private readonly IArmazenamentoDeArquivos _arquivos;
+        private readonly IUserContext _userContext;
+
+        public SolicitacoesController(
+            ApplicationDbContext context,
+            IAnaliseAutomaticaService analise,
+            IMedidorDeUso medidor,
+            IArmazenamentoDeArquivos arquivos,
+            IUserContext userContext)
         {
             _context = context;
+            _analise = analise;
+            _medidor = medidor;
+            _arquivos = arquivos;
+            _userContext = userContext;
         }
 
         // GET: Solicitacoes
@@ -36,20 +50,17 @@ namespace GeotecnologiaKNS.Controllers
                 .Include(p => p.Propriedade.Documentos)
                 .Include(y => y.Propriedade.Produtor.Documentos)
                 .Include(z => z.Documentos)
-                .Include(q => q.Propriedade.Cartografia.Arquivos)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (solicitacao == null)
             {
                 return NotFound();
             }
-            if (solicitacao.Propriedade.Cartografia == null)
-            {
-                solicitacao.Propriedade.Cartografia = new Cartografia
-                {
-                    Arquivos = new List<CartografiaArquivo>() // Inicializa uma lista vazia
-                };
-            }
-            solicitacao.Cartografia ??= new Cartografia();
+
+            ViewBag.Analise = await _context.AnalisesAutomaticas
+                .Include(x => x.Ocorrencias)
+                .Where(x => x.SolicitacaoId == solicitacao.Id)
+                .OrderByDescending(x => x.IniciadaEm)
+                .FirstOrDefaultAsync();
 
             return View(solicitacao);
         }
@@ -74,7 +85,16 @@ namespace GeotecnologiaKNS.Controllers
                 solicitacao.DataSolicitacao = DateTime.Now;
                 _context.Add(solicitacao);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+
+                await _medidor.RegistrarAsync(
+                    solicitacao.TenantId, TipoDeUso.SolicitacaoAberta, solicitacao.Id);
+
+                // Enfileira e devolve a tela na hora. O processador em plano de
+                // fundo cruza o perímetro e define o status; até lá a
+                // solicitação fica como Solicitado — nunca liberada por omissão.
+                await _analise.EnfileirarAsync(solicitacao.Id);
+
+                return RedirectToAction(nameof(Details), new { id = solicitacao.Id });
             }
             FillPropriedadesViewBag();
             return View(solicitacao);
@@ -196,6 +216,10 @@ namespace GeotecnologiaKNS.Controllers
             return View(solicitacao);
         }
         [HttpPost, ActionName("Upload")]
+        [ValidateAntiForgeryToken]
+        // Mesmo caso do upload de imóvel: sem o filtro o documento nasce com
+        // TenantId 0 e o filtro global o esconde de quem o enviou.
+        [TenantFilter]
         public async Task<ActionResult> UploadAsync(AnaliseArquivoViewModel arquivo)
         {
             if (!ModelState.IsValid)
@@ -209,7 +233,10 @@ namespace GeotecnologiaKNS.Controllers
 
             solicitacao.Documentos ??= new List<AnaliseArquivo>();
 
-            solicitacao.Documentos.Add(arquivo.Model);
+            var documento = arquivo.Model;
+            await AnexoDeDocumento.PrepararAsync(documento, _arquivos, _userContext.TenantId ?? 0);
+
+            solicitacao.Documentos.Add(documento);
             _context.Solicitacao.Update(solicitacao);
 
             await _context.SaveChangesAsync();
@@ -218,13 +245,17 @@ namespace GeotecnologiaKNS.Controllers
         }
 
         [HttpPost, ActionName("DeleteFile")]
+        [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteFileAsync(int id)
         {
             var arquivo = await _context.AnalisesArquivos.FindAsync(id);
 
             if (arquivo == null)
             {
-                return Problem();
+                // NotFound e não Problem: o documento pode simplesmente não existir, ou
+                // pertencer a outra indústria e ser filtrado. Nenhum dos dois é erro
+                // do servidor, e devolver 500 ainda poluiria o monitoramento.
+                return NotFound();
             }
 
             var solicitacao = await _context.Solicitacao
@@ -233,6 +264,8 @@ namespace GeotecnologiaKNS.Controllers
 
             _context.AnalisesArquivos.Remove(arquivo);
             await _context.SaveChangesAsync();
+
+            await AnexoDeDocumento.DescartarAsync(arquivo, _arquivos);
 
             return View("_file-list-Analise", solicitacao);
         }
@@ -244,10 +277,13 @@ namespace GeotecnologiaKNS.Controllers
 
             if (arquivo == null)
             {
-                return Problem();
+                // NotFound e não Problem: o documento pode simplesmente não existir, ou
+                // pertencer a outra indústria e ser filtrado. Nenhum dos dois é erro
+                // do servidor, e devolver 500 ainda poluiria o monitoramento.
+                return NotFound();
             }
 
-            return File(arquivo.Dados, arquivo.ContentType);
+            return await AnexoDeDocumento.ResponderAsync(arquivo, _arquivos);
         }
     }
 }

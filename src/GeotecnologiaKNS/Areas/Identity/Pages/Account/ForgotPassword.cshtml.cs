@@ -72,13 +72,48 @@ namespace GeotecnologiaKNS.Areas.Identity.Pages.Account
 
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    "Redefinição de senha — KNS Ambiental",
+                    MensagemDeRedefinicao(HtmlEncoder.Default.Encode(callbackUrl)));
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }
 
             return Page();
         }
+
+        /// <summary>
+        /// Corpo da mensagem de redefinição.
+        /// </summary>
+        /// <remarks>
+        /// HTML enxuto e em tabela porque cliente de e-mail corporativo ignora
+        /// boa parte de CSS moderno — o que se ganha em capricho se perde em
+        /// mensagem que chega quebrada. O link aparece também como texto: há
+        /// clientes que não tornam o botão clicável.
+        /// </remarks>
+        private static string MensagemDeRedefinicao(string link) =>
+            $@"<table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0""
+                      style=""font-family: Arial, Helvetica, sans-serif; color: #1F3242;"">
+                 <tr><td style=""padding: 24px 0;"">
+                   <p style=""font-size: 16px; margin: 0 0 16px;""><strong>Redefinição de senha</strong></p>
+                   <p style=""font-size: 14px; line-height: 1.6; margin: 0 0 20px;"">
+                     Recebemos um pedido para redefinir a senha da sua conta no painel de
+                     análises da KNS Ambiental. Clique no botão abaixo para escolher uma nova senha.
+                   </p>
+                   <p style=""margin: 0 0 24px;"">
+                     <a href=""{link}""
+                        style=""background: #127CC3; color: #FFFFFF; text-decoration: none;
+                               padding: 12px 22px; border-radius: 6px; display: inline-block;
+                               font-size: 14px;"">Redefinir minha senha</a>
+                   </p>
+                   <p style=""font-size: 13px; line-height: 1.6; color: #5B7183; margin: 0 0 8px;"">
+                     Se o botão não funcionar, copie e cole este endereço no navegador:
+                   </p>
+                   <p style=""font-size: 12px; word-break: break-all; color: #5B7183; margin: 0 0 24px;"">{link}</p>
+                   <p style=""font-size: 13px; line-height: 1.6; color: #5B7183; margin: 0;"">
+                     Se não foi você quem pediu, ignore esta mensagem — sua senha atual
+                     continua valendo.
+                   </p>
+                 </td></tr>
+               </table>";
     }
 }

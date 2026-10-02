@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
 {
-    public class Solicitacao : IIndustriaInfo, IPropriedadeInfo, ICartografiasInfo, IPrimaryKeyInfo<int>
+    public class Solicitacao : IIndustriaInfo, IPropriedadeInfo, IPrimaryKeyInfo<int>
     {
         private const string RequiredMessage = "Campo obrigatório";
         private const string TextoLongoMessage = "O campo {0} deve ter no máximo {1} caracteres.";
@@ -36,8 +36,6 @@ namespace GeotecnologiaKNS.Models
 
         [Display(Name = "Data da Avaliação")]
         public DateTime? DataAnalise { get; set; }
-
-        public Cartografia? Cartografia { get; set; }
 
         [Display(Name = "Observações")]
         [StringLength(2000, ErrorMessage = TextoLongoMessage)]

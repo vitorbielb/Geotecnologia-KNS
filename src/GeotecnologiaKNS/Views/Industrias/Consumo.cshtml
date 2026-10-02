@@ -1,0 +1,73 @@
+@model IReadOnlyList<GeotecnologiaKNS.Services.ConsumoMensal>
+
+@{
+    ViewData["Title"] = "Consumo";
+}
+
+<div class="kns-cabecalho">
+    <div>
+        <h1 class="kns-cabecalho__titulo">Consumo por indústria</h1>
+        <p class="kns-cabecalho__sub">
+            O que cada indústria usou, mês a mês. Base para a fatura — o preço de
+            cada item é definido fora do sistema.
+        </p>
+    </div>
+    <div class="kns-trilha">
+        <i class="mdi mdi-chart-box-outline"></i>
+        <span>Indústrias</span>
+        <span>/</span>
+        <span class="kns-trilha__atual">Consumo</span>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+
+                @if (Model.Count == 0)
+                {
+                    <div class="alert alert-info mb-0">
+                        Nenhum consumo registrado nos últimos doze meses. A medição
+                        começa a contar a partir das análises, solicitações e imóveis
+                        cadastrados daqui em diante.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Competência</th>
+                                    <th>Indústria</th>
+                                    <th class="text-end">Análises</th>
+                                    <th class="text-end">Solicitações</th>
+                                    <th class="text-end">Imóveis</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var linha in Model)
+                                {
+                                    <tr>
+                                        <td>@linha.CompetenciaFormatada</td>
+                                        <td>@linha.Industria</td>
+                                        <td class="text-end">@linha.Analises</td>
+                                        <td class="text-end">@linha.Solicitacoes</td>
+                                        <td class="text-end">@linha.Imoveis</td>
+                                        <td class="text-end"><strong>@linha.Total</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index" class="btn btn-secondary">Voltar às indústrias</a>
+</div>

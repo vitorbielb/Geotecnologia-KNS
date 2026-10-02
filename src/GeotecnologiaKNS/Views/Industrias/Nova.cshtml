@@ -1,0 +1,130 @@
+﻿@model GeotecnologiaKNS.Models.NovaIndustriaViewModel
+
+@{
+    ViewData["Title"] = "Nova indústria";
+}
+
+<div class="kns-cabecalho">
+    <div>
+        <h1 class="kns-cabecalho__titulo">Nova indústria</h1>
+        <p class="kns-cabecalho__sub">
+            A indústria e o usuário que vai administrá-la são criados juntos.
+        </p>
+    </div>
+    <div class="kns-trilha">
+        <i class="mdi mdi-domain"></i>
+        <span>Indústrias</span>
+        <span>/</span>
+        <span class="kns-trilha__atual">Nova</span>
+    </div>
+</div>
+
+<form asp-action="Nova" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    <div class="row">
+        <div class="col-lg-6 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Dados da indústria</h4>
+
+                    <div class="form-group">
+                        <label asp-for="Nome" class="control-label"></label>
+                        <input asp-for="Nome" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="Nome" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="NomeResumido" class="control-label"></label>
+                        <input asp-for="NomeResumido" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="NomeResumido" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="RazaoSocial" class="control-label"></label>
+                        <input asp-for="RazaoSocial" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="RazaoSocial" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Cnpj" class="control-label"></label>
+                        <input asp-for="Cnpj" class="form-control" placeholder="00.000.000/0000-00" autocomplete="off" />
+                        <span asp-validation-for="Cnpj" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Logotipo" class="control-label"></label>
+                        <input asp-for="Logotipo" type="file" accept="image/*" class="form-control" />
+                        <small class="text-muted">Opcional. Aparece na barra superior para os usuários desta indústria.</small>
+                        <span asp-validation-for="Logotipo" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Administrador da indústria</h4>
+                    <p class="text-muted">
+                        Recebe a função <strong>ClienteAdmin</strong> e passa a poder cadastrar
+                        os demais usuários e ajustar as regras de conformidade.
+                    </p>
+
+                    <div class="form-group">
+                        <label asp-for="AdminUserName" class="control-label"></label>
+                        <input asp-for="AdminUserName" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="AdminUserName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="AdminEmail" class="control-label"></label>
+                        <input asp-for="AdminEmail" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="AdminEmail" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="AdminPhoneNumber" class="control-label"></label>
+                        <input asp-for="AdminPhoneNumber" class="form-control" autocomplete="off" />
+                        <span asp-validation-for="AdminPhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="AdminPassword" class="control-label"></label>
+                                <input asp-for="AdminPassword" class="form-control" autocomplete="new-password" />
+                                <span asp-validation-for="AdminPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="AdminConfirmPassword" class="control-label"></label>
+                                <input asp-for="AdminConfirmPassword" class="form-control" autocomplete="new-password" />
+                                <span asp-validation-for="AdminConfirmPassword" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mb-0">
+                        Combine com o cliente uma senha provisória e peça que ele a troque no primeiro acesso.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+        <button type="submit" class="btn btn-primary gradient-button">
+            <i class="mdi mdi-check-circle-outline"></i>
+            Criar indústria e administrador
+        </button>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

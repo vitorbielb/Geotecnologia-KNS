@@ -1,39 +1,74 @@
-﻿@page
+@page
 @model LoginWith2faModel
+
 @{
-    ViewData["Title"] = "Two-factor authentication";
+    Layout = "_NoContent";
+    ViewData["Title"] = "Verificação em duas etapas";
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
-<p>Your login is protected with an authenticator app. Enter your authenticator code below.</p>
-<div class="row">
-    <div class="col-md-4">
-        <form method="post" asp-route-returnUrl="@Model.ReturnUrl">
-            <input asp-for="RememberMe" type="hidden" />
-            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <div class="form-floating mb-3">
-                <input asp-for="Input.TwoFactorCode" class="form-control" autocomplete="off" />
-                <label asp-for="Input.TwoFactorCode" class="form-label"></label>
-                <span asp-validation-for="Input.TwoFactorCode" class="text-danger"></span>
+@* Mesma identidade do login: quem chega aqui está no meio de entrar, e trocar
+   de cara no meio do caminho parece outro sistema. *@
+<div class="kns-auth kns-auth--simples">
+
+    <main class="kns-auth__formulario">
+        <div class="kns-auth__caixa">
+
+            <div class="kns-auth__marca-form">
+                <img src="~/images/logo.png" alt="KNS Ambiental — Geotecnologia" />
             </div>
-            <div class="checkbox mb-3">
-                <label asp-for="Input.RememberMachine" class="form-label">
-                    <input asp-for="Input.RememberMachine" />
-                    @Html.DisplayNameFor(m => m.Input.RememberMachine)
-                </label>
+
+            <h2 class="kns-auth__saudacao">Verificação em duas etapas</h2>
+            <p class="kns-auth__instrucao">
+                Abra seu aplicativo autenticador e informe o código de seis dígitos.
+            </p>
+
+            <form method="post" asp-route-returnUrl="@Model.ReturnUrl">
+                <input asp-for="RememberMe" type="hidden" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" role="alert"></div>
+
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.TwoFactorCode" class="form-control" id="codigo"
+                           placeholder="000000" autocomplete="one-time-code"
+                           inputmode="numeric" maxlength="7" />
+                    <label asp-for="Input.TwoFactorCode" for="codigo">Código do autenticador</label>
+                    <span asp-validation-for="Input.TwoFactorCode" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="Input.RememberMachine" class="form-check-input" id="lembrar" />
+                    <label asp-for="Input.RememberMachine" class="form-check-label" for="lembrar"
+                           style="text-transform: none; letter-spacing: 0; font-weight: 400;">
+                        Não pedir de novo neste computador
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary kns-auth__acao">Entrar</button>
+
+                <div class="kns-auth__links">
+                    <a asp-page="./LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl">
+                        Usar um código de recuperação
+                    </a>
+                </div>
+            </form>
+
+            <div class="kns-auth__selo">
+                <i class="mdi mdi-cellphone-key"></i>
+                <span>O código muda a cada 30 segundos e só vale uma vez.</span>
             </div>
-            <div>
-                <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-            </div>
-        </form>
-    </div>
+        </div>
+    </main>
+
 </div>
-<p>
-    Don't have access to your authenticator device? You can
-    <a id="recovery-code-login" asp-page="./LoginWithRecoveryCode" asp-route-returnUrl="@Model.ReturnUrl">log in with a recovery code</a>.
-</p>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            var resumo = document.querySelector('.validation-summary-errors');
+            if (resumo && resumo.textContent.trim()) {
+                resumo.classList.remove('d-none');
+            }
+        })();
+    </script>
 }

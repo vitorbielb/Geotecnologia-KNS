@@ -24,18 +24,30 @@ public static class AppClaimsPrincipalExt
         return string.Empty;
     }
 
-    public static bool IsApplicationAdmin(this IIdentity identity)
-    {
-        var claim = identity.AsClaimIdentity().FindFirst(ClaimTypes.Role);
-        return claim?.Value == nameof(Roles.Administrador);
-    }
+    /// <summary>
+    /// Indica se o usuário administra a própria aplicação — é quem cadastra
+    /// indústrias e enxerga todos os inquilinos.
+    /// </summary>
+    public static bool IsApplicationAdmin(this IIdentity identity) =>
+        TemPapel(identity, nameof(Roles.Administrador));
 
+    /// <summary>Indica se o usuário administra a indústria dele.</summary>
+    public static bool IsTenantAdmin(this IIdentity identity) =>
+        TemPapel(identity, nameof(Roles.ClienteAdmin));
 
-    public static bool IsTenantAdmin(this IIdentity identity)
-    {
-        var claim = identity.AsClaimIdentity().FindFirst(ClaimTypes.Role);
-        return claim?.Value == nameof(Roles.ClienteAdmin);
-    }
+    /// <summary>
+    /// Procura entre todos os papéis do usuário, e não apenas no primeiro.
+    /// </summary>
+    /// <remarks>
+    /// FindFirst devolve um papel qualquer entre os atribuídos. Enquanto cada
+    /// usuário tiver um só, funciona; ao receber um segundo, o administrador
+    /// poderia deixar de ser reconhecido como tal — e isso derrubaria também o
+    /// acesso amplo que os filtros de inquilino lhe concedem, em silêncio.
+    /// </remarks>
+    private static bool TemPapel(IIdentity identity, string papel) =>
+        identity.AsClaimIdentity()
+                .FindAll(ClaimTypes.Role)
+                .Any(c => string.Equals(c.Value, papel, StringComparison.Ordinal));
 
 
     public static int? GetTenantId(this IIdentity identity)

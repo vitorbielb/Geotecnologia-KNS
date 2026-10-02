@@ -1,0 +1,103 @@
+@{
+    Layout = null;
+}
+
+@model Propriedade
+@{
+    var fornecedores = ViewBag.CadeiaIndireta as List<FornecedorIndireto> ?? new List<FornecedorIndireto>();
+}
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Cadeia de fornecimento indireto</h4>
+        <p class="text-muted">
+            Imóveis que forneceram animais a este fornecedor direto. A fazenda que vende boi
+            gordo quase sempre comprou bezerro de outra, e é na outra que o passivo costuma
+            estar — olhar só o fornecedor direto dá um laudo limpo sobre uma cadeia que não é.
+        </p>
+
+        @if (fornecedores.Count == 0)
+        {
+            <div class="alert alert-warning">
+                <strong>Nenhum fornecedor indireto declarado.</strong>
+                A regra IND-001 sai como <em>não avaliada</em> nos laudos deste imóvel. Isso não
+                quer dizer que a cadeia esteja limpa — quer dizer que ela não foi verificada.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive mb-3">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>CAR</th>
+                            <th>Produtor</th>
+                            <th>CPF/CNPJ</th>
+                            <th>Origem da informação</th>
+                            <th>Declarado em</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in fornecedores)
+                        {
+                            <tr>
+                                <td><code>@item.CodigoCar</code></td>
+                                <td>@(string.IsNullOrWhiteSpace(item.NomeProdutor) ? "—" : item.NomeProdutor)</td>
+                                <td>
+                                    @if (string.IsNullOrWhiteSpace(item.Documento))
+                                    {
+                                        <span class="text-warning" title="Sem documento, só o cruzamento geográfico é feito — e metade dos embargos do IBAMA não tem área delimitada.">
+                                            não informado
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        @item.Documento
+                                    }
+                                </td>
+                                <td>@(string.IsNullOrWhiteSpace(item.Origem) ? "—" : item.Origem)</td>
+                                <td>@item.DeclaradoEm.ToString("dd/MM/yyyy")</td>
+                                <td class="text-end">
+                                    <form asp-action="RemoverFornecedorIndireto" method="post" class="d-inline"
+                                          onsubmit="return confirm('Remover @item.CodigoCar da cadeia declarada?');">
+                                        <input type="hidden" name="id" value="@item.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remover</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <h5>Declarar fornecedor indireto</h5>
+        <form asp-action="AdicionarFornecedorIndireto" method="post">
+            <input type="hidden" name="PropriedadeId" value="@Model.Id" />
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="ind-car">Número do CAR</label>
+                    <input type="text" class="form-control" id="ind-car" name="CodigoCar" maxlength="100" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="ind-nome">Produtor</label>
+                    <input type="text" class="form-control" id="ind-nome" name="NomeProdutor" maxlength="200" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="ind-doc">CPF/CNPJ</label>
+                    <input type="text" class="form-control" id="ind-doc" name="Documento" maxlength="20" />
+                    <div class="form-text">Sem ele, só o cruzamento geográfico.</div>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="ind-origem">Origem</label>
+                    <input type="text" class="form-control" id="ind-origem" name="Origem" maxlength="200"
+                           placeholder="GTA, declaração..." />
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">Incluir</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

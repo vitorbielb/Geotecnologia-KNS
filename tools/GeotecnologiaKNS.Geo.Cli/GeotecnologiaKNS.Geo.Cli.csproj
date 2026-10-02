@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LangVersion>preview</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>GeotecnologiaKNS.Geo.Cli</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.9" />
+
+		<!-- O NetTopologySuite.IO.GeoJSON arrasta Newtonsoft.Json 9.0.1, que tem
+		     vulnerabilidade conhecida de alta gravidade (GHSA-5crp-9r3c-p9vr).
+		     A referência direta eleva a resolução para uma versão corrigida. -->
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\GeotecnologiaKNS.Geo\GeotecnologiaKNS.Geo.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,162 @@
+@using GeotecnologiaKNS.Views
+@model GeotecnologiaKNS.Models.AnaliseAutomatica
+
+@{
+    string SeveridadeCss(int severidade) => severidade switch
+    {
+        2 => "danger",
+        1 => "warning",
+        _ => "secondary"
+    };
+
+    string SeveridadeTexto(int severidade) => severidade switch
+    {
+        2 => "BLOQUEIO",
+        1 => "ALERTA",
+        _ => "INFORMATIVO"
+    };
+}
+
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">Análise automática</h4>
+            @Html.DisplayStatus(Model.Resultado)
+        </div>
+
+        <p class="text-muted mt-2 mb-3">
+            @Model.Politica — executada em @Model.IniciadaEm.ToString("dd/MM/yyyy HH:mm")
+            @if (Model.AreaImovelHa > 0)
+            {
+                <text>· imóvel de @Model.AreaImovelHa.ToString("N2") ha</text>
+            }
+        </p>
+
+        @if (Model.Situacao is SituacaoAnalise.Pendente or SituacaoAnalise.Processando)
+        {
+            <div class="alert alert-info d-flex align-items-center gap-2 mb-0" id="kns-analise-andamento">
+                <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                <div>
+                    <strong>Análise em andamento.</strong>
+                    O perímetro está sendo cruzado com as camadas de referência.
+                    @if (Model.Tentativas > 1)
+                    {
+                        <text>Tentativa @Model.Tentativas.</text>
+                    }
+                    Esta página se atualiza sozinha quando terminar.
+                </div>
+            </div>
+
+            @* Recarrega em vez de consultar um endpoint de estado: são poucos
+               segundos de espera e uma tela só, e um endpoint de sondagem seria
+               mais superfície para manter do que o problema justifica. *@
+            <script>
+                setTimeout(function () { window.location.reload(); }, 4000);
+            </script>
+
+            return;
+        }
+
+        @* Cobertura parcial vem antes de tudo: um laudo sem ocorrências se lê
+           como aprovação, e é exatamente aí que a omissão engana. *@
+        @if (Model.Situacao == SituacaoAnalise.Concluida && !Model.CoberturaCompleta)
+        {
+            <div class="alert alert-warning">
+                <strong>Verificação incompleta.</strong>
+                As regras abaixo não puderam ser aplicadas porque nenhuma camada do
+                tipo que elas examinam estava carregada. O que não aparece nesta
+                análise não foi verificado — não é ausência de restrição.
+                @if (!string.IsNullOrWhiteSpace(Model.RegrasNaoAvaliadas))
+                {
+                    <ul class="mb-0 mt-2">
+                        @foreach (var regra in Model.RegrasNaoAvaliadas.Split('\n',
+                            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        {
+                            <li>@regra</li>
+                        }
+                    </ul>
+                }
+            </div>
+        }
+
+        @if (Model.Situacao == SituacaoAnalise.Falhou)
+        {
+            <div class="alert alert-danger">
+                <strong>A análise não pôde ser concluída.</strong><br />
+                @Model.Erro
+                <hr />
+                A solicitação permanece sem liberação até que a causa seja resolvida
+                e a análise seja executada novamente.
+            </div>
+        }
+        else if (Model.Ocorrencias.Count == 0 && Model.CoberturaCompleta)
+        {
+            <div class="alert alert-success mb-0">
+                Nenhuma sobreposição restritiva encontrada nas camadas verificadas.
+            </div>
+        }
+        else if (Model.Ocorrencias.Count == 0)
+        {
+            <div class="alert alert-info mb-0">
+                Nenhuma sobreposição nas camadas disponíveis. O resultado não é uma
+                liberação — veja acima o que ficou sem verificação.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Severidade</th>
+                            <th>Regra</th>
+                            <th>Camada</th>
+                            <th>Feição</th>
+                            <th class="text-end">Sobreposição</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ocorrencia in Model.Ocorrencias.OrderByDescending(o => o.Severidade)
+                                                                     .ThenByDescending(o => o.AreaSobrepostaHa))
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-@SeveridadeCss(ocorrencia.Severidade)">
+                                        @SeveridadeTexto(ocorrencia.Severidade)
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>@ocorrencia.CodigoRegra</strong><br />
+                                    <span class="text-muted">@ocorrencia.Descricao</span>
+                                    @if (!string.IsNullOrWhiteSpace(ocorrencia.Fundamento))
+                                    {
+                                        <br />
+
+                                        <small class="text-muted">@ocorrencia.Fundamento</small>
+                                    }
+                                </td>
+                                <td>
+                                    @ocorrencia.Camada<br />
+                                    <small class="text-muted">@ocorrencia.Origem</small>
+                                </td>
+                                <td>@(string.IsNullOrWhiteSpace(ocorrencia.Rotulo) ? "-" : ocorrencia.Rotulo)</td>
+                                <td class="text-end">
+                                    @ocorrencia.AreaSobrepostaHa.ToString("N2") ha<br />
+                                    <small class="text-muted">@ocorrencia.PercentualDoImovel.ToString("N2")% do imóvel</small>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.CamadasVerificadas))
+        {
+            <details class="mt-3">
+                <summary class="text-muted">Camadas verificadas nesta análise</summary>
+                <pre class="mt-2 text-muted" style="white-space: pre-wrap; font-size: 0.85rem;">@Model.CamadasVerificadas</pre>
+            </details>
+        }
+    </div>
+</div>

@@ -17,10 +17,10 @@ namespace GeotecnologiaKNS.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.21")
+                .HasAnnotation("ProductVersion", "10.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.AnaliseArquivo", b =>
                 {
@@ -28,14 +28,17 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Chave")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("Dados")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<DateTime?>("DataAnalise")
@@ -48,11 +51,148 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Property<int?>("SolicitacaoId")
                         .HasColumnType("int");
 
+                    b.Property<long>("Tamanho")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SolicitacaoId");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("AnalisesArquivos");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.AnaliseAutomatica", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("AreaImovelHa")
+                        .HasColumnType("float");
+
+                    b.Property<string>("CamadasVerificadas")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("CoberturaCompleta")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("CodigoCar")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("ConcluidaEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Erro")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("IniciadaEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Parecer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Politica")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("PoliticaAplicada")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ProximaTentativaEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RegrasNaoAvaliadas")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Resultado")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Situacao")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SolicitacaoId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Tentativas")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SolicitacaoId");
+
+                    b.HasIndex("TenantId");
+
+                    b.HasIndex("Situacao", "ProximaTentativaEm");
+
+                    b.ToTable("AnalisesAutomaticas");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.AnaliseOcorrencia", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnaliseId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("AreaSobrepostaHa")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Camada")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("CodigoRegra")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Fundamento")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Origem")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<double>("PercentualDoImovel")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Rotulo")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("Severidade")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnaliseId");
+
+                    b.ToTable("AnalisesOcorrencias");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationRole", b =>
@@ -81,7 +221,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedName")
+                    b.HasIndex("TenantId", "NormalizedName")
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
@@ -135,6 +275,9 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("SenhaProvisoria")
+                        .HasColumnType("bit");
+
                     b.Property<int>("TenantId")
                         .HasColumnType("int");
 
@@ -160,16 +303,67 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Cartografia", b =>
+            modelBuilder.Entity("GeotecnologiaKNS.Models.EventoDeUso", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Competencia")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Descricao")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("OcorridoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReferenciaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId", "Competencia");
+
+                    b.ToTable("EventosDeUso");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.FornecedorIndireto", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CartografiaArquivoId")
-                        .HasColumnType("int");
+                    b.Property<string>("CodigoCar")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("DeclaradoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Documento")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("NomeProdutor")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Origem")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("PropriedadeId")
                         .HasColumnType("int");
@@ -179,72 +373,11 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CartografiaArquivoId");
+                    b.HasIndex("PropriedadeId");
 
-                    b.HasIndex("PropriedadeId")
-                        .IsUnique();
+                    b.HasIndex("TenantId", "PropriedadeId");
 
-                    b.HasIndex("TenantId");
-
-                    b.ToTable("Cartografias");
-                });
-
-            modelBuilder.Entity("GeotecnologiaKNS.Models.CartografiaArquivo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int?>("CartografiaId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<byte[]>("Dados")
-                        .IsRequired()
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<DateTime?>("DataCartografia")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Descricao")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Tipo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CartografiaId");
-
-                    b.ToTable("CartografiasArquivos");
-                });
-
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Geozone", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UtmAsJson")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("Utm");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Geozones");
+                    b.ToTable("FornecedoresIndiretos");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Industria", b =>
@@ -253,7 +386,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TenantId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TenantId"));
 
                     b.Property<string>("Cnpj")
                         .IsRequired()
@@ -282,32 +415,55 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.ToTable("Industrias");
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
+            modelBuilder.Entity("GeotecnologiaKNS.Models.PoliticaTenant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Cpf")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("AtualizadaEm")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("SolicitacoesId")
-                        .HasColumnType("int");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SolicitacoesId");
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.ToTable("Politicas");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Cpf")
+                        .IsRequired()
+                        .HasMaxLength(18)
+                        .HasColumnType("nvarchar(18)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("TenantId");
 
@@ -320,14 +476,17 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Chave")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("Dados")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Descricao")
@@ -337,9 +496,17 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Property<int?>("ProdutorId")
                         .HasColumnType("int");
 
+                    b.Property<long>("Tamanho")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProdutorId");
+
+                    b.HasIndex("TenantId");
 
                     b.ToTable("ProdutoresArquivos");
                 });
@@ -350,7 +517,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Area")
                         .IsRequired()
@@ -372,8 +539,10 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("GeozoneId")
-                        .HasColumnType("int");
+                    b.Property<string>("CodigoCar")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("float");
@@ -387,14 +556,28 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.Property<string>("NomePropriedade")
                         .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("OrigemCoordenadas")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("PerimetroAtualizadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PerimetroGeoJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PerimetroOrigem")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<int>("ProdutorId")
                         .HasColumnType("int");
+
+                    b.Property<string>("SituacaoCar")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int");
@@ -415,7 +598,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GeozoneId");
+                    b.HasIndex("CodigoCar");
 
                     b.HasIndex("ProdutorId");
 
@@ -430,14 +613,17 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Chave")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("ContentType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("Dados")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Descricao")
@@ -447,11 +633,75 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Property<int?>("PropriedadeId")
                         .HasColumnType("int");
 
+                    b.Property<long>("Tamanho")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PropriedadeId");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("PropriedadesArquivos");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.RegraTenant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AnoMinimo")
+                        .HasColumnType("int");
+
+                    b.Property<double>("AreaMinimaHa")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("Ativa")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CadeiaIndireta")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Codigo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Fundamento")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<double>("PercentualMinimo")
+                        .HasColumnType("float");
+
+                    b.Property<int>("PoliticaId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Restricao")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Severidade")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PoliticaId");
+
+                    b.ToTable("Regras");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Solicitacao", b =>
@@ -460,13 +710,11 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Analista")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("CartografiaId")
-                        .HasColumnType("int");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<DateTime?>("DataAnalise")
                         .HasColumnType("datetime2");
@@ -475,17 +723,23 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Observacao")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<string>("Parecer")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int?>("ProdutorId")
+                        .HasColumnType("int");
 
                     b.Property<int>("PropriedadeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Solicitante")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -495,7 +749,7 @@ namespace GeotecnologiaKNS.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CartografiaId");
+                    b.HasIndex("ProdutorId");
 
                     b.HasIndex("PropriedadeId");
 
@@ -510,7 +764,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -535,7 +789,7 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -628,6 +882,36 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasForeignKey("SolicitacaoId");
                 });
 
+            modelBuilder.Entity("GeotecnologiaKNS.Models.AnaliseAutomatica", b =>
+                {
+                    b.HasOne("GeotecnologiaKNS.Models.Solicitacao", "Solicitacao")
+                        .WithMany()
+                        .HasForeignKey("SolicitacaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GeotecnologiaKNS.Models.Industria", "Industria")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Industria");
+
+                    b.Navigation("Solicitacao");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.AnaliseOcorrencia", b =>
+                {
+                    b.HasOne("GeotecnologiaKNS.Models.AnaliseAutomatica", "Analise")
+                        .WithMany("Ocorrencias")
+                        .HasForeignKey("AnaliseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Analise");
+                });
+
             modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationUser", b =>
                 {
                     b.HasOne("GeotecnologiaKNS.Models.Industria", "Industria")
@@ -639,44 +923,49 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Navigation("Industria");
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Cartografia", b =>
+            modelBuilder.Entity("GeotecnologiaKNS.Models.EventoDeUso", b =>
                 {
-                    b.HasOne("GeotecnologiaKNS.Models.CartografiaArquivo", "CartografiaArquivo")
-                        .WithMany()
-                        .HasForeignKey("CartografiaArquivoId");
-
-                    b.HasOne("GeotecnologiaKNS.Models.Propriedade", "Propriedade")
-                        .WithOne("Cartografia")
-                        .HasForeignKey("GeotecnologiaKNS.Models.Cartografia", "PropriedadeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("GeotecnologiaKNS.Models.Industria", "Industria")
-                        .WithMany("Cartografias")
+                        .WithMany()
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("CartografiaArquivo");
+                    b.Navigation("Industria");
+                });
+
+            modelBuilder.Entity("GeotecnologiaKNS.Models.FornecedorIndireto", b =>
+                {
+                    b.HasOne("GeotecnologiaKNS.Models.Propriedade", "Propriedade")
+                        .WithMany()
+                        .HasForeignKey("PropriedadeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GeotecnologiaKNS.Models.Industria", "Industria")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Industria");
 
                     b.Navigation("Propriedade");
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.CartografiaArquivo", b =>
+            modelBuilder.Entity("GeotecnologiaKNS.Models.PoliticaTenant", b =>
                 {
-                    b.HasOne("GeotecnologiaKNS.Models.Cartografia", null)
-                        .WithMany("Arquivos")
-                        .HasForeignKey("CartografiaId");
+                    b.HasOne("GeotecnologiaKNS.Models.Industria", "Industria")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Industria");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
                 {
-                    b.HasOne("GeotecnologiaKNS.Models.Solicitacao", "Solicitacoes")
-                        .WithMany()
-                        .HasForeignKey("SolicitacoesId");
-
                     b.HasOne("GeotecnologiaKNS.Models.Industria", "Industria")
                         .WithMany("Produtores")
                         .HasForeignKey("TenantId")
@@ -684,8 +973,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Industria");
-
-                    b.Navigation("Solicitacoes");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.ProdutorArquivo", b =>
@@ -697,10 +984,6 @@ namespace GeotecnologiaKNS.Data.Migrations
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Propriedade", b =>
                 {
-                    b.HasOne("GeotecnologiaKNS.Models.Geozone", "Geozone")
-                        .WithMany()
-                        .HasForeignKey("GeozoneId");
-
                     b.HasOne("GeotecnologiaKNS.Models.Produtor", "Produtor")
                         .WithMany("Propriedades")
                         .HasForeignKey("ProdutorId")
@@ -712,8 +995,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Geozone");
 
                     b.Navigation("Industria");
 
@@ -727,11 +1008,22 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasForeignKey("PropriedadeId");
                 });
 
+            modelBuilder.Entity("GeotecnologiaKNS.Models.RegraTenant", b =>
+                {
+                    b.HasOne("GeotecnologiaKNS.Models.PoliticaTenant", "Politica")
+                        .WithMany("Regras")
+                        .HasForeignKey("PoliticaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Politica");
+                });
+
             modelBuilder.Entity("GeotecnologiaKNS.Models.Solicitacao", b =>
                 {
-                    b.HasOne("GeotecnologiaKNS.Models.Cartografia", "Cartografia")
-                        .WithMany()
-                        .HasForeignKey("CartografiaId");
+                    b.HasOne("GeotecnologiaKNS.Models.Produtor", null)
+                        .WithMany("Solicitacoes")
+                        .HasForeignKey("ProdutorId");
 
                     b.HasOne("GeotecnologiaKNS.Models.Propriedade", "Propriedade")
                         .WithMany()
@@ -744,8 +1036,6 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Cartografia");
 
                     b.Navigation("Industria");
 
@@ -805,6 +1095,11 @@ namespace GeotecnologiaKNS.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("GeotecnologiaKNS.Models.AnaliseAutomatica", b =>
+                {
+                    b.Navigation("Ocorrencias");
+                });
+
             modelBuilder.Entity("GeotecnologiaKNS.Models.ApplicationRole", b =>
                 {
                     b.Navigation("Claims");
@@ -815,15 +1110,8 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Navigation("Claims");
                 });
 
-            modelBuilder.Entity("GeotecnologiaKNS.Models.Cartografia", b =>
-                {
-                    b.Navigation("Arquivos");
-                });
-
             modelBuilder.Entity("GeotecnologiaKNS.Models.Industria", b =>
                 {
-                    b.Navigation("Cartografias");
-
                     b.Navigation("Produtores");
 
                     b.Navigation("Propriedades");
@@ -833,17 +1121,22 @@ namespace GeotecnologiaKNS.Data.Migrations
                     b.Navigation("Usuarios");
                 });
 
+            modelBuilder.Entity("GeotecnologiaKNS.Models.PoliticaTenant", b =>
+                {
+                    b.Navigation("Regras");
+                });
+
             modelBuilder.Entity("GeotecnologiaKNS.Models.Produtor", b =>
                 {
                     b.Navigation("Documentos");
 
                     b.Navigation("Propriedades");
+
+                    b.Navigation("Solicitacoes");
                 });
 
             modelBuilder.Entity("GeotecnologiaKNS.Models.Propriedade", b =>
                 {
-                    b.Navigation("Cartografia");
-
                     b.Navigation("Documentos");
                 });
 

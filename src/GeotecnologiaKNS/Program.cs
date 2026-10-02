@@ -6,8 +6,10 @@ using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar a conexão com o banco de dados
-builder.Configuration.AddJsonFile("appsettings.json");
+// Não adicionar appsettings.json aqui: CreateBuilder já o carregou, e recarregá-lo
+// o coloca no fim da cadeia, com prioridade sobre user-secrets e variáveis de
+// ambiente. Era por isso que um valor vazio no arquivo vencia o segredo
+// configurado — e, em produção, venceria a variável de ambiente.
 
 // Adicionar serviços ao contêiner
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -17,17 +19,45 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>()
+builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+                {
+                    // O UserName aqui é o nome da pessoa, não um apelido de
+                    // login — quem entra no sistema usa o e-mail. O conjunto
+                    // padrão do Identity não tem espaço nem acento, e isso
+                    // reprovava "Ana Prado" ou "João Gonçalves" na hora de
+                    // atribuir o papel, deixando o usuário sem permissão
+                    // nenhuma.
+                    options.User.AllowedUserNameCharacters =
+                        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+" +
+                        "áàâãäéèêëíìîïóòôõöúùûüçñÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇÑ' ";
+                })
                 .AddUserManager<UserManager<ApplicationUser>>()
                 .AddRoles<ApplicationRole>()
                 .AddClaimsPrincipalFactory<AppClaimsPrincipalFactory>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+builder.Services.Configure<GoogleMapsOptions>(builder.Configuration.GetSection(GoogleMapsOptions.SectionName));
+
+// Bases geoespaciais de referência (PostGIS). Sem a connection string "Geo"
+// configurada, o app segue funcionando com o cadastro manual.
+builder.Services.AddGeo(builder.Configuration.GetConnectionString("Geo"));
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     // Cookie settings
     options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+    options.Cookie.SameSite = SameSiteMode.Lax;
+
+    // Em desenvolvimento o perfil de launch "http" não tem HTTPS; exigir o cookie
+    // seguro ali impediria o login.
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.SameAsRequest
+        : CookieSecurePolicy.Always;
+
+    // Com SlidingExpiration a janela é renovada a cada requisição;
+    // 5 minutos derrubavam o usuário no meio de um preenchimento de formulário.
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(
+        builder.Configuration.GetValue<int?>("Identity:CookieExpirationMinutes") ?? 60);
 
     options.LoginPath = "/Identity/Account/Login";
     options.AccessDeniedPath = "/Identity/Account/AccessDenied";
@@ -38,23 +68,47 @@ builder.Services.AddAuthorization(options =>
 {
     options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
     options.AddPolicy("UserCanUpdateSolicitacoes", policy => policy.RequireOperation(x => x.Solicitacao.Update));
-    options.AddPolicy("UserCanUpdateCartografias", policy => policy.RequireOperation(x => x.Cartografia.Update));
     options.AddPolicy("UserCanTenantCreate", policy => policy.RequireOperation(x => x.Tenant.Create));
     options.AddPolicy("UserCanUserCreate", policy => policy.RequireOperation(x => x.User.Create));
 });
 
+// As telas de documento enviam e excluem por AJAX; sem um nome de cabeçalho
+// configurado, não haveria como mandar o token nessas chamadas.
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
+
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IIndustriaRepository, IndustriaRepository>();
 builder.Services.AddScoped<ISolicitacaoRepository, SolicitacaoRepository>();
-builder.Services.AddScoped<IProdutorRepository, ProdutorRepository>();
 builder.Services.AddScoped<IPropriedadeRepository, PropriedadeRepository>();
-builder.Services.AddScoped<ICartografiaRepository, CartografiaRepository>();
 builder.Services.AddControllersWithViews();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining(typeof(Program));
 builder.Services.AddAdminPanel();
 builder.Services.AddScoped<ImageLoader>();
+builder.Services.AddScoped<IPropriedadeCarService, PropriedadeCarService>();
+builder.Services.AddScoped<IMotorDeRegras, MotorDeRegras>();
+builder.Services.AddScoped<IPoliticaAnaliseRepository, PoliticaAnaliseRepository>();
+builder.Services.AddScoped<IAnaliseAutomaticaService, AnaliseAutomaticaService>();
+builder.Services.AddHostedService<ProcessadorDeAnalises>();
+builder.Services.AddHostedService<AtualizadorDeCamadas>();
+builder.Services.Configure<GeotecnologiaKNS.Infra.Email.OpcoesDeEmail>(
+    builder.Configuration.GetSection(GeotecnologiaKNS.Infra.Email.OpcoesDeEmail.SecaoDeConfiguracao));
+
+// O IEmailSender nao generico e o que a UI do Identity resolve; o generico
+// IEmailSender<TUser> e outro contrato e nao seria usado pelas paginas.
+builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender,
+                              GeotecnologiaKNS.Infra.Email.RemetenteDeEmail>();
+
+builder.Services.AddScoped<IMedidorDeUso, MedidorDeUso>();
 builder.Services.AddScoped<IUserContext, UserContext>();
+
+// Os anexos saíram da coluna varbinary e passaram a morar no disco: cada backup
+// do banco carregava junto todo PDF já enviado, e backup que fica grande demais
+// é backup que deixa de ser feito.
+builder.Services.Configure<OpcoesDeArquivos>(
+    builder.Configuration.GetSection(OpcoesDeArquivos.Secao));
+builder.Services.AddSingleton<IArmazenamentoDeArquivos, ArmazenamentoEmDisco>();
+builder.Services.AddHostedService<MigradorDeAnexos>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -96,81 +150,12 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Depois da autorização: antes disso o usuário ainda não tem identidade.
+app.UseSenhaProvisoria();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 app.Run();
-
-
-
-// Optimization pass: 2025-04-07 01:23:53
-
-// Optimization pass: 2025-04-10 22:09:08
-
-// Optimization pass: 2025-04-11 16:37:24
-
-// Optimization pass: 2025-04-16 09:18:58
-
-// Optimization pass: 2025-04-17 09:25:14
-
-// Optimization pass: 2025-05-02 21:26:33
-
-// Optimization pass: 2025-05-09 01:27:19
-
-// Optimization pass: 2025-05-15 00:16:29
-
-// Optimization pass: 2025-05-21 06:53:56
-
-// Optimization pass: 2025-05-21 21:54:51
-
-// Optimization pass: 2025-05-29 10:53:01
-
-// Optimization pass: 2025-08-04 22:19:24
-
-// Optimization pass: 2025-08-11 05:33:46
-
-// Optimization pass: 2025-08-13 22:33:47
-
-// Optimization pass: 2025-08-15 18:32:33
-
-// Optimization pass: 2025-08-19 11:22:43
-
-// Optimization pass: 2025-08-20 19:12:10
-
-// Optimization pass: 2025-08-25 05:34:09
-
-// Optimization pass: 2025-09-03 05:44:35
-
-// Optimization pass: 2025-09-04 19:33:49
-
-// Optimization pass: 2025-09-05 22:27:35
-
-// Optimization pass: 2025-09-11 14:54:12
-
-// Optimization pass: 2025-09-15 19:45:35
-
-// Optimization pass: 2025-09-18 06:28:00
-
-// Optimization pass: 2025-09-22 23:24:48
-
-// Optimization pass: 2025-09-25 13:03:56
-
-// Optimization pass: 2025-09-29 05:05:31
-
-// Optimization pass: 2025-10-01 04:50:36
-
-// Optimization pass: 2025-10-08 12:33:07
-
-// Optimization pass: 2025-10-10 12:08:32
-
-// Optimization pass: 2025-10-14 09:18:45
-
-// Optimization pass: 2025-10-16 16:55:47
-
-// Optimization pass: 2025-10-20 02:57:13
-
-// Optimization pass: 2025-10-22 20:55:30
-
-// Optimization pass: 2025-10-24 11:37:21

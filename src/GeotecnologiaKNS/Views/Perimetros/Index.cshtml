@@ -1,0 +1,111 @@
+@model IReadOnlyList<GeotecnologiaKNS.Geo.Entities.CamadaReferencia>
+
+@{
+    ViewData["Title"] = "Perímetros próprios";
+}
+
+<div class="kns-cabecalho">
+    <div>
+        <h1 class="kns-cabecalho__titulo">Perímetros próprios</h1>
+        <p class="kns-cabecalho__sub">
+            Áreas restritivas que a sua indústria define. Entram na análise pela regra
+            OUT-001, junto com as bases públicas.
+        </p>
+    </div>
+    <div class="kns-trilha">
+        <i class="mdi mdi-home-outline"></i>
+        <span>Configurações</span>
+        <span>/</span>
+        <span class="kns-trilha__atual">Perímetros</span>
+    </div>
+</div>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h4 class="card-title">Enviar um perímetro</h4>
+        <p class="text-muted">
+            Aceita <strong>.zip</strong> com shapefile (o .shp sozinho não serve — ele depende
+            do .shx, .dbf e .prj que vêm junto) ou <strong>.geojson</strong>. Até 50 MB.
+        </p>
+
+        <form asp-action="Enviar" method="post" enctype="multipart/form-data">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label" for="nome">Nome do perímetro</label>
+                    <input type="text" class="form-control" id="nome" name="nome" maxlength="200"
+                           placeholder="Ex.: Áreas de conflito fundiário 2026" required />
+                    <div class="form-text">É este nome que aparece no laudo quando houver sobreposição.</div>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label" for="arquivo">Arquivo</label>
+                    <input type="file" class="form-control" id="arquivo" name="arquivo"
+                           accept=".zip,.geojson,.json" required />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Carregar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h4 class="card-title">Perímetros carregados</h4>
+
+        @if (Model.Count == 0)
+        {
+            <div class="alert alert-info mb-0">
+                <strong>Nenhum perímetro próprio.</strong>
+                A regra OUT-001 aparece como <em>não avaliada</em> nos laudos enquanto não houver
+                nenhum — o sistema prefere dizer que não verificou a dar o imóvel por limpo.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th class="text-end">Áreas</th>
+                            <th>Carregado em</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var camada in Model)
+                        {
+                            <tr>
+                                <td>@camada.Nome</td>
+                                <td class="text-end">@camada.TotalFeicoes.ToString("N0")</td>
+                                <td>@(camada.AtualizadaEm?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "—")</td>
+                                <td class="text-end">
+                                    <form asp-action="Remover" method="post" class="d-inline"
+                                          onsubmit="return confirm('Remover o perímetro @camada.Nome? As análises seguintes deixam de considerá-lo.');">
+                                        <input type="hidden" name="id" value="@camada.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Remover</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="text-muted mb-0">
+                Laudos já emitidos não mudam: eles guardam o retrato das camadas usadas na execução.
+            </p>
+        }
+    </div>
+</div>

@@ -52,7 +52,8 @@ namespace GeotecnologiaKNS.Models
 
             return new ApplicationUser
             {
-                Id = viewModel.Id,
+                // Sem Id informado mantém o Guid gerado pelo IdentityUser.
+                Id = string.IsNullOrWhiteSpace(viewModel.Id) ? Guid.NewGuid().ToString() : viewModel.Id,
                 UserName = userName,
                 Email = email,
                 PhoneNumber = phoneNumber,

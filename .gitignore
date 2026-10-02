@@ -363,3 +363,10 @@ MigrationBackup/
 FodyWeavers.xsd
 /wwwroot/images/industrias
 /src/GeotecnologiaKNS/wwwroot/images/industrias
+
+# Mensagens gravadas em disco pelo modo de entrega "Pasta" (desenvolvimento).
+correspondencia/
+
+# Anexos gravados em disco pelo armazenamento de arquivos.
+# Saíram da coluna varbinary do banco; são dados de cliente, nunca do repositório.
+src/GeotecnologiaKNS/App_Data/
