@@ -132,7 +132,13 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             var documento = await ConsultarDocumentoAsync(
                 propriedade.Produtor?.Cpf, cancellationToken);
 
-            var avaliacao = _motor.Avaliar(cruzamento, politica, documento);
+            // A fazenda que vende boi gordo quase sempre comprou bezerro de
+            // outra, e é na outra que o passivo costuma estar. Olhar só o
+            // fornecedor direto dá laudo limpo sobre cadeia que não é.
+            var cadeia = await VerificarCadeiaIndiretaAsync(
+                propriedade.Id, solicitacao.TenantId, cancellationToken);
+
+            var avaliacao = _motor.Avaliar(cruzamento, politica, documento, cadeia);
 
             analise.AreaImovelHa = cruzamento.AreaImovelHa;
             analise.Resultado = avaliacao.Status;
@@ -147,17 +153,21 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             analise.Situacao = SituacaoAnalise.Concluida;
             analise.ConcluidaEm = DateTime.Now;
 
+            // Os textos são cortados no tamanho da coluna porque vêm de fora:
+            // nome de embargado, rótulo de feição, nome de fornecedor. Um deles
+            // passar do limite derrubava a gravação da análise inteira — a
+            // ocorrência mais longa fazia o laudo não existir.
             analise.Ocorrencias = avaliacao.Achados.Select(a => new AnaliseOcorrencia
             {
-                CodigoRegra = a.CodigoRegra,
-                Descricao = a.Descricao,
+                CodigoRegra = Cortar(a.CodigoRegra, 20)!,
+                Descricao = Cortar(a.Descricao, 300)!,
                 Severidade = (int)a.Severidade,
-                Camada = a.CamadaNome,
-                Origem = a.Origem,
-                Rotulo = a.Rotulo,
+                Camada = Cortar(a.CamadaNome, 200)!,
+                Origem = Cortar(a.Origem, 200)!,
+                Rotulo = Cortar(a.Rotulo, 300),
                 AreaSobrepostaHa = a.AreaSobrepostaHa,
                 PercentualDoImovel = a.PercentualDoImovel,
-                Fundamento = a.Fundamento
+                Fundamento = Cortar(a.Fundamento, 500)
             }).ToList();
 
             // O veredito da análise vira o status da solicitação. O analista
@@ -290,6 +300,116 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
         return new ConsultaPorDocumento(
             RestricaoDocumentoService.Normalizar(documento), achados, tipos);
     }
+
+    /// <summary>
+    /// Verifica cada fornecedor indireto declarado para o imóvel.
+    /// </summary>
+    /// <remarks>
+    /// Cada fornecedor custa um cruzamento geoespacial completo, então o
+    /// trabalho cresce com o tamanho da cadeia. Vale a pena mesmo assim: é a
+    /// única forma de o laudo falar da cadeia, e a análise já roda em segundo
+    /// plano, fora da requisição.
+    ///
+    /// Falha em um fornecedor não derruba a análise do imóvel: ela vira "não
+    /// verificado" com o motivo, que é informação melhor que nenhuma — e muito
+    /// melhor que um laudo que não sai.
+    /// </remarks>
+    private async Task<CadeiaIndireta> VerificarCadeiaIndiretaAsync(
+        int propriedadeId, int tenantId, CancellationToken cancellationToken)
+    {
+        // Teto por análise: uma cadeia declarada com centenas de imóveis
+        // travaria a fila inteira atrás de uma solicitação só.
+        const int MaximoPorAnalise = 50;
+
+        var fornecedores = await _context.FornecedoresIndiretos
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .Where(x => x.PropriedadeId == propriedadeId && x.TenantId == tenantId)
+            .OrderBy(x => x.Id)
+            .Take(MaximoPorAnalise)
+            .ToListAsync(cancellationToken);
+
+        var declarados = await _context.FornecedoresIndiretos
+            .AsNoTracking()
+            .IgnoreQueryFilters()
+            .CountAsync(x => x.PropriedadeId == propriedadeId && x.TenantId == tenantId, cancellationToken);
+
+        var avaliados = new List<FornecedorIndiretoAvaliado>(fornecedores.Count);
+
+        foreach (var fornecedor in fornecedores)
+        {
+            avaliados.Add(await VerificarFornecedorAsync(fornecedor, tenantId, cancellationToken));
+        }
+
+        if (declarados > fornecedores.Count)
+        {
+            avaliados.Add(new FornecedorIndiretoAvaliado(
+                $"(+{declarados - fornecedores.Count} não verificados)",
+                null,
+                Verificado: false,
+                Array.Empty<string>(),
+                $"A cadeia declarada passa de {MaximoPorAnalise} imóveis; os excedentes não " +
+                "entraram nesta análise."));
+        }
+
+        return new CadeiaIndireta(declarados, avaliados);
+    }
+
+    private async Task<FornecedorIndiretoAvaliado> VerificarFornecedorAsync(
+        FornecedorIndireto fornecedor, int tenantId, CancellationToken cancellationToken)
+    {
+        var restricoes = new List<string>();
+
+        // O documento é verificado antes da geografia, e separadamente: ele
+        // funciona mesmo quando o imóvel está fora da base do CAR, que é o caso
+        // mais comum na ponta da cadeia.
+        var porDocumento = await _restricoes.ConsultarAsync(fornecedor.Documento, cancellationToken);
+
+        restricoes.AddRange(porDocumento.Select(
+            a => $"{a.Origem}: {a.Referencia ?? "sem referência"}"));
+
+        try
+        {
+            var cruzamento = await _intersecao.CruzarPorCarAsync(
+                fornecedor.CodigoCar, tenantId, cancellationToken);
+
+            restricoes.AddRange(cruzamento.Sobreposicoes.Select(
+                s => $"{s.CamadaNome}: {Formatar(s.AreaSobrepostaHa)} ha " +
+                     $"({Formatar(s.PercentualDoImovel)}% do imóvel)"));
+
+            return new FornecedorIndiretoAvaliado(
+                fornecedor.CodigoCar, fornecedor.NomeProdutor,
+                Verificado: true, restricoes, Observacao: null);
+        }
+        catch (Exception ex)
+        {
+            // Imóvel fora da base do CAR é o caso esperado, não exceção rara.
+            // Marcar como não verificado, e não como limpo: a diferença entre
+            // os dois é o que o laudo existe para registrar.
+            _logger.LogInformation(
+                "Fornecedor indireto {Car} não pôde ser cruzado: {Motivo}",
+                fornecedor.CodigoCar, ex.Message);
+
+            return new FornecedorIndiretoAvaliado(
+                fornecedor.CodigoCar, fornecedor.NomeProdutor,
+                Verificado: false, restricoes,
+                Observacao: $"Não foi possível cruzar o perímetro: {ex.Message}");
+        }
+    }
+
+    /// <summary>Corta no tamanho da coluna, marcando que houve corte.</summary>
+    private static string? Cortar(string? texto, int tamanho)
+    {
+        if (string.IsNullOrEmpty(texto) || texto.Length <= tamanho)
+        {
+            return texto;
+        }
+
+        return texto[..(tamanho - 1)] + "…";
+    }
+
+    private static string Formatar(double valor) =>
+        valor.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
 
     private async Task<string> DescreverCamadasAsync(int tenantId, CancellationToken cancellationToken)
     {

@@ -32,6 +32,7 @@ namespace GeotecnologiaKNS.Data
         public DbSet<PoliticaTenant> Politicas { get; set; }
         public DbSet<RegraTenant> Regras { get; set; }
         public DbSet<EventoDeUso> EventosDeUso { get; set; }
+        public DbSet<FornecedorIndireto> FornecedoresIndiretos { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -130,6 +131,28 @@ namespace GeotecnologiaKNS.Data
             // Restrict, e não cascade: apagar uma indústria não pode levar junto
             // o histórico do que ela consumiu — é o lastro da fatura já emitida.
             modelBuilder.Entity<EventoDeUso>()
+                .HasOne(e => e.Industria)
+                .WithMany()
+                .HasForeignKey(e => e.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FornecedorIndireto>()
+                .HasQueryFilter(x => !_userContext.TenantId.HasValue || x.TenantId == _userContext.TenantId);
+
+            // A análise busca todos os indiretos de um imóvel de uma vez; sem
+            // índice, cada análise varreria a tabela inteira.
+            modelBuilder.Entity<FornecedorIndireto>()
+                .HasIndex(x => new { x.TenantId, x.PropriedadeId });
+
+            // Cascade aqui, ao contrário do resto: o fornecedor indireto só
+            // existe como elo de um imóvel, e sem ele não quer dizer nada.
+            modelBuilder.Entity<FornecedorIndireto>()
+                .HasOne(e => e.Propriedade)
+                .WithMany()
+                .HasForeignKey(e => e.PropriedadeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FornecedorIndireto>()
                 .HasOne(e => e.Industria)
                 .WithMany()
                 .HasForeignKey(e => e.TenantId)

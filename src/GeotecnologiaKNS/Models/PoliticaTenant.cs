@@ -69,6 +69,13 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Lista restritiva")]
         public TipoRestricao? Restricao { get; set; }
 
+        /// <summary>
+        /// Quando verdadeira, a regra examina a cadeia de fornecedores
+        /// indiretos em vez do imóvel ou do produtor.
+        /// </summary>
+        [Display(Name = "Cadeia indireta")]
+        public bool CadeiaIndireta { get; set; }
+
         /// <summary>0 informativo, 1 alerta, 2 bloqueio.</summary>
         [Display(Name = "Severidade")]
         public int Severidade { get; set; }

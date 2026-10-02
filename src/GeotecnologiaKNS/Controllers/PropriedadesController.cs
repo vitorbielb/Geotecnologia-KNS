@@ -64,7 +64,98 @@ namespace GeotecnologiaKNS.Controllers
                 return NotFound();
             }
 
+            ViewBag.CadeiaIndireta = await _context.FornecedoresIndiretos
+                .AsNoTracking()
+                .Where(x => x.PropriedadeId == propriedade.Id)
+                .OrderBy(x => x.CodigoCar)
+                .ToListAsync();
+
             return View(propriedade);
+        }
+
+        /// <summary>
+        /// Declara um imóvel que forneceu animais a este fornecedor direto.
+        /// </summary>
+        /// <remarks>
+        /// Declarado, e não descoberto: quem conhece a cadeia é o próprio
+        /// fornecedor, e a prova documental é a GTA do órgão estadual. O laudo
+        /// registra que a verificação alcança só o que foi informado.
+        /// </remarks>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [TenantFilter]
+        public async Task<IActionResult> AdicionarFornecedorIndireto(
+            FornecedorIndireto fornecedor, CancellationToken cancellationToken)
+        {
+            var normalizado = GeotecnologiaKNS.Geo.CodigoCar.Normalizar(fornecedor.CodigoCar);
+
+            if (normalizado is null)
+            {
+                TempData["Erro"] = "O número do CAR informado não é válido.";
+                return RedirectToAction(nameof(Details), new { id = fornecedor.PropriedadeId });
+            }
+
+            var propriedade = await _context.Propriedades
+                .FirstOrDefaultAsync(x => x.Id == fornecedor.PropriedadeId, cancellationToken);
+
+            if (propriedade is null)
+            {
+                return NotFound();
+            }
+
+            // O próprio imóvel como fornecedor de si mesmo duplicaria todos os
+            // achados dele no laudo, como se fossem da cadeia.
+            if (string.Equals(normalizado, propriedade.CodigoCar, StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["Erro"] = "O imóvel não pode ser fornecedor indireto de si mesmo.";
+                return RedirectToAction(nameof(Details), new { id = fornecedor.PropriedadeId });
+            }
+
+            var jaExiste = await _context.FornecedoresIndiretos.AnyAsync(
+                x => x.PropriedadeId == fornecedor.PropriedadeId && x.CodigoCar == normalizado,
+                cancellationToken);
+
+            if (jaExiste)
+            {
+                TempData["Erro"] = "Este fornecedor indireto já está declarado para o imóvel.";
+                return RedirectToAction(nameof(Details), new { id = fornecedor.PropriedadeId });
+            }
+
+            fornecedor.CodigoCar = normalizado;
+            fornecedor.DeclaradoEm = DateTime.Now;
+
+            _context.FornecedoresIndiretos.Add(fornecedor);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            TempData["Sucesso"] = "Fornecedor indireto declarado. Ele entra na próxima análise do imóvel.";
+
+            return RedirectToAction(nameof(Details), new { id = fornecedor.PropriedadeId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoverFornecedorIndireto(
+            int id, CancellationToken cancellationToken)
+        {
+            // O filtro global por indústria já impede alcançar o de outra; a
+            // busca pelo Id sozinho seria suficiente, mas depender disso em
+            // silêncio é frágil demais para um dado que separa concorrentes.
+            var fornecedor = await _context.FornecedoresIndiretos
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (fornecedor is null)
+            {
+                return NotFound();
+            }
+
+            var propriedadeId = fornecedor.PropriedadeId;
+
+            _context.FornecedoresIndiretos.Remove(fornecedor);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            TempData["Sucesso"] = "Fornecedor indireto removido.";
+
+            return RedirectToAction(nameof(Details), new { id = propriedadeId });
         }
 
         // GET: Propriedades/Create

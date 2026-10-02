@@ -36,7 +36,7 @@ namespace GeotecnologiaKNS.UnitTests.Analises
         /// </summary>
         private static IReadOnlyList<TipoCamada> TodosOsTipos =>
             PoliticaAnalise.Padrao().Regras
-                .Where(r => !r.EhPorDocumento)
+                .Where(r => r.EhGeografica)
                 .Select(r => r.Tipo)
                 .Distinct()
                 .ToList();
@@ -62,9 +62,25 @@ namespace GeotecnologiaKNS.UnitTests.Analises
         private static ResultadoCruzamento Cruzamento(params Sobreposicao[] sobreposicoes) =>
             new(Car, AreaImovelHa: 1000, sobreposicoes, DateTime.UtcNow, TodosOsTipos);
 
+        /// <summary>
+        /// Cadeia indireta declarada e limpa.
+        /// </summary>
+        /// <remarks>
+        /// Mesma razão do ProdutorLimpo: estes testes medem as regras
+        /// geográficas, e sem a cadeia declarada a IND-001 ficaria não avaliada,
+        /// derrubando a cobertura por motivo alheio ao que se verifica aqui.
+        /// </remarks>
+        private static CadeiaIndireta CadeiaLimpa =>
+            new(1, new[]
+            {
+                new FornecedorIndiretoAvaliado(
+                    "MT-5107925-FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "Fornecedor limpo",
+                    Verificado: true, Array.Empty<string>(), null)
+            });
+
         private static ResultadoAvaliacao Avaliar(params Sobreposicao[] sobreposicoes) =>
             new MotorDeRegras().Avaliar(
-                Cruzamento(sobreposicoes), PoliticaAnalise.Padrao(), ProdutorLimpo);
+                Cruzamento(sobreposicoes), PoliticaAnalise.Padrao(), ProdutorLimpo, CadeiaLimpa);
 
         [Fact]
         public void Avaliar_SemSobreposicao_DeveLiberar()

@@ -7,6 +7,16 @@
 </head>
 
 
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="alert alert-success">@sucesso</div>
+}
+
+@if (TempData["Erro"] is string erro)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+
 <div class="row">
     <div class="col-md-12 grid-margin stretch-card">
         <div class="card">
@@ -163,6 +173,9 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Documentos</button>
                     </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cadeia-tab" data-bs-toggle="tab" data-bs-target="#cadeia" type="button" role="tab" aria-controls="cadeia" aria-selected="false">Cadeia indireta</button>
+                    </li>
                 </ul>
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
@@ -173,6 +186,9 @@
                     </div>
                     <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
                         <partial name="_file-list-ADM" model="Model"></partial>
+                    </div>
+                    <div class="tab-pane fade" id="cadeia" role="tabpanel" aria-labelledby="cadeia-tab">
+                        <partial name="_cadeia-indireta" model="Model"></partial>
                     </div>
                 </div>
             </div>

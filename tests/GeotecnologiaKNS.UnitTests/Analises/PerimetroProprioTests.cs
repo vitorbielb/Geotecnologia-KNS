@@ -22,7 +22,7 @@ namespace GeotecnologiaKNS.UnitTests.Analises
 
         private static IReadOnlyList<TipoCamada> TiposPublicos =>
             PoliticaAnalise.Padrao().Regras
-                .Where(r => !r.EhPorDocumento && r.Tipo != TipoCamada.OutroPerimetro)
+                .Where(r => r.EhGeografica && r.Tipo != TipoCamada.OutroPerimetro)
                 .Select(r => r.Tipo)
                 .Distinct()
                 .ToList();
@@ -36,12 +36,21 @@ namespace GeotecnologiaKNS.UnitTests.Analises
                 "Perímetro declarado pela indústria", null,
                 "Gleba Sorriso", null, areaHa, percentual);
 
+        /// <summary>Cadeia declarada e limpa, para a IND-001 não contaminar a medida.</summary>
+        private static CadeiaIndireta CadeiaLimpa =>
+            new(1, new[]
+            {
+                new FornecedorIndiretoAvaliado(
+                    "MT-1", "Fornecedor limpo", Verificado: true, Array.Empty<string>(), null)
+            });
+
         private static ResultadoAvaliacao Avaliar(
             IReadOnlyList<TipoCamada> verificados, params Sobreposicao[] sobreposicoes) =>
             new MotorDeRegras().Avaliar(
                 new ResultadoCruzamento(Car, 1000, sobreposicoes, DateTime.UtcNow, verificados),
                 PoliticaAnalise.Padrao(),
-                ProdutorLimpo);
+                ProdutorLimpo,
+                CadeiaLimpa);
 
         [Fact]
         public void SemPerimetroCarregado_OUT001_DeveSairComoNaoAvaliada()

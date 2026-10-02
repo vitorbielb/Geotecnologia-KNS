@@ -46,6 +46,16 @@
     <div class="alert alert-success">@sucesso</div>
 }
 
+@if (ViewBag.RegrasNovas is int novas && novas > 0)
+{
+    <div class="alert alert-info">
+        <strong>@novas regra(s) nova(s) no protocolo foram acrescentadas à sua política.</strong>
+        Entraram como <em>informativas</em>: registram o que encontram sem alterar o veredito,
+        porque mudar o resultado de laudos por uma regra que ninguém aqui revisou seria pior que
+        não entregá-la. Revise a consequência de cada uma abaixo.
+    </div>
+}
+
 @if (!personalizada)
 {
     <div class="alert alert-info">
@@ -72,6 +82,12 @@
             Uma regra dispara quando a sobreposição atinge a área <em>ou</em> o percentual informado.
             Com ambos em zero, qualquer sobreposição dispara. O ano mínimo aplica o corte temporal
             e só vale para camadas datadas, como o PRODES.
+        </p>
+        <p class="text-muted">
+            A <strong>IND-001</strong> vem como informativa: ela registra o que foi encontrado na
+            cadeia de fornecedores indiretos sem alterar o veredito. Subir para alerta ou bloqueio
+            faz a cadeia pesar na decisão — inclusive quando ela não foi declarada, caso em que o
+            laudo deixa de sair como liberado.
         </p>
 
         <form asp-action="Salvar" method="post">
@@ -105,11 +121,19 @@
                                         <small class="text-muted">@regra.Fundamento</small>
                                     }
                                 </td>
-                                @* Regra por documento não examina camada: mostrar
-                                   "Embargo ambiental" na coluna de tipo faria
-                                   parecer a mesma coisa que a EMB-001. *@
+                                @* Cada eixo tem de se identificar: mostrar "Embargo
+                                   ambiental" numa regra por documento a faria
+                                   parecer a mesma coisa que a EMB-001, e mostrar
+                                   um tipo de camada na regra de cadeia indireta
+                                   mandaria carregar um arquivo que não existe. *@
                                 <td>
-                                    @if (regra.Restricao.HasValue)
+                                    @if (regra.CadeiaIndireta)
+                                    {
+                                        <span>Cadeia indireta</span>
+                                        <br />
+                                        <small class="text-muted">fornecedores declarados</small>
+                                    }
+                                    else if (regra.Restricao.HasValue)
                                     {
                                         <span>@NomeRestricao(regra.Restricao.Value)</span>
                                         <br />

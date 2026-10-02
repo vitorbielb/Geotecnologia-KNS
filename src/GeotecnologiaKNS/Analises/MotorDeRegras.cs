@@ -5,6 +5,27 @@ using GeotecnologiaKNS.Geo.Services;
 namespace GeotecnologiaKNS.Analises;
 
 /// <summary>
+/// Sobre o que o achado recai.
+/// </summary>
+/// <remarks>
+/// O laudo escreve cada um de um jeito, e a diferença não é cosmética: dizer
+/// "sobreposição de 0,00 ha" sobre um embargo em nome do produtor faria a
+/// restrição parecer irrelevante, e dizer "em nome do produtor" sobre um achado
+/// na cadeia indireta apontaria a pessoa errada.
+/// </remarks>
+public enum EscopoDoAchado
+{
+    /// <summary>Sobreposição geográfica no imóvel analisado.</summary>
+    Imovel = 0,
+
+    /// <summary>Restrição em nome do produtor, por CPF/CNPJ.</summary>
+    Documento = 1,
+
+    /// <summary>Restrição em imóvel que forneceu ao fornecedor direto.</summary>
+    CadeiaIndireta = 2
+}
+
+/// <summary>
 /// Uma regra que disparou, com a evidência que a fez disparar.
 /// </summary>
 public record Achado(
@@ -16,7 +37,8 @@ public record Achado(
     string? Rotulo,
     double AreaSobrepostaHa,
     double PercentualDoImovel,
-    string? Fundamento);
+    string? Fundamento,
+    EscopoDoAchado Escopo = EscopoDoAchado.Imovel);
 
 /// <summary>
 /// Uma regra que não pôde ser aplicada porque nenhuma camada do tipo que ela
@@ -61,12 +83,47 @@ public record ConsultaPorDocumento(
     IReadOnlyList<AchadoPorDocumento> Achados,
     IReadOnlyList<TipoRestricao> TiposDisponiveis);
 
+/// <summary>
+/// O que a verificação de um fornecedor indireto devolveu.
+/// </summary>
+/// <param name="Verificado">
+/// Falso quando o imóvel não pôde ser conferido — fora da base do CAR, por
+/// exemplo. Não é o mesmo que estar limpo, e o laudo não pode confundir os dois.
+/// </param>
+public record FornecedorIndiretoAvaliado(
+    string CodigoCar,
+    string? NomeProdutor,
+    bool Verificado,
+    IReadOnlyList<string> Restricoes,
+    string? Observacao)
+{
+    public bool TemRestricao => Restricoes.Count > 0;
+}
+
+/// <summary>
+/// A cadeia de fornecedores indiretos declarada para o imóvel.
+/// </summary>
+/// <param name="Declarados">
+/// Quantos foram informados. Zero significa cadeia não informada — não
+/// significa que não existe. A fazenda que vende boi gordo quase sempre comprou
+/// bezerro de alguém.
+/// </param>
+public record CadeiaIndireta(
+    int Declarados,
+    IReadOnlyList<FornecedorIndiretoAvaliado> Avaliados)
+{
+    public bool Informada => Declarados > 0;
+
+    public int NaoVerificados => Avaliados.Count(a => !a.Verificado);
+}
+
 public interface IMotorDeRegras
 {
     ResultadoAvaliacao Avaliar(
         ResultadoCruzamento cruzamento,
         PoliticaAnalise politica,
-        ConsultaPorDocumento? documento = null);
+        ConsultaPorDocumento? documento = null,
+        CadeiaIndireta? cadeia = null);
 }
 
 public class MotorDeRegras : IMotorDeRegras
@@ -74,7 +131,8 @@ public class MotorDeRegras : IMotorDeRegras
     public ResultadoAvaliacao Avaliar(
         ResultadoCruzamento cruzamento,
         PoliticaAnalise politica,
-        ConsultaPorDocumento? documento = null)
+        ConsultaPorDocumento? documento = null,
+        CadeiaIndireta? cadeia = null)
     {
         ArgumentNullException.ThrowIfNull(cruzamento);
         ArgumentNullException.ThrowIfNull(politica);
@@ -83,7 +141,7 @@ public class MotorDeRegras : IMotorDeRegras
 
         foreach (var sobreposicao in cruzamento.Sobreposicoes)
         {
-            foreach (var regra in politica.Regras.Where(r => !r.EhPorDocumento && r.Satisfeita(sobreposicao)))
+            foreach (var regra in politica.Regras.Where(r => r.EhGeografica && r.Satisfeita(sobreposicao)))
             {
                 achados.Add(new Achado(
                     regra.Codigo,
@@ -99,6 +157,7 @@ public class MotorDeRegras : IMotorDeRegras
         }
 
         achados.AddRange(AvaliarPorDocumento(politica, documento));
+        achados.AddRange(AvaliarCadeiaIndireta(politica, cadeia));
 
         // Ordena por gravidade e, dentro dela, pela área — o laudo precisa abrir
         // com o achado que decide o veredito.
@@ -107,14 +166,14 @@ public class MotorDeRegras : IMotorDeRegras
             .ThenByDescending(a => a.AreaSobrepostaHa)
             .ToList();
 
-        var naoAvaliadas = LevantarNaoAvaliadas(cruzamento, politica, documento);
+        var naoAvaliadas = LevantarNaoAvaliadas(cruzamento, politica, documento, cadeia);
         var status = DeterminarStatus(achados, naoAvaliadas);
 
         return new ResultadoAvaliacao(
             status,
             achados,
             naoAvaliadas,
-            MontarParecer(cruzamento, achados, naoAvaliadas, status, politica),
+            MontarParecer(cruzamento, achados, naoAvaliadas, status, politica, cadeia),
             MontarResumo(achados, naoAvaliadas, status, politica.Regras.Count));
     }
 
@@ -151,9 +210,75 @@ public class MotorDeRegras : IMotorDeRegras
                     DescreverAchado(achado),
                     AreaSobrepostaHa: 0,
                     PercentualDoImovel: 0,
-                    regra.Fundamento);
+                    regra.Fundamento,
+                    EscopoDoAchado.Documento);
             }
         }
+    }
+
+    /// <summary>
+    /// Produz um achado por fornecedor indireto com restrição.
+    /// </summary>
+    /// <remarks>
+    /// Um achado por fornecedor, e não um só para a cadeia inteira: quem lê o
+    /// laudo precisa saber qual imóvel da cadeia tem o problema para ir atrás
+    /// dele. Juntar tudo numa linha obrigaria a abrir outro relatório.
+    /// </remarks>
+    private static IEnumerable<Achado> AvaliarCadeiaIndireta(
+        PoliticaAnalise politica, CadeiaIndireta? cadeia)
+    {
+        if (cadeia is null)
+        {
+            yield break;
+        }
+
+        foreach (var regra in politica.Regras.Where(r => r.CadeiaIndireta))
+        {
+            foreach (var fornecedor in cadeia.Avaliados.Where(a => a.TemRestricao))
+            {
+                yield return new Achado(
+                    regra.Codigo,
+                    regra.Descricao,
+                    regra.Severidade,
+                    "Cadeia de fornecimento indireto",
+                    "Declarado pela indústria",
+                    DescreverFornecedor(fornecedor),
+
+                    // Zero, como nas regras por documento: a restrição é de
+                    // outro imóvel, e exibir área daria a entender que é deste.
+                    AreaSobrepostaHa: 0,
+                    PercentualDoImovel: 0,
+                    regra.Fundamento,
+                    EscopoDoAchado.CadeiaIndireta);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Identifica o fornecedor na ocorrência, sem repetir o que a seção da
+    /// cadeia já detalha.
+    /// </summary>
+    /// <remarks>
+    /// Curto de propósito: listar aqui as vinte sobreposições de um fornecedor
+    /// enchia o rótulo da ocorrência e estourava a coluna, derrubando a gravação
+    /// da análise inteira. O detalhe mora na seção CADEIA DE FORNECIMENTO
+    /// INDIRETO, que não tem limite de tamanho.
+    /// </remarks>
+    private static string DescreverFornecedor(FornecedorIndiretoAvaliado fornecedor)
+    {
+        var texto = new StringBuilder(fornecedor.CodigoCar);
+
+        if (!string.IsNullOrWhiteSpace(fornecedor.NomeProdutor))
+        {
+            texto.Append(" — ").Append(fornecedor.NomeProdutor);
+        }
+
+        if (fornecedor.Restricoes.Count > 0)
+        {
+            texto.Append($" ({fornecedor.Restricoes.Count} restrição(ões))");
+        }
+
+        return texto.ToString();
     }
 
     private static string DescreverAchado(AchadoPorDocumento achado)
@@ -196,16 +321,25 @@ public class MotorDeRegras : IMotorDeRegras
     private static List<RegraNaoAvaliada> LevantarNaoAvaliadas(
         ResultadoCruzamento cruzamento,
         PoliticaAnalise politica,
-        ConsultaPorDocumento? documento)
+        ConsultaPorDocumento? documento,
+        CadeiaIndireta? cadeia)
     {
         var verificados = cruzamento.TiposVerificados.ToHashSet();
         var listas = documento?.TiposDisponiveis.ToHashSet() ?? new HashSet<TipoRestricao>();
         var temDocumento = !string.IsNullOrWhiteSpace(documento?.Documento);
 
+        // Cadeia não informada é regra não avaliada, e não regra cumprida. É o
+        // ponto inteiro do recurso: a fazenda que vende boi gordo quase sempre
+        // comprou bezerro de alguém, e dar o laudo por completo sem saber de
+        // quem é afirmar o que não se apurou.
+        var cadeiaInformada = cadeia?.Informada == true;
+
         return politica.Regras
-            .Where(r => r.EhPorDocumento
-                ? !temDocumento || !listas.Contains(r.Restricao!.Value)
-                : !verificados.Contains(r.Tipo))
+            .Where(r => r.CadeiaIndireta
+                ? !cadeiaInformada
+                : r.EhPorDocumento
+                    ? !temDocumento || !listas.Contains(r.Restricao!.Value)
+                    : !verificados.Contains(r.Tipo))
             .Select(r => new RegraNaoAvaliada(r.Codigo, r.Descricao, r.Tipo, r.Severidade))
             .OrderByDescending(r => r.SeveridadePrevista)
             .ThenBy(r => r.CodigoRegra, StringComparer.Ordinal)
@@ -268,7 +402,8 @@ public class MotorDeRegras : IMotorDeRegras
         double AreaTotalHa,
         double PercentualTotal,
         string? Fundamento,
-        IReadOnlyList<string> Rotulos);
+        IReadOnlyList<string> Rotulos,
+        EscopoDoAchado Escopo);
 
     /// <summary>
     /// Agrupa por regra e camada. Um imóvel pode tocar dezenas de polígonos da
@@ -296,7 +431,8 @@ public class MotorDeRegras : IMotorDeRegras
                      .Select(a => a.Rotulo!)
                      .Distinct()
                      .Take(5)
-                     .ToList());
+                     .ToList(),
+                    primeiro.Escopo);
             })
             .OrderByDescending(g => g.Severidade)
             .ThenByDescending(g => g.AreaTotalHa)
@@ -327,7 +463,12 @@ public class MotorDeRegras : IMotorDeRegras
             return Status.Alerta;
         }
 
-        return naoAvaliadas.Count == 0 ? Status.Liberado : Status.Alerta;
+        // Regra que só informaria, se não avaliada, também só informa. Rebaixar
+        // o veredito por causa dela diria que a análise está incompleta quando
+        // a própria indústria declarou que aquele ponto não decide compra.
+        var faltamRegrasQueDecidem = naoAvaliadas.Any(r => r.SeveridadePrevista != Severidade.Informativo);
+
+        return faltamRegrasQueDecidem ? Status.Alerta : Status.Liberado;
     }
 
     private static string MontarParecer(
@@ -335,7 +476,8 @@ public class MotorDeRegras : IMotorDeRegras
         IReadOnlyList<Achado> achados,
         IReadOnlyList<RegraNaoAvaliada> naoAvaliadas,
         Status status,
-        PoliticaAnalise politica)
+        PoliticaAnalise politica,
+        CadeiaIndireta? cadeia)
     {
         var texto = new StringBuilder();
 
@@ -357,6 +499,7 @@ public class MotorDeRegras : IMotorDeRegras
                 : "Nenhuma sobreposição encontrada nas camadas disponíveis. O resultado não é " +
                   "uma liberação: parte das regras não pôde ser verificada, como detalhado abaixo.");
 
+            EscreverCadeiaIndireta(texto, cadeia);
             EscreverNaoAvaliadas(texto, naoAvaliadas);
             return texto.ToString();
         }
@@ -371,12 +514,17 @@ public class MotorDeRegras : IMotorDeRegras
             texto.AppendLine();
             texto.AppendLine($"[{grupo.Severidade.ToString().ToUpperInvariant()}] {grupo.CodigoRegra} — {grupo.Descricao}");
 
-            // Achado por documento não tem área: escrever "0,00 ha (0,00% do
-            // imóvel)" faria parecer restrição irrelevante, quando é o
-            // contrário — ela não depende de o imóvel tocar coisa alguma.
-            var porDocumento = grupo.AreaTotalHa == 0 && grupo.PercentualTotal == 0;
-
-            if (porDocumento)
+            // Achado sem área não é achado irrelevante: escrever "0,00 ha
+            // (0,00% do imóvel)" faria parecer que é, quando é o contrário —
+            // ele não depende de o imóvel tocar coisa alguma.
+            if (grupo.Escopo == EscopoDoAchado.CadeiaIndireta)
+            {
+                texto.AppendLine($"  Fonte: {grupo.Origem}");
+                texto.AppendLine(
+                    $"  Fornecedores indiretos com restrição: {grupo.Quantidade}. " +
+                    "O achado é na cadeia, não no imóvel analisado.");
+            }
+            else if (grupo.Escopo == EscopoDoAchado.Documento)
             {
                 texto.AppendLine($"  Fonte: {grupo.Origem}");
                 texto.AppendLine(
@@ -394,7 +542,12 @@ public class MotorDeRegras : IMotorDeRegras
             if (grupo.Rotulos.Count > 0)
             {
                 var reticencias = grupo.Quantidade > grupo.Rotulos.Count ? ", ..." : string.Empty;
-                var titulo = porDocumento ? "Atos" : "Feições";
+                var titulo = grupo.Escopo switch
+                {
+                    EscopoDoAchado.CadeiaIndireta => "Imóveis",
+                    EscopoDoAchado.Documento => "Atos",
+                    _ => "Feições"
+                };
                 texto.AppendLine($"  {titulo}: {string.Join(", ", grupo.Rotulos)}{reticencias}");
             }
 
@@ -404,9 +557,73 @@ public class MotorDeRegras : IMotorDeRegras
             }
         }
 
+        EscreverCadeiaIndireta(texto, cadeia);
         EscreverNaoAvaliadas(texto, naoAvaliadas);
 
         return texto.ToString();
+    }
+
+    /// <summary>
+    /// Seção que declara o alcance real da verificação na cadeia indireta.
+    /// </summary>
+    /// <remarks>
+    /// É a parte mais importante do recurso, e a mais fácil de escrever errado.
+    /// O sistema só conhece os fornecedores que alguém declarou; se a fazenda
+    /// comprou bezerro de dez e declarou três, as outras sete não existem para
+    /// ele. Um laudo que diga "cadeia indireta verificada" sem essa ressalva
+    /// vira documento de defesa com base falsa — e é justamente num
+    /// questionamento do Ministério Público que isso apareceria.
+    /// </remarks>
+    private static void EscreverCadeiaIndireta(StringBuilder texto, CadeiaIndireta? cadeia)
+    {
+        texto.AppendLine();
+        texto.AppendLine("CADEIA DE FORNECIMENTO INDIRETO");
+
+        if (cadeia is null || !cadeia.Informada)
+        {
+            texto.AppendLine(
+                "Nenhum fornecedor indireto foi declarado para este imóvel. A cadeia indireta " +
+                "não foi verificada — o que não significa que não exista.");
+            return;
+        }
+
+        var comRestricao = cadeia.Avaliados.Count(a => a.TemRestricao);
+
+        texto.AppendLine(
+            $"Declarados: {cadeia.Declarados}. Verificados: " +
+            $"{cadeia.Avaliados.Count(a => a.Verificado)}. Com restrição: {comRestricao}.");
+
+        texto.AppendLine(
+            "A verificação alcança apenas os fornecedores informados. Fornecedores não " +
+            "declarados não foram verificados e não estão refletidos neste resultado.");
+
+        foreach (var fornecedor in cadeia.Avaliados.OrderByDescending(a => a.TemRestricao))
+        {
+            texto.AppendLine();
+
+            var marca = !fornecedor.Verificado
+                ? "NÃO VERIFICADO"
+                : fornecedor.TemRestricao ? "COM RESTRIÇÃO" : "sem restrição";
+
+            texto.Append($"  [{marca}] {fornecedor.CodigoCar}");
+
+            if (!string.IsNullOrWhiteSpace(fornecedor.NomeProdutor))
+            {
+                texto.Append(" — ").Append(fornecedor.NomeProdutor);
+            }
+
+            texto.AppendLine();
+
+            foreach (var restricao in fornecedor.Restricoes)
+            {
+                texto.AppendLine($"    {restricao}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(fornecedor.Observacao))
+            {
+                texto.AppendLine($"    {fornecedor.Observacao}");
+            }
+        }
     }
 
     /// <summary>
@@ -427,14 +644,20 @@ public class MotorDeRegras : IMotorDeRegras
         texto.AppendLine();
         texto.AppendLine("REGRAS NÃO AVALIADAS");
         texto.AppendLine(
-            "Nenhuma camada dos tipos abaixo estava carregada no momento da análise. " +
-            "Estas regras não foram aplicadas — não se pode concluir que o imóvel as atende.");
+            "As regras abaixo não puderam ser aplicadas por falta de base para consultá-las. " +
+            "Elas não foram avaliadas — não se pode concluir que o imóvel as atende.");
 
         foreach (var regra in naoAvaliadas)
         {
             texto.AppendLine();
             texto.AppendLine($"[NÃO AVALIADA] {regra.CodigoRegra} — {regra.Descricao}");
-            texto.AppendLine($"  Tipo de camada ausente: {DescreverTipo(regra.Tipo)}");
+
+            // IND-001 não depende de camada: ela fica sem avaliar quando
+            // ninguém declarou a cadeia. Dizer "camada ausente" mandaria quem
+            // lê procurar um arquivo que não resolveria nada.
+            texto.AppendLine(regra.CodigoRegra == "IND-001"
+                ? "  Motivo: nenhum fornecedor indireto declarado para o imóvel."
+                : $"  Tipo de camada ausente: {DescreverTipo(regra.Tipo)}");
             texto.AppendLine(
                 $"  Severidade que teria sido aplicada: {regra.SeveridadePrevista.ToString().ToUpperInvariant()}");
         }

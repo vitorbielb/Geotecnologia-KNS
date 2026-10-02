@@ -30,6 +30,19 @@ namespace GeotecnologiaKNS.Controllers
 
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
+            // O protocolo ganha regras com o tempo, e quem personalizou a
+            // política ficava sem elas para sempre. Aqui é onde a indústria pode
+            // revisá-las, então é aqui que elas entram.
+            if (_userContext.TenantId is { } tenantId && tenantId > 0)
+            {
+                var novas = await _politicas.SincronizarComProtocoloAsync(tenantId, cancellationToken);
+
+                if (novas > 0)
+                {
+                    ViewBag.RegrasNovas = novas;
+                }
+            }
+
             var politica = await _context.Politicas
                 .Include(x => x.Regras)
                 .FirstOrDefaultAsync(cancellationToken);

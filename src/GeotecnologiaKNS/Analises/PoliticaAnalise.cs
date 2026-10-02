@@ -50,6 +50,22 @@ public class RegraAnalise
     /// <summary>Indica se esta regra examina lista restritiva, e não camada.</summary>
     public bool EhPorDocumento => Restricao.HasValue;
 
+    /// <summary>
+    /// Quando verdadeira, a regra examina a cadeia de fornecedores indiretos.
+    /// </summary>
+    /// <remarks>
+    /// Terceiro eixo, ao lado da camada e do documento. A pergunta é outra —
+    /// "quem vendeu para quem me vendeu responde por restrição?" — mas a
+    /// calibragem é a mesma: código, descrição, severidade e fundamento. Uma
+    /// indústria pode querer bloquear a compra por achado na cadeia indireta;
+    /// outra, apenas registrar enquanto negocia com o fornecedor. É decisão
+    /// dela, não minha, e por isso é dado e não código.
+    /// </remarks>
+    public bool CadeiaIndireta { get; set; }
+
+    /// <summary>Indica se a regra examina o imóvel em si, por sobreposição.</summary>
+    public bool EhGeografica => !EhPorDocumento && !CadeiaIndireta;
+
     public Severidade Severidade { get; set; }
 
     /// <summary>Área mínima sobreposta, em hectares, para a regra disparar.</summary>
@@ -208,6 +224,31 @@ public class PoliticaAnalise
                 Descricao = "Sobreposição com outro perímetro restritivo",
                 Tipo = TipoCamada.OutroPerimetro,
                 Severidade = Severidade.Alerta
+            },
+            new()
+            {
+                Codigo = "IND-001",
+                Descricao = "Fornecedor indireto com restrição",
+                CadeiaIndireta = true,
+
+                // Informativo no padrão, de propósito, e esta é a decisão mais
+                // delicada da regra.
+                //
+                // Quase nenhuma indústria tem hoje a cadeia indireta mapeada.
+                // Subir isto para alerta faria todo laudo sair como alerta no
+                // dia seguinte — e alerta que aparece em tudo deixa de ser
+                // alerta. A informação, porém, não some: o laudo ganha a seção
+                // da cadeia dizendo que ela não foi verificada, e um achado nela
+                // aparece nominalmente.
+                //
+                // Quem leva a cadeia indireta a sério sobe para Alerta ou
+                // Bloqueio na própria política, e aí a cadeia não declarada
+                // passa a derrubar o veredito. É decisão de quem responde pela
+                // conformidade, não minha.
+                Severidade = Severidade.Informativo,
+                Fundamento =
+                    "Restrição encontrada em imóvel que forneceu animais ao fornecedor direto. " +
+                    "Verificação limitada ao que foi declarado."
             }
         }
     };
