@@ -160,30 +160,63 @@ public class RecarregadorDeCamadas
         {
             Directory.CreateDirectory(pasta);
 
-            _logger.LogInformation("Recarregando {Chave} a partir de {Url}", fonte.Chave, fonte.UrlResolvida());
+            // Percorre a fonte e as reservas dela. Uma origem pública fora do ar
+            // não pode significar camada envelhecendo em silêncio, que é a falha
+            // que não se parece com falha nenhuma.
+            Exception? ultimaFalha = null;
 
-            var baixado = await BaixarAsync(fonte, pasta, cancellationToken);
-            var arquivo = await PrepararArquivoAsync(fonte, baixado, pasta, cancellationToken);
-            var mensagem = await ImportarAsync(fonte, arquivo, cancellationToken);
+            foreach (var tentativa in fonte.ComAsReservas())
+            {
+                try
+                {
+                    var mensagem = await BaixarEImportarAsync(tentativa, pasta, cancellationToken);
 
-            _logger.LogInformation(
-                "Recarga de {Chave} concluída em {Segundos:N0}s: {Mensagem}",
-                fonte.Chave, relogio.Elapsed.TotalSeconds, mensagem);
+                    _logger.LogInformation(
+                        "Recarga de {Chave} concluída em {Segundos:N0}s: {Mensagem}",
+                        fonte.Chave, relogio.Elapsed.TotalSeconds, mensagem);
 
-            return new ResultadoDaRecarga(fonte.Chave, true, mensagem, relogio.Elapsed);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
+                    return new ResultadoDaRecarga(fonte.Chave, true, mensagem, relogio.Elapsed);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    ultimaFalha = ex;
+
+                    if (tentativa.Reserva is not null)
+                    {
+                        _logger.LogWarning(
+                            ex, "{Origem} falhou para {Chave}; tentando a reserva.",
+                            tentativa.Origem, fonte.Chave);
+                    }
+                }
+            }
+
             _logger.LogError(
-                ex, "Recarga de {Chave} falhou. A versão anterior continua no ar.", fonte.Chave);
+                ultimaFalha, "Recarga de {Chave} falhou. A versão anterior continua no ar.", fonte.Chave);
 
-            return new ResultadoDaRecarga(fonte.Chave, false, ex.Message, relogio.Elapsed);
+            return new ResultadoDaRecarga(
+                fonte.Chave, false, ultimaFalha?.Message ?? "Falha desconhecida.", relogio.Elapsed);
         }
         finally
         {
             await DestravarAsync(fonte.Chave);
             Apagar(pasta);
         }
+    }
+
+    private async Task<string> BaixarEImportarAsync(
+        FonteDeCamada fonte, string pasta, CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Recarregando {Chave} a partir de {Url}", fonte.Chave, fonte.UrlResolvida());
+
+        // Subpasta por tentativa: a reserva não pode achar o arquivo meio
+        // baixado da tentativa anterior e tomá-lo por bom.
+        var daTentativa = Path.Combine(pasta, Guid.NewGuid().ToString("N")[..8]);
+        Directory.CreateDirectory(daTentativa);
+
+        var baixado = await BaixarAsync(fonte, daTentativa, cancellationToken);
+        var arquivo = await PrepararArquivoAsync(fonte, baixado, daTentativa, cancellationToken);
+
+        return await ImportarAsync(fonte, arquivo, cancellationToken);
     }
 
     private async Task<string> BaixarAsync(

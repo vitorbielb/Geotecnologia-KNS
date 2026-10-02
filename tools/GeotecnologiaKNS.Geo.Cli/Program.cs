@@ -667,11 +667,28 @@ static async Task<int> ListarCamadasAsync(IServiceProvider provider)
 
     Console.WriteLine($"{"CHAVE",-26} {"TIPO",-24} {"FEIÇÕES",9}  {"ATUALIZADA",-14} SITUAÇÃO");
 
-    foreach (var camada in camadas)
+    foreach (var camada in camadas.Where(x => x.TenantId is null))
     {
         Console.WriteLine(
-            $"{camada.Chave,-26} {camada.Tipo,-24} {camada.TotalFeicoes,9:N0}  " +
+            $"{Encurtar(camada.Chave, 26),-26} {camada.Tipo,-24} {camada.TotalFeicoes,9:N0}  " +
             $"{Quando(camada.AtualizadaEm),-14} {Situacao(camada.AtualizadaEm, camada.PeriodicidadeDias)}");
+    }
+
+    // Separadas das públicas de propósito: estas são de uma indústria só, e
+    // misturá-las na mesma lista daria a impressão de que valem para todas.
+    var proprias = camadas.Where(x => x.TenantId is not null).ToList();
+
+    if (proprias.Count > 0)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"{"PERÍMETRO PRÓPRIO",-26} {"INDÚSTRIA",-24} {"ÁREAS",9}  {"CARREGADO",-14}");
+
+        foreach (var camada in proprias.OrderBy(x => x.TenantId).ThenBy(x => x.Nome))
+        {
+            Console.WriteLine(
+                $"{Encurtar(camada.Nome, 26),-26} {camada.TenantId,-24} {camada.TotalFeicoes,9:N0}  " +
+                $"{Quando(camada.AtualizadaEm),-14}");
+        }
     }
 
     var listas = await contexto.ListasRestritivas.AsNoTracking().OrderBy(x => x.Tipo).ToListAsync();
@@ -691,6 +708,9 @@ static async Task<int> ListarCamadasAsync(IServiceProvider provider)
 
     return 0;
 }
+
+static string Encurtar(string texto, int limite) =>
+    texto.Length <= limite ? texto : texto[..(limite - 1)] + "…";
 
 static string Quando(DateTime? data)
 {

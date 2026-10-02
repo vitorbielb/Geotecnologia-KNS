@@ -29,7 +29,7 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- camadas
 | UC-001 | UnidadeConservacao | CNUC/MMA | carregada |
 | ASS-001 | AssentamentoRural | INCRA | carregada |
 | QUI-001 | TerritorioQuilombola | IBGE | carregada |
-| OUT-001 | OutroPerimetro | definido pela indústria | — |
+| OUT-001 | OutroPerimetro | definido pela indústria | carregada pela tela |
 
 ---
 
@@ -94,13 +94,24 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
 
 - O `maxFeatures` **é obrigatório**: sem ele o nginx da FUNAI devolve 403. O
   valor 5000 cobre a base inteira, que tem 665 polígonos.
-- **A origem é intermitente.** Em 01/10/2026 todo `GetFeature` passou a
-  devolver 403 — com `maxFeatures`, sem ele, em `/ows` e em `/wfs`, tanto
-  em SHAPE-ZIP quanto em GeoJSON — enquanto o `GetCapabilities` no mesmo
-  servidor continuava respondendo 200. Dois dias antes a carga tinha funcionado.
-  É bloqueio do nginx deles, não erro de requisição. Quando acontece, a camada
-  simplesmente continua na versão anterior e a recarga tenta de novo na próxima
-  conferência; a falha aparece no registro, não no laudo.
+- **A origem é intermitente, e por isso tem reserva.** Em 01/10/2026 todo
+  `GetFeature` passou a devolver 403 — com `maxFeatures`, sem ele, em `/ows`
+  e em `/wfs`, tanto em SHAPE-ZIP quanto em GeoJSON — enquanto o
+  `GetCapabilities` no mesmo servidor continuava respondendo 200. Dois dias
+  antes a carga tinha funcionado. É bloqueio do nginx deles, não erro de
+  requisição, e segue assim no dia seguinte.
+
+  Quando a FUNAI recusa, a recarga cai sozinha para o **IBGE**
+  (`CGMAT:qg_2022_610_terraindigena__v02`). A reserva cobre menos — 573
+  polígonos contra 665, porque o quadro geográfico do IBGE não traz as terras em
+  estudo — e a origem registrada no laudo diz de onde veio. Entre uma base um
+  pouco menor e uma base de meses atrás, a menor protege mais: camada velha não
+  avisa que está velha, só deixa de encontrar o que passou a existir.
+
+  O arquivo do IBGE tem um polígono corrompido que fazia o leitor abortar a
+  camada inteira. Agora a leitura pula o que não consegue interpretar e registra
+  quantas vezes isso aconteceu — perder um polígono é ruim, perder 572 por causa
+  dele é pior.
 - O arquivo vem em SIRGAS 2000 (EPSG 4674). Para o Brasil a diferença para
   WGS 84 é centimétrica e irrelevante na escala de um imóvel rural.
 - O rótulo inclui a fase (`Regularizada`, `Declarada`, `Em Estudo`...), porque
@@ -158,6 +169,7 @@ sempre. Nenhum erro aparece em lugar nenhum.
 |---|---|---|
 | Embargos IBAMA (área e documento) | diária | semanal |
 | DETER | quase diária | semanal |
+| MapBiomas Alerta | diária | semanal |
 | Terras indígenas | esporádica | trimestral |
 | Unidades de conservação | esporádica | trimestral |
 | Assentamentos | esporádica | trimestral |
@@ -242,6 +254,30 @@ retrato das camadas e das regras usadas na execução.
 Recarregar `prodes-amazonia-2024` traz a revisão de 2024, não o ano seguinte.
 Isso é de propósito: trocar o ano por baixo mudaria o significado dos laudos já
 emitidos. Um ano novo é camada nova, com entrada própria no catálogo.
+
+---
+
+## MapBiomas Alerta
+
+```bash
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- recarregar --chave mapbiomas-alerta
+```
+
+Complementa o DETER em vez de repeti-lo: o DETER cobre a Amazônia, o MapBiomas
+Alerta cobre **todos os biomas** e já vem validado contra imagem de alta
+resolução. Quando os dois apontam a mesma área, o motor agrupa os achados sob a
+regra ALE-001 e o laudo cita as duas origens — ninguém é bloqueado duas vezes
+pelo mesmo fato.
+
+- A camada tem 541 mil alertas acumulados; a carga usa janela móvel de doze
+  meses (`CQL_FILTER=detected_at >= ...`), o que dá cerca de 19 mil.
+- `detected_at` é texto no formato `AAAA-MM-DD`, então a comparação por data
+  funciona como comparação de texto. É o que torna a janela móvel possível sem
+  conversão.
+- O WFS é público: não exige o cadastro que a plataforma pede para o restante.
+- O alerta não tem nome, então o rótulo usa o município (`cities`).
+
+Última carga de referência: 19.400 alertas em 37s, 26,6 MB.
 
 ---
 

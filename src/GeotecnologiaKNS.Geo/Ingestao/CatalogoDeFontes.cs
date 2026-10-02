@@ -37,9 +37,19 @@ public record FonteDeCamada(
     int PeriodicidadeDias,
     string Url,
     string? CorpoJson = null,
-    int? AnoReferencia = null)
+    int? AnoReferencia = null,
+    FonteDeCamada? Reserva = null)
 {
     public bool EhPost => CorpoJson is not null;
+
+    /// <summary>A fonte e, em seguida, as reservas dela.</summary>
+    public IEnumerable<FonteDeCamada> ComAsReservas()
+    {
+        for (var fonte = this; fonte is not null; fonte = fonte.Reserva)
+        {
+            yield return fonte;
+        }
+    }
 
     /// <summary>URL com as marcações de data resolvidas.</summary>
     public string UrlResolvida() =>
@@ -94,7 +104,28 @@ public static class CatalogoDeFontes
             Trimestral,
             "https://geoserver.funai.gov.br/geoserver/Funai/ows?service=WFS&version=1.0.0" +
             "&request=GetFeature&typeName=Funai:tis_poligonais&maxFeatures=5000" +
-            "&outputFormat=SHAPE-ZIP"),
+            "&outputFormat=SHAPE-ZIP",
+
+            // O IBGE como reserva, porque a FUNAI é intermitente: em 01/10/2026
+            // todo GetFeature dela passou a devolver 403 enquanto o
+            // GetCapabilities do mesmo servidor seguia respondendo 200.
+            //
+            // A reserva cobre menos — 573 polígonos contra 665, porque o quadro
+            // geográfico do IBGE não traz as terras em estudo. Mas camada
+            // desatualizada não avisa que está desatualizada: ela só deixa de
+            // encontrar o que passou a existir. Entre uma base um pouco menor e
+            // uma base de setembro, a menor protege mais.
+            Reserva: new FonteDeCamada(
+                "terra-indigena-funai",
+                "Terras Indígenas",
+                TipoCamada.TerraIndigena,
+                "IBGE — Terras Indígenas 2022 (reserva da FUNAI)",
+                FormatoDaFonte.ShapefileEmZip,
+                Trimestral,
+                "https://geoservicos.ibge.gov.br/geoserver/CGMAT/ows?service=WFS&version=1.0.0" +
+                "&request=GetFeature&typeName=CGMAT:qg_2022_610_terraindigena__v02" +
+                "&outputFormat=SHAPE-ZIP",
+                AnoReferencia: 2022)),
 
         // O filtro por data é necessário: a camada completa acumula anos de
         // alertas e a requisição sem filtro estoura em 504. A janela móvel de
@@ -153,6 +184,22 @@ public static class CatalogoDeFontes
             "https://certificacao.incra.gov.br/csv_shp/zip/Assentamento%20Brasil.zip"),
 
         // A fonte é o IBGE, não o INCRA: todas as rotas do INCRA exigem login.
+        // Complementa o DETER em vez de repeti-lo: o DETER cobre Amazônia, o
+        // MapBiomas Alerta cobre todos os biomas e já vem validado contra
+        // imagem de alta resolução. Quando os dois apontam a mesma área, o
+        // motor agrupa os dois achados sob a regra ALE-001 e o laudo cita as
+        // duas origens — ninguém é bloqueado duas vezes pelo mesmo fato.
+        new FonteDeCamada(
+            "mapbiomas-alerta",
+            "MapBiomas Alerta (12 meses)",
+            TipoCamada.AlertaDesmatamento,
+            "MapBiomas Alerta (dashboard-alert-shapefile)",
+            FormatoDaFonte.ShapefileEmZip,
+            Semanal,
+            "https://geoserver.alerta.mapbiomas.org/geoserver/ows?service=WFS&version=1.0.0" +
+            "&request=GetFeature&typeName=mapbiomas-alertas:dashboard-alert-shapefile" +
+            "&outputFormat=SHAPE-ZIP&CQL_FILTER=detected_at%20%3E%3D%20'{corte12m}'"),
+
         new FonteDeCamada(
             "quilombola-ibge",
             "Territórios Quilombolas",

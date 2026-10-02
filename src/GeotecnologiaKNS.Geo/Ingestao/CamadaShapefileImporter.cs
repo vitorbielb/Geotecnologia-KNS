@@ -32,7 +32,11 @@ public class CamadaShapefileImporter
     private static readonly string[] CamposRotulo =
     {
         "nome", "NOME", "terrai_nom", "no_uc", "NOME_UC", "nom_uc", "nome_proje", "nm_tq",
-        "num_tad", "NUM_TAD", "des_infrac", "cod_imovel", "municipio", "MUNICIPIO", "municipality", "MUNICIPALITY"
+        "num_tad", "NUM_TAD", "des_infrac", "cod_imovel", "municipio", "MUNICIPIO", "municipality", "MUNICIPALITY",
+
+        // MapBiomas Alerta: o alerta não tem nome, e o município é o que
+        // permite reconhecê-lo no laudo.
+        "cities", "CITIES"
     };
 
     /// <summary>
@@ -96,6 +100,7 @@ public class CamadaShapefileImporter
 
         var lidos = 0;
         var descartados = 0;
+        var ilegiveis = new Contador();
         var gravados = 0;
         var lote = new List<FeicaoReferencia>(TamanhoLote);
 
@@ -103,7 +108,7 @@ public class CamadaShapefileImporter
         // e camadas como o PRODES Cerrado passam de dois milhões de polígonos.
         using var leitor = Shapefile.OpenRead(caminhoShapefile);
 
-        foreach (var feature in leitor)
+        foreach (var feature in Legiveis(leitor, ilegiveis, cancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             lidos++;
@@ -144,11 +149,91 @@ public class CamadaShapefileImporter
             throw new InvalidOperationException(publicacao.Explicacao);
         }
 
+        if (ilegiveis.Total > 0)
+        {
+            _logger.LogWarning(
+                "Camada {Chave}: {Ilegiveis} leitura(s) falharam e foram puladas — o arquivo de " +
+                "origem tem geometria corrompida. Conte pela diferença entre o total da origem e " +
+                "o gravado para saber quantas feições de fato se perderam.",
+                chave, ilegiveis.Total);
+        }
+
         _logger.LogInformation(
             "Camada {Chave}: {Gravados} feições gravadas, {Descartados} descartadas de {Lidos} lidas.",
             chave, gravados, descartados, lidos);
 
         return new ResultadoImportacaoCamada(camada.Id, chave, lidos, gravados, descartados);
+    }
+
+    /// <summary>
+    /// Percorre o shapefile pulando as feições que o leitor não consegue ler.
+    /// </summary>
+    /// <remarks>
+    /// Sem isto, um único polígono corrompido derruba a camada inteira: a
+    /// exceção sobe de dentro do enumerador e nada do que já tinha sido lido
+    /// chega ao banco. Aconteceu de verdade com o arquivo de terras indígenas
+    /// do IBGE — 573 polígonos perdidos por causa de um.
+    ///
+    /// Pular é melhor que abortar porque a camada parcial não passa batida: a
+    /// conferência de tamanho recusa a carga se faltar muita coisa, e o que
+    /// falta aparece no registro. Abortar, não — abortar deixa a camada velha
+    /// sem ninguém saber por quê.
+    /// </remarks>
+    /// <summary>Contagem compartilhada: um iterador não aceita parâmetro por referência.</summary>
+    private sealed class Contador
+    {
+        public int Total { get; set; }
+    }
+
+    private static IEnumerable<NetTopologySuite.Features.Feature> Legiveis(
+        IEnumerable<NetTopologySuite.Features.Feature> leitor,
+        Contador ilegiveis,
+        CancellationToken cancellationToken)
+    {
+        // Teto de falhas seguidas: se o leitor parar de avançar, insistir viraria
+        // laço infinito em vez de erro.
+        const int FalhasSeguidasAceitas = 100;
+
+        var enumerador = leitor.GetEnumerator();
+        var seguidas = 0;
+
+        try
+        {
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                NetTopologySuite.Features.Feature atual;
+
+                try
+                {
+                    if (!enumerador.MoveNext())
+                    {
+                        break;
+                    }
+
+                    atual = enumerador.Current;
+                    seguidas = 0;
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    ilegiveis.Total++;
+
+                    if (++seguidas > FalhasSeguidasAceitas)
+                    {
+                        break;
+                    }
+
+                    continue;
+                }
+
+                yield return atual;
+            }
+        }
+        finally
+        {
+            (enumerador as IDisposable)?.Dispose();
+        }
     }
 
     private static string? ExtrairRotulo(NetTopologySuite.Features.IAttributesTable atributos)
