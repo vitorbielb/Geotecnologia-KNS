@@ -34,12 +34,20 @@ public record ResultadoCruzamento(
 public interface IIntersecaoService
 {
     /// <summary>
-    /// Cruza o perímetro do imóvel contra todas as camadas ativas.
+    /// Cruza o perímetro do imóvel contra as camadas públicas e as da indústria.
     /// </summary>
-    Task<ResultadoCruzamento> CruzarPorCarAsync(string codigoCar, CancellationToken cancellationToken = default);
+    /// <param name="tenantId">
+    /// Indústria em nome de quem a análise roda, ou nulo para usar só as
+    /// camadas públicas. É obrigatório declarar: as indústrias atendidas são
+    /// concorrentes entre si, e um parâmetro opcional transformaria o
+    /// esquecimento de quem chama em vazamento silencioso.
+    /// </param>
+    Task<ResultadoCruzamento> CruzarPorCarAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default);
 
     /// <summary>Camadas ativas, para exibir no laudo o que foi de fato verificado.</summary>
-    Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(
+        int? tenantId, CancellationToken cancellationToken = default);
 }
 
 public class IntersecaoService : IIntersecaoService
@@ -51,7 +59,8 @@ public class IntersecaoService : IIntersecaoService
         _context = context;
     }
 
-    public async Task<ResultadoCruzamento> CruzarPorCarAsync(string codigoCar, CancellationToken cancellationToken = default)
+    public async Task<ResultadoCruzamento> CruzarPorCarAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
     {
         var normalizado = CodigoCar.Normalizar(codigoCar)
             ?? throw new ArgumentException("Código do CAR inválido.", nameof(codigoCar));
@@ -63,7 +72,8 @@ public class IntersecaoService : IIntersecaoService
             throw new InvalidOperationException($"Imóvel {normalizado} não está na base do CAR.");
         }
 
-        var sobreposicoes = await ConsultarSobreposicoesAsync(normalizado, areaImovel.Value, cancellationToken);
+        var sobreposicoes = await ConsultarSobreposicoesAsync(
+            normalizado, areaImovel.Value, tenantId, cancellationToken);
 
         // O que foi consultado importa tanto quanto o que foi encontrado: sem
         // esta lista, "nenhuma sobreposição" fica indistinguível de "não havia
@@ -73,9 +83,8 @@ public class IntersecaoService : IIntersecaoService
         // primeira carga recusada deixa a camada cadastrada e vazia, e sem este
         // filtro o tipo dela entraria aqui — a regra se diria avaliada, e o
         // laudo liberaria o imóvel por omissão.
-        var tiposVerificados = await _context.Camadas
-            .AsNoTracking()
-            .Where(x => x.Ativa && x.TotalFeicoes > 0)
+        var tiposVerificados = await CamadasVisiveis(tenantId)
+            .Where(x => x.TotalFeicoes > 0)
             .Select(x => x.Tipo)
             .Distinct()
             .ToListAsync(cancellationToken);
@@ -84,15 +93,22 @@ public class IntersecaoService : IIntersecaoService
             normalizado, areaImovel.Value, sobreposicoes, DateTime.UtcNow, tiposVerificados);
     }
 
-    public async Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(
+        int? tenantId, CancellationToken cancellationToken = default)
     {
-        return await _context.Camadas
-            .AsNoTracking()
-            .Where(x => x.Ativa)
+        return await CamadasVisiveis(tenantId)
             .OrderBy(x => x.Tipo)
             .ThenBy(x => x.Nome)
             .ToListAsync(cancellationToken);
     }
+
+    /// <summary>
+    /// Camadas públicas mais as da própria indústria — nunca as de outra.
+    /// </summary>
+    private IQueryable<CamadaReferencia> CamadasVisiveis(int? tenantId) =>
+        _context.Camadas
+            .AsNoTracking()
+            .Where(x => x.Ativa && (x.TenantId == null || x.TenantId == tenantId));
 
     /// <summary>
     /// Área do imóvel em hectares, calculada sobre a geometria.
@@ -120,11 +136,14 @@ public class IntersecaoService : IIntersecaoService
     private async Task<List<Sobreposicao>> ConsultarSobreposicoesAsync(
         string codigoCar,
         double areaImovelHa,
+        int? tenantId,
         CancellationToken cancellationToken)
     {
         // ST_Intersects usa o índice GiST para descartar o que não encosta;
         // ST_Intersection, que é caro, só roda no que sobrou. ST_IsValid protege
         // contra feições de origem com geometria quebrada, que abortariam a query.
+        // O filtro por tenant está na mesma consulta que o cruzamento, e não
+        // numa camada acima, porque é aqui que ele não tem como ser esquecido.
         const string Sql = @"
             SELECT c.chave,
                    c.nome,
@@ -142,12 +161,14 @@ public class IntersecaoService : IIntersecaoService
              AND f.versao = c.versao_atual
             WHERE i.codigo_car = @codigo
               AND c.ativa
+              AND (c.tenant_id IS NULL OR c.tenant_id = @tenant)
               AND ST_IsValid(f.geometria)
               AND ST_Area(ST_Intersection(f.geometria, i.perimetro)::geography) > 0
             ORDER BY area_ha DESC";
 
         await using var comando = await CriarComandoAsync(Sql, cancellationToken);
         comando.Parameters.AddWithValue("codigo", codigoCar);
+        comando.Parameters.AddWithValue("tenant", (object?)tenantId ?? DBNull.Value);
 
         var sobreposicoes = new List<Sobreposicao>();
 

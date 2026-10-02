@@ -19,6 +19,7 @@ public static class GeoDiExtension
         {
             services.AddScoped<ICarLookupService, CarLookupIndisponivel>();
             services.AddScoped<IIntersecaoService, IntersecaoIndisponivel>();
+            services.AddScoped<IPerimetroProprioService, PerimetroIndisponivel>();
             return services;
         }
 
@@ -38,6 +39,8 @@ public static class GeoDiExtension
         services.AddScoped<CadastroEmpregadoresImporter>();
         services.AddScoped<IRestricaoDocumentoService, RestricaoDocumentoService>();
         services.AddScoped<RecarregadorDeCamadas>();
+        services.AddScoped<IPerimetroProprioService, PerimetroProprioService>();
+        services.AddScoped<PerimetroProprioService>();
 
         return services;
     }
@@ -53,11 +56,39 @@ internal sealed class IntersecaoIndisponivel : IIntersecaoService
     private const string Mensagem =
         "As bases geoespaciais não estão configuradas; a análise automática não pode ser executada.";
 
-    public Task<ResultadoCruzamento> CruzarPorCarAsync(string codigoCar, CancellationToken cancellationToken = default)
+    public Task<ResultadoCruzamento> CruzarPorCarAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
         => throw new InvalidOperationException(Mensagem);
 
-    public Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(
+        int? tenantId, CancellationToken cancellationToken = default)
         => Task.FromResult<IReadOnlyList<CamadaReferencia>>(Array.Empty<CamadaReferencia>());
+}
+
+/// <summary>
+/// Implementação nula usada quando o PostGIS ainda não foi configurado.
+/// </summary>
+/// <remarks>
+/// Listar vazio e recusar o envio com explicação é melhor que estourar na tela:
+/// quem instalou o sistema sem a base geoespacial precisa descobrir isso lendo
+/// uma frase, não uma pilha de exceção.
+/// </remarks>
+internal sealed class PerimetroIndisponivel : IPerimetroProprioService
+{
+    private const string Mensagem =
+        "As bases geoespaciais não estão configuradas; não há onde guardar o perímetro.";
+
+    public Task<IReadOnlyList<CamadaReferencia>> ListarAsync(
+        int tenantId, CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<CamadaReferencia>>(Array.Empty<CamadaReferencia>());
+
+    public Task<ResultadoPerimetro> ImportarAsync(
+        string caminho, string nome, int tenantId, CancellationToken cancellationToken = default)
+        => throw new InvalidOperationException(Mensagem);
+
+    public Task<bool> RemoverAsync(
+        int camadaId, int tenantId, CancellationToken cancellationToken = default)
+        => Task.FromResult(false);
 }
 
 /// <summary>

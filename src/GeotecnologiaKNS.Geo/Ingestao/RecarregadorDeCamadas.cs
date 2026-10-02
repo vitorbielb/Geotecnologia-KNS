@@ -295,7 +295,7 @@ public class RecarregadorDeCamadas
             {
                 var resultado = await _geoJson.ImportarAsync(
                     arquivo, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
-                    fonte.AnoReferencia, cancellationToken);
+                    fonte.AnoReferencia, tenantId: null, cancellationToken);
 
                 return $"{resultado.Gravados:N0} feições ({resultado.Descartados:N0} descartadas).";
             }
@@ -304,7 +304,7 @@ public class RecarregadorDeCamadas
             {
                 var resultado = await _shapefile.ImportarAsync(
                     arquivo, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
-                    fonte.AnoReferencia, cancellationToken);
+                    fonte.AnoReferencia, tenantId: null, cancellationToken);
 
                 return $"{resultado.Gravados:N0} feições ({resultado.Descartados:N0} descartadas).";
             }

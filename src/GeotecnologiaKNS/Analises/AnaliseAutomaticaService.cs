@@ -121,7 +121,11 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
                     "A propriedade não tem número do CAR; a análise automática depende dele.");
             }
 
-            var cruzamento = await _intersecao.CruzarPorCarAsync(propriedade.CodigoCar, cancellationToken);
+            // O tenant vai explícito porque a indústria pode ter perímetros
+            // próprios, e o processamento roda em segundo plano, onde o filtro
+            // global por inquilino está desligado de propósito.
+            var cruzamento = await _intersecao.CruzarPorCarAsync(
+                propriedade.CodigoCar, solicitacao.TenantId, cancellationToken);
 
             // O documento do produtor, não o do imóvel: a restrição recai sobre
             // a pessoa e acompanha quem ela é, não onde está a fazenda.
@@ -133,7 +137,8 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             analise.AreaImovelHa = cruzamento.AreaImovelHa;
             analise.Resultado = avaliacao.Status;
             analise.Parecer = avaliacao.Parecer;
-            analise.CamadasVerificadas = await DescreverCamadasAsync(cancellationToken);
+            analise.CamadasVerificadas = await DescreverCamadasAsync(
+                solicitacao.TenantId, cancellationToken);
             analise.CoberturaCompleta = avaliacao.CoberturaCompleta;
             analise.RegrasNaoAvaliadas = avaliacao.NaoAvaliadas.Count == 0
                 ? null
@@ -286,9 +291,9 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             RestricaoDocumentoService.Normalizar(documento), achados, tipos);
     }
 
-    private async Task<string> DescreverCamadasAsync(CancellationToken cancellationToken)
+    private async Task<string> DescreverCamadasAsync(int tenantId, CancellationToken cancellationToken)
     {
-        var camadas = await _intersecao.ObterCamadasAtivasAsync(cancellationToken);
+        var camadas = await _intersecao.ObterCamadasAtivasAsync(tenantId, cancellationToken);
         var texto = new StringBuilder();
 
         foreach (var camada in camadas)

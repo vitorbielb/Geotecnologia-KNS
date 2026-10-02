@@ -51,6 +51,7 @@ public class CamadaGeoJsonImporter
         TipoCamada tipo,
         string origem,
         int? anoReferencia = null,
+        int? tenantId = null,
         CancellationToken cancellationToken = default)
     {
         if (!File.Exists(caminhoGeoJson))
@@ -58,7 +59,8 @@ public class CamadaGeoJsonImporter
             throw new FileNotFoundException("Arquivo GeoJSON não encontrado.", caminhoGeoJson);
         }
 
-        var camada = await PrepararCamadaAsync(chave, nome, tipo, origem, anoReferencia, cancellationToken);
+        var camada = await PrepararCamadaAsync(
+            chave, nome, tipo, origem, anoReferencia, tenantId, cancellationToken);
 
         var troca = new TrocaDeCamada(_context, _logger);
         await troca.LimparTentativaAnteriorAsync(camada, cancellationToken);
@@ -136,7 +138,7 @@ public class CamadaGeoJsonImporter
 
     private async Task<CamadaReferencia> PrepararCamadaAsync(
         string chave, string nome, TipoCamada tipo, string origem, int? anoReferencia,
-        CancellationToken cancellationToken)
+        int? tenantId, CancellationToken cancellationToken)
     {
         var camada = await _context.Camadas.FirstOrDefaultAsync(x => x.Chave == chave, cancellationToken);
 
@@ -149,6 +151,7 @@ public class CamadaGeoJsonImporter
         camada.Nome = nome;
         camada.Tipo = tipo;
         camada.Origem = origem;
+        camada.TenantId = tenantId;
         camada.AnoReferencia = anoReferencia;
         camada.Ativa = true;
         camada.AtualizadaEm = DateTime.UtcNow;

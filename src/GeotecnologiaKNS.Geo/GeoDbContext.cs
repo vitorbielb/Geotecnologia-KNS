@@ -161,6 +161,7 @@ public class GeoDbContext : DbContext
             entity.Property(x => x.AtualizadaEm).HasColumnName("atualizada_em");
             entity.Property(x => x.TotalFeicoes).HasColumnName("total_feicoes");
             entity.Property(x => x.VersaoAtual).HasColumnName("versao_atual");
+            entity.Property(x => x.TenantId).HasColumnName("tenant_id");
             entity.Property(x => x.PeriodicidadeDias).HasColumnName("periodicidade_dias");
 
             entity.HasIndex(x => x.Chave).IsUnique();

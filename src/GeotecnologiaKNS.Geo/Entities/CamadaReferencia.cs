@@ -64,6 +64,23 @@ public class CamadaReferencia
     /// <summary>Camada inativa não entra no cruzamento, mas o histórico é preservado.</summary>
     public bool Ativa { get; set; } = true;
 
+    /// <summary>
+    /// Indústria dona da camada. Nulo para as camadas públicas, que valem
+    /// para todas.
+    /// </summary>
+    /// <remarks>
+    /// As camadas públicas — embargos, terras indígenas, PRODES — são as mesmas
+    /// para todo mundo. Mas a indústria também pode subir perímetros próprios,
+    /// e aí o isolamento deixa de ser detalhe de arquitetura: as indústrias
+    /// atendidas são concorrentes diretas entre si, e a lista de áreas que uma
+    /// delas resolveu bloquear diz onde ela compra e onde parou de comprar.
+    /// Vazar isso seria entregar estratégia comercial à concorrente.
+    ///
+    /// Por isso o cruzamento exige o tenant explicitamente, em vez de assumir
+    /// um padrão: esquecer de passar não pode significar "mostra tudo".
+    /// </remarks>
+    public int? TenantId { get; set; }
+
     public DateTime? AtualizadaEm { get; set; }
 
     public int TotalFeicoes { get; set; }

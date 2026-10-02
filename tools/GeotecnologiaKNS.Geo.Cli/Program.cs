@@ -106,6 +106,12 @@ try
         case "cobertura":
             return await CoberturaAsync(scope.ServiceProvider);
 
+        case "imoveis":
+            return await ListarImoveisAsync(scope.ServiceProvider);
+
+        case "importar-perimetro":
+            return await ImportarPerimetroAsync(scope.ServiceProvider, configuration);
+
         default:
             Console.Error.WriteLine("Comandos:");
             Console.Error.WriteLine("  diagnostico");
@@ -121,9 +127,11 @@ try
             Console.Error.WriteLine("  importar-embargo --arquivo <termo_de_embargo.csv>");
             Console.Error.WriteLine("  camadas");
             Console.Error.WriteLine("  recarregar [--chave <chave>] [--todas]");
-            Console.Error.WriteLine("  cruzar --car <codigo>");
+            Console.Error.WriteLine("  cruzar --car <codigo> [--tenant <id>]");
             Console.Error.WriteLine("  simular-car --car <codigo> [--area-ha 1000]");
             Console.Error.WriteLine("  cobertura");
+            Console.Error.WriteLine("  imoveis");
+            Console.Error.WriteLine("  importar-perimetro --arquivo <arq.zip|.geojson> --nome <nome> --tenant <id>");
             Console.Error.WriteLine();
             Console.Error.WriteLine("  Tipos de camada: " + string.Join(", ", Enum.GetNames<TipoCamada>()));
             return 1;
@@ -795,6 +803,65 @@ static async Task<int> RecarregarAsync(
     return falhas == 0 ? 0 : 1;
 }
 
+/// <summary>
+/// Carrega um perímetro próprio em nome de uma indústria.
+/// </summary>
+/// <remarks>
+/// O caminho normal é a tela, que já sabe de quem é a sessão. Aqui o tenant é
+/// obrigatório e explícito: carregar perímetro sem dono o tornaria público, e
+/// público significa visível para as concorrentes da indústria que o enviou.
+/// </remarks>
+static async Task<int> ImportarPerimetroAsync(IServiceProvider provider, IConfiguration configuration)
+{
+    var arquivo = configuration["arquivo"];
+    var nome = configuration["nome"];
+
+    if (string.IsNullOrWhiteSpace(arquivo) || string.IsNullOrWhiteSpace(nome)
+        || !int.TryParse(configuration["tenant"], out var tenant) || tenant <= 0)
+    {
+        Console.Error.WriteLine("Informe --arquivo <caminho>, --nome <nome> e --tenant <id>.");
+        return 1;
+    }
+
+    var resultado = await provider.GetRequiredService<PerimetroProprioService>()
+        .ImportarAsync(arquivo, nome, tenant);
+
+    Console.WriteLine(
+        $"Perímetro \"{resultado.Nome}\" (indústria {tenant}): " +
+        $"{resultado.Feicoes:N0} área(s), {resultado.Descartados:N0} descartada(s).");
+
+    return 0;
+}
+
+/// <summary>Imóveis carregados, com a caixa envolvente — útil para testar o cruzamento.</summary>
+static async Task<int> ListarImoveisAsync(IServiceProvider provider)
+{
+    var contexto = provider.GetRequiredService<GeoDbContext>();
+    var conexao = (Npgsql.NpgsqlConnection)contexto.Database.GetDbConnection();
+
+    if (conexao.State != System.Data.ConnectionState.Open)
+    {
+        await conexao.OpenAsync();
+    }
+
+    await using var comando = conexao.CreateCommand();
+    comando.CommandText = @"
+        SELECT codigo_car, municipio, uf,
+               ST_XMin(perimetro), ST_YMin(perimetro), ST_XMax(perimetro), ST_YMax(perimetro)
+        FROM geo.imovel_car ORDER BY codigo_car";
+
+    await using var leitor = await comando.ExecuteReaderAsync();
+
+    while (await leitor.ReadAsync())
+    {
+        Console.WriteLine(
+            $"{leitor.GetString(0)}  {leitor.GetString(1)}/{leitor.GetString(2)}  " +
+            $"[{leitor.GetDouble(3):F4} {leitor.GetDouble(4):F4} {leitor.GetDouble(5):F4} {leitor.GetDouble(6):F4}]");
+    }
+
+    return 0;
+}
+
 static async Task<int> CruzarAsync(IServiceProvider provider, IConfiguration configuration)
 {
     var car = configuration["car"];
@@ -805,9 +872,16 @@ static async Task<int> CruzarAsync(IServiceProvider provider, IConfiguration con
         return 1;
     }
 
-    var resultado = await provider.GetRequiredService<IIntersecaoService>().CruzarPorCarAsync(car);
+    // Sem --tenant a ferramenta não age em nome de indústria alguma e enxerga
+    // só as camadas públicas. Com ele, dá para conferir da linha de comando o
+    // que uma indústria específica veria — inclusive os perímetros dela.
+    var tenant = int.TryParse(configuration["tenant"], out var t) ? t : (int?)null;
+
+    var resultado = await provider.GetRequiredService<IIntersecaoService>()
+        .CruzarPorCarAsync(car, tenant);
 
     Console.WriteLine($"CAR:   {resultado.CodigoCar}");
+    Console.WriteLine($"Visão: {(tenant.HasValue ? $"indústria {tenant}" : "só camadas públicas")}");
     Console.WriteLine($"Área:  {resultado.AreaImovelHa:N2} ha");
     Console.WriteLine($"Sobreposições: {resultado.Sobreposicoes.Count}");
     Console.WriteLine();

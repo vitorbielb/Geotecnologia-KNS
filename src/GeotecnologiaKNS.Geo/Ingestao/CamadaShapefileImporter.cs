@@ -65,6 +65,7 @@ public class CamadaShapefileImporter
         TipoCamada tipo,
         string origem,
         int? anoReferencia = null,
+        int? tenantId = null,
         CancellationToken cancellationToken = default)
     {
         if (!File.Exists(caminhoShapefile))
@@ -84,6 +85,7 @@ public class CamadaShapefileImporter
         camada.Origem = origem;
         camada.AnoReferencia = anoReferencia;
         camada.Ativa = true;
+        camada.TenantId = tenantId;
 
         await _context.SaveChangesAsync(cancellationToken);
 

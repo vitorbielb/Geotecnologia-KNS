@@ -21,6 +21,7 @@ namespace GeotecnologiaKNS.FuncionalTests
         [InlineData("/Propriedades")]
         [InlineData("/Solicitacoes")]
         [InlineData("/Industrias")]
+        [InlineData("/Perimetros")]
         public async Task SemLogin_TelaProtegida_DeveMandarParaOLogin(string caminho)
         {
             var cliente = ClienteAutenticado.Criar(_app);
