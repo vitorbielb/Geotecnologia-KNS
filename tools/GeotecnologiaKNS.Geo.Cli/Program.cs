@@ -28,6 +28,11 @@ var configuration = new ConfigurationBuilder()
     .AddCommandLine(args)
     .Build();
 
+// A ferramenta roda em servidor, às vezes Linux, onde a cultura do processo é a
+// invariante — e aí "57.843 feições" sairia como "57,843 feições" para um
+// operador brasileiro. Fixada aqui, uma vez, para toda a saída.
+CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
+
 var comando = args.FirstOrDefault()?.ToLowerInvariant();
 
 // Inspecionar lê só o arquivo; não faz sentido exigir banco para isso.

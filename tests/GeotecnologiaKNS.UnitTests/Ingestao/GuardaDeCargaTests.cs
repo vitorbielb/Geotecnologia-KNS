@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentAssertions;
 using GeotecnologiaKNS.Geo.Ingestao;
 
@@ -83,12 +84,49 @@ namespace GeotecnologiaKNS.UnitTests.Ingestao
         {
             // Quem lê isso num registro de madrugada precisa saber, em uma
             // linha, que o sistema não ficou sem camada.
+            //
+            // O separador de milhar é parte do que se afirma aqui: a recarga
+            // roda em serviço de fundo, fora do pipeline que define a cultura da
+            // aplicação, e num servidor Linux "57.843" saía como "57,843".
+            // Este teste passava no Windows e quebrou no CI por isso.
             var resultado = new ResultadoDaTroca(
                 false, MotivoDaRecusa.EncolheuDemais, Antes: 57_843, Depois: 200);
 
             resultado.Explicacao.Should().Contain("57.843");
             resultado.Explicacao.Should().Contain("200");
             resultado.Explicacao.Should().Contain("anterior foi mantida");
+        }
+
+        [Theory]
+        [InlineData("en-US")]
+        [InlineData("de-DE")]
+        [InlineData("")]
+        public void Explicacao_EmServidorDeOutraCultura_DeveSairEmPortugues(string cultura)
+        {
+            // A recarga roda em serviço de fundo, fora do pipeline que define a
+            // cultura da aplicação. Num servidor Linux a cultura do processo é a
+            // do sistema, e foi assim que "57.843" virou "57,843" no CI — número
+            // de dezena de milhar com o separador trocado diz outra coisa.
+            //
+            // en-US troca ponto por vírgula; de-DE é o caso em que o separador
+            // coincide com o nosso, e serve para o teste não passar por acaso;
+            // vazio é a cultura invariante.
+            var anterior = CultureInfo.CurrentCulture;
+
+            try
+            {
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(cultura);
+
+                var resultado = new ResultadoDaTroca(
+                    false, MotivoDaRecusa.EncolheuDemais, Antes: 57_843, Depois: 200);
+
+                resultado.Explicacao.Should().Contain("57.843");
+                resultado.Explicacao.Should().NotContain("57,843");
+            }
+            finally
+            {
+                CultureInfo.CurrentCulture = anterior;
+            }
         }
 
         [Fact]

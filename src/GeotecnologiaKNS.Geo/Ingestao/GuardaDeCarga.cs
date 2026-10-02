@@ -27,11 +27,12 @@ public record ResultadoDaTroca(
             $"A carga não produziu {Unidade} alguma. A versão anterior foi mantida.",
 
         MotivoDaRecusa.EncolheuDemais =>
-            $"A carga trouxe {Depois:N0} {Unidade} contra {Antes:N0} da versão " +
+            $"A carga trouxe {Formatos.Quantidade(Depois)} {Unidade} contra " +
+            $"{Formatos.Quantidade(Antes)} da versão " +
             "anterior. Uma queda dessa ordem costuma ser arquivo truncado na origem, " +
             "não redução real. A versão anterior foi mantida.",
 
-        _ => $"{Depois:N0} {Unidade} ({Antes:N0} antes)."
+        _ => $"{Formatos.Quantidade(Depois)} {Unidade} ({Formatos.Quantidade(Antes)} antes)."
     };
 }
 

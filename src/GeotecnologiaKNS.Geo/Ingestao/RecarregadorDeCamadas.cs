@@ -320,8 +320,8 @@ public class RecarregadorDeCamadas
             {
                 var resultado = await _embargo.ImportarAsync(arquivo, cancellationToken);
 
-                return $"{resultado.Gravados:N0} polígonos e " +
-                       $"{resultado.Documentos:N0} registros por documento.";
+                return $"{Formatos.Quantidade(resultado.Gravados)} polígonos e " +
+                       $"{Formatos.Quantidade(resultado.Documentos)} registros por documento.";
             }
 
             case FormatoDaFonte.GeoJsonEmZip:
@@ -330,7 +330,8 @@ public class RecarregadorDeCamadas
                     arquivo, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
                     fonte.AnoReferencia, tenantId: null, cancellationToken);
 
-                return $"{resultado.Gravados:N0} feições ({resultado.Descartados:N0} descartadas).";
+                return $"{Formatos.Quantidade(resultado.Gravados)} feições " +
+                       $"({Formatos.Quantidade(resultado.Descartados)} descartadas).";
             }
 
             default:
@@ -339,7 +340,8 @@ public class RecarregadorDeCamadas
                     arquivo, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
                     fonte.AnoReferencia, tenantId: null, cancellationToken);
 
-                return $"{resultado.Gravados:N0} feições ({resultado.Descartados:N0} descartadas).";
+                return $"{Formatos.Quantidade(resultado.Gravados)} feições " +
+                       $"({Formatos.Quantidade(resultado.Descartados)} descartadas).";
             }
         }
     }
