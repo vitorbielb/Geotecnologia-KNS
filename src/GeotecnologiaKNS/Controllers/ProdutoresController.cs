@@ -7,10 +7,17 @@ namespace GeotecnologiaKNS.Controllers;
 public class ProdutoresController : Controller
 {
     private readonly ApplicationDbContext _context;
+    private readonly IArmazenamentoDeArquivos _arquivos;
+    private readonly IUserContext _userContext;
 
-    public ProdutoresController(ApplicationDbContext dbcontext)
+    public ProdutoresController(
+        ApplicationDbContext dbcontext,
+        IArmazenamentoDeArquivos arquivos,
+        IUserContext userContext)
     {
         _context = dbcontext;
+        _arquivos = arquivos;
+        _userContext = userContext;
     }
 
     // GET: Produtores
@@ -158,7 +165,10 @@ public class ProdutoresController : Controller
 
         produtor.Documentos ??= new List<ProdutorArquivo>();
 
-        produtor.Documentos.Add(arquivo.Model);
+        var documento = arquivo.Model;
+        await AnexoDeDocumento.PrepararAsync(documento, _arquivos, _userContext.TenantId ?? 0);
+
+        produtor.Documentos.Add(documento);
         _context.Produtores.Update(produtor);
 
         await _context.SaveChangesAsync();
@@ -187,6 +197,10 @@ public class ProdutoresController : Controller
         _context.ProdutoresArquivos.Remove(arquivo);
         await _context.SaveChangesAsync();
 
+        // Depois do commit: se o conteúdo sumisse antes e a transação falhasse,
+        // sobraria linha apontando para arquivo inexistente.
+        await AnexoDeDocumento.DescartarAsync(arquivo, _arquivos);
+
         return View("_file-list", produtor);
     }
 
@@ -203,6 +217,6 @@ public class ProdutoresController : Controller
                 return NotFound();
         }
 
-        return File(arquivo.Dados, arquivo.ContentType);
+        return await AnexoDeDocumento.ResponderAsync(arquivo, _arquivos);
     }
 }

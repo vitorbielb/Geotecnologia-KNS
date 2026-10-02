@@ -11,14 +11,21 @@ namespace GeotecnologiaKNS.Controllers
         private readonly IAnaliseAutomaticaService _analise;
         private readonly IMedidorDeUso _medidor;
 
+        private readonly IArmazenamentoDeArquivos _arquivos;
+        private readonly IUserContext _userContext;
+
         public SolicitacoesController(
             ApplicationDbContext context,
             IAnaliseAutomaticaService analise,
-            IMedidorDeUso medidor)
+            IMedidorDeUso medidor,
+            IArmazenamentoDeArquivos arquivos,
+            IUserContext userContext)
         {
             _context = context;
             _analise = analise;
             _medidor = medidor;
+            _arquivos = arquivos;
+            _userContext = userContext;
         }
 
         // GET: Solicitacoes
@@ -226,7 +233,10 @@ namespace GeotecnologiaKNS.Controllers
 
             solicitacao.Documentos ??= new List<AnaliseArquivo>();
 
-            solicitacao.Documentos.Add(arquivo.Model);
+            var documento = arquivo.Model;
+            await AnexoDeDocumento.PrepararAsync(documento, _arquivos, _userContext.TenantId ?? 0);
+
+            solicitacao.Documentos.Add(documento);
             _context.Solicitacao.Update(solicitacao);
 
             await _context.SaveChangesAsync();
@@ -255,6 +265,8 @@ namespace GeotecnologiaKNS.Controllers
             _context.AnalisesArquivos.Remove(arquivo);
             await _context.SaveChangesAsync();
 
+            await AnexoDeDocumento.DescartarAsync(arquivo, _arquivos);
+
             return View("_file-list-Analise", solicitacao);
         }
 
@@ -271,7 +283,7 @@ namespace GeotecnologiaKNS.Controllers
                 return NotFound();
             }
 
-            return File(arquivo.Dados, arquivo.ContentType);
+            return await AnexoDeDocumento.ResponderAsync(arquivo, _arquivos);
         }
     }
 }

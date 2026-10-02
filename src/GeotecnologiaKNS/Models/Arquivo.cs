@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeotecnologiaKNS.Models
@@ -24,7 +25,27 @@ namespace GeotecnologiaKNS.Models
 
         [DisplayName("Descrição")]
         public string Descricao { get; set; }
-        public byte[] Dados { get; set; }
+
+        /// <summary>
+        /// Onde o conteúdo está guardado, no armazenamento de arquivos.
+        /// </summary>
+        [MaxLength(300)]
+        public string? Chave { get; set; }
+
+        /// <summary>Tamanho em bytes, para exibir sem precisar abrir o arquivo.</summary>
+        public long Tamanho { get; set; }
+
+        /// <summary>
+        /// Conteúdo gravado na própria tabela. Só nos documentos antigos.
+        /// </summary>
+        /// <remarks>
+        /// Os anexos moravam aqui, numa coluna <c>varbinary(max)</c>, e cada
+        /// backup do banco levava junto todo PDF já enviado. A coluna continua
+        /// para que os documentos de antes da mudança sigam abrindo; os novos
+        /// nascem com <see cref="Chave"/> preenchida e esta nula.
+        /// </remarks>
+        public byte[]? Dados { get; set; }
+
         public string ContentType { get; set; }
         [NotMapped] public abstract int VinculoId { get; set; }
     }

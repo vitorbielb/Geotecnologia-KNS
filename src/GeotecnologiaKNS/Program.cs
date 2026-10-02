@@ -101,6 +101,14 @@ builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSe
 
 builder.Services.AddScoped<IMedidorDeUso, MedidorDeUso>();
 builder.Services.AddScoped<IUserContext, UserContext>();
+
+// Os anexos saíram da coluna varbinary e passaram a morar no disco: cada backup
+// do banco carregava junto todo PDF já enviado, e backup que fica grande demais
+// é backup que deixa de ser feito.
+builder.Services.Configure<OpcoesDeArquivos>(
+    builder.Configuration.GetSection(OpcoesDeArquivos.Secao));
+builder.Services.AddSingleton<IArmazenamentoDeArquivos, ArmazenamentoEmDisco>();
+builder.Services.AddHostedService<MigradorDeAnexos>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

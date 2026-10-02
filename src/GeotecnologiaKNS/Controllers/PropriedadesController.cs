@@ -11,14 +11,21 @@ namespace GeotecnologiaKNS.Controllers
         private readonly IPropriedadeCarService _carService;
         private readonly IMedidorDeUso _medidor;
 
+        private readonly IArmazenamentoDeArquivos _arquivos;
+        private readonly IUserContext _userContext;
+
         public PropriedadesController(
             ApplicationDbContext context,
             IPropriedadeCarService carService,
-            IMedidorDeUso medidor)
+            IMedidorDeUso medidor,
+            IArmazenamentoDeArquivos arquivos,
+            IUserContext userContext)
         {
             _medidor = medidor;
             _context = context;
             _carService = carService;
+            _arquivos = arquivos;
+            _userContext = userContext;
         }
 
         // GET: Propriedades
@@ -308,7 +315,10 @@ namespace GeotecnologiaKNS.Controllers
 
             propriedade.Documentos ??= new List<PropriedadeArquivo>();
 
-            propriedade.Documentos.Add(arquivo.Model);
+            var documento = arquivo.Model;
+            await AnexoDeDocumento.PrepararAsync(documento, _arquivos, _userContext.TenantId ?? 0);
+
+            propriedade.Documentos.Add(documento);
             _context.Propriedades.Update(propriedade);
 
             await _context.SaveChangesAsync();
@@ -337,6 +347,8 @@ namespace GeotecnologiaKNS.Controllers
             _context.PropriedadesArquivos.Remove(arquivo);
             await _context.SaveChangesAsync();
 
+            await AnexoDeDocumento.DescartarAsync(arquivo, _arquivos);
+
             return View("_file-list", produtor);
         }
 
@@ -353,7 +365,7 @@ namespace GeotecnologiaKNS.Controllers
                 return NotFound();
             }
 
-            return File(arquivo.Dados, arquivo.ContentType);
+            return await AnexoDeDocumento.ResponderAsync(arquivo, _arquivos);
         }
     }
 }

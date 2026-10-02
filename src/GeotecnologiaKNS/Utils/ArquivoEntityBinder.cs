@@ -35,7 +35,13 @@ namespace GeotecnologiaKNS.Utils
     /// </summary>
     internal sealed class ArquivoUpload
     {
-        /// <summary>Tamanho máximo aceito por arquivo (os dados são gravados na própria tabela).</summary>
+        /// <summary>Tamanho máximo aceito por arquivo.</summary>
+        /// <remarks>
+        /// O conteúdo é lido inteiro em memória aqui antes de seguir para o
+        /// armazenamento, então o teto também é o que cada envio simultâneo
+        /// custa de memória ao servidor. Dez megabytes cobre com folga um PDF
+        /// de licença ambiental digitalizado, que é o caso real.
+        /// </remarks>
         public const int TamanhoMaximoEmBytes = 10 * 1024 * 1024;
 
         private ArquivoUpload(IFormCollection form, int vinculoId, string descricao, string contentType, byte[] dados)
