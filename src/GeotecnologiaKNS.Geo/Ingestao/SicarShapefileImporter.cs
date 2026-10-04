@@ -81,15 +81,16 @@ public class SicarShapefileImporter
         _logger = logger;
     }
 
-    /// <param name="municipiosDoEscopo">
-    /// Municípios que esta carga se propõe a cobrir por inteiro. Nulo quando a
-    /// carga é de um arquivo completo, e aí tudo o que aparecer conta.
+    /// <param name="pertenceAoEscopo">
+    /// Decide, pelo código do IBGE, se um município está entre os que esta
+    /// carga se propõe a cobrir por inteiro. Nulo quando a carga é de um
+    /// arquivo completo, e aí tudo o que aparecer conta.
     /// </param>
     public async Task<ResultadoImportacao> ImportarAsync(
         string caminhoShapefile,
         string origem,
         string? uf = null,
-        IReadOnlySet<string>? municipiosDoEscopo = null,
+        Func<string, bool>? pertenceAoEscopo = null,
         CancellationToken cancellationToken = default)
     {
         if (!File.Exists(caminhoShapefile))
@@ -153,7 +154,7 @@ public class SicarShapefileImporter
             }
 
             await RegistrarCoberturaAsync(
-                municipiosVistos, municipiosDoEscopo, carga.Id, cancellationToken);
+                municipiosVistos, pertenceAoEscopo, carga.Id, cancellationToken);
 
             carga.Status = StatusCarga.Concluida;
             carga.ConcluidaEm = DateTime.UtcNow;
@@ -261,21 +262,25 @@ public class SicarShapefileImporter
     /// </summary>
     private async Task RegistrarCoberturaAsync(
         Dictionary<string, (string Uf, string? Nome, int Imoveis)> municipios,
-        IReadOnlySet<string>? municipiosDoEscopo,
+        Func<string, bool>? pertenceAoEscopo,
         long cargaId,
         CancellationToken cancellationToken)
     {
-        // Aparecer no arquivo não é o mesmo que estar coberto. Uma carga
-        // filtrada por município traz, junto, imóveis cujo código do CAR aponta
-        // para um município vizinho — o SICAR tem registros em que o
-        // cod_municipio_ibge e o município embutido no código do CAR discordam.
-        // Esses imóveis são gravados, porque são dados reais, mas o município
-        // deles não pode ser dado por coberto: uma consulta futura lá não
-        // registraria lacuna, e ninguém saberia que falta carregar.
-        if (municipiosDoEscopo is not null)
+        // Aparecer no arquivo não é o mesmo que estar coberto. O SICAR tem
+        // registros em que o cod_municipio_ibge e o município embutido no
+        // código do CAR discordam, então uma carga filtrada traz junto imóveis
+        // de fora do que se pediu — numa carga de Goiás apareceram dois imóveis
+        // com código do Distrito Federal.
+        //
+        // Eles são gravados, porque são dados reais. Mas o município deles não
+        // pode ser dado por coberto: uma consulta lá deixaria de virar lacuna, e
+        // ninguém saberia que o município inteiro ainda falta. Dois imóveis
+        // registrando o Distrito Federal como coberto é a forma mais barata de
+        // esconder um estado inteiro.
+        if (pertenceAoEscopo is not null)
         {
             municipios = municipios
-                .Where(x => municipiosDoEscopo.Contains(x.Key))
+                .Where(x => pertenceAoEscopo(x.Key))
                 .ToDictionary(x => x.Key, x => x.Value);
         }
 
@@ -285,6 +290,17 @@ public class SicarShapefileImporter
         }
 
         var codigos = municipios.Keys.ToList();
+
+        // A contagem sai do banco, e não do arquivo que acabou de ser lido.
+        // Uma carga por páginas chama este método uma vez por página, e um
+        // município grande aparece em mais de uma: contar o que veio na página
+        // faria a última sobrescrever as anteriores, e o número exibido ficaria
+        // menor que a realidade sem nada indicar isso.
+        var totaisReais = await _context.ImoveisCar
+            .Where(x => x.CodigoIbge != null && codigos.Contains(x.CodigoIbge))
+            .GroupBy(x => x.CodigoIbge!)
+            .Select(x => new { Codigo = x.Key, Total = x.Count() })
+            .ToDictionaryAsync(x => x.Codigo, x => x.Total, cancellationToken);
 
         var existentes = await _context.Cobertura
             .Where(x => codigos.Contains(x.CodigoIbge))
@@ -296,7 +312,7 @@ public class SicarShapefileImporter
             {
                 cobertura.Uf = dados.Uf;
                 cobertura.Municipio = dados.Nome ?? cobertura.Municipio;
-                cobertura.Imoveis = dados.Imoveis;
+                cobertura.Imoveis = totaisReais.GetValueOrDefault(codigoIbge, dados.Imoveis);
                 cobertura.CargaId = cargaId;
                 cobertura.CobertoEm = DateTime.UtcNow;
                 continue;
@@ -307,7 +323,7 @@ public class SicarShapefileImporter
                 CodigoIbge = codigoIbge,
                 Uf = dados.Uf,
                 Municipio = dados.Nome,
-                Imoveis = dados.Imoveis,
+                Imoveis = totaisReais.GetValueOrDefault(codigoIbge, dados.Imoveis),
                 CargaId = cargaId,
                 CobertoEm = DateTime.UtcNow
             });

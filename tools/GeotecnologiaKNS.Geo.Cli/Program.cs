@@ -117,7 +117,7 @@ try
             return await SimularCarAsync(scope.ServiceProvider, configuration);
 
         case "cobertura":
-            return await CoberturaAsync(scope.ServiceProvider, configuration);
+            return await CoberturaAsync(scope.ServiceProvider, configuration, Marcado);
 
         case "imoveis":
             return await ListarImoveisAsync(scope.ServiceProvider);
@@ -145,7 +145,7 @@ try
             Console.Error.WriteLine("  recarregar [--chave <chave>] [--todas]");
             Console.Error.WriteLine("  cruzar --car <codigo> [--tenant <id>]");
             Console.Error.WriteLine("  simular-car --car <codigo> [--area-ha 1000]");
-            Console.Error.WriteLine("  cobertura [--remover <codigo IBGE>]");
+            Console.Error.WriteLine("  cobertura [--uf <UF>] [--remover <codigo IBGE>] [--recontar]");
             Console.Error.WriteLine("  imoveis");
             Console.Error.WriteLine("  baixar-car --uf <UF> | --municipio <codigo IBGE> | --lacunas");
             Console.Error.WriteLine("  importar-perimetro --arquivo <arq.zip|.geojson> --nome <nome> --tenant <id>");
@@ -165,9 +165,49 @@ catch (Exception ex)
 /// existe. A fila de lacunas é o que guia a próxima carga: em vez de tentar
 /// mapear o país, carrega-se o que está sendo usado de verdade.
 /// </summary>
-static async Task<int> CoberturaAsync(IServiceProvider provider, IConfiguration configuration)
+static async Task<int> CoberturaAsync(
+    IServiceProvider provider, IConfiguration configuration, Func<string, bool> marcado)
 {
     var contexto = provider.GetRequiredService<GeoDbContext>();
+
+    // Recontagem direto da base de imóveis. Serve depois de qualquer trabalho
+    // manual no banco, e corrigiu de uma vez as cargas feitas antes de a
+    // contagem passar a sair do banco em vez da página.
+    if (marcado("recontar"))
+    {
+        var reais = await contexto.ImoveisCar.AsNoTracking()
+            .Where(x => x.CodigoIbge != null)
+            .GroupBy(x => x.CodigoIbge!)
+            .Select(x => new { Codigo = x.Key, Total = x.Count() })
+            .ToDictionaryAsync(x => x.Codigo, x => x.Total);
+
+        var linhas = await contexto.Cobertura.ToListAsync();
+        var ajustados = 0;
+
+        foreach (var linha in linhas)
+        {
+            var real = reais.GetValueOrDefault(linha.CodigoIbge);
+
+            if (linha.Imoveis == real)
+            {
+                continue;
+            }
+
+            Console.WriteLine(
+                $"  {linha.CodigoIbge} {linha.Municipio}: {linha.Imoveis:N0} → {real:N0}");
+
+            linha.Imoveis = real;
+            ajustados++;
+        }
+
+        await contexto.SaveChangesAsync();
+
+        Console.WriteLine(ajustados == 0
+            ? "Todas as contagens já batiam com a base."
+            : $"{ajustados} contagem(ns) corrigida(s).");
+
+        return 0;
+    }
 
     // Cobertura afirma que um município foi carregado por inteiro. Quando uma
     // carga mal escopada registra o que não cobriu, a afirmação fica falsa e
@@ -192,6 +232,36 @@ static async Task<int> CoberturaAsync(IServiceProvider provider, IConfiguration 
         Console.WriteLine(
             $"Cobertura de {alvo.Municipio ?? remover}/{alvo.Uf} removida. " +
             "Os imóveis continuam carregados; o município volta a gerar lacuna quando consultado.");
+
+        return 0;
+    }
+
+    // Com --uf, lista município a município: é como se confere se um estado
+    // está coberto de verdade ou se tem município entrando por tabela, com
+    // meia dúzia de imóveis que vieram de carona na camada do vizinho.
+    var daUf = configuration["uf"]?.ToUpperInvariant();
+
+    if (!string.IsNullOrWhiteSpace(daUf))
+    {
+        var municipios = await contexto.Cobertura.AsNoTracking()
+            .Where(x => x.Uf == daUf)
+            .OrderByDescending(x => x.Imoveis)
+            .ToListAsync();
+
+        if (municipios.Count == 0)
+        {
+            Console.WriteLine($"Nenhum município de {daUf} coberto.");
+            return 0;
+        }
+
+        Console.WriteLine($"{daUf}: {municipios.Count} município(s), {municipios.Sum(x => x.Imoveis):N0} imóveis");
+        Console.WriteLine();
+        Console.WriteLine($"  {"IBGE",-9} {"IMÓVEIS",9}  MUNICÍPIO");
+
+        foreach (var municipio in municipios)
+        {
+            Console.WriteLine($"  {municipio.CodigoIbge,-9} {municipio.Imoveis,9:N0}  {municipio.Municipio}");
+        }
 
         return 0;
     }

@@ -102,7 +102,12 @@ public class BaixadorBaseCar
         var sigla = uf.ToUpperInvariant();
 
         return UfConhecida(sigla)
-            ? BaixarAsync(sigla, filtro: null, escopo: sigla, cancellationToken)
+            // Cobre o estado pedido, e só ele: imóvel de código vizinho que
+            // venha na camada é gravado, mas não faz o município dele passar
+            // por carregado.
+            ? BaixarAsync(
+                sigla, filtro: null, escopo: sigla, cancellationToken,
+                pertenceAoEscopo: codigo => UfDoMunicipio(codigo) == sigla)
             : Task.FromResult(new ResultadoDaBaixa(
                 uf, 0, 0, 0, TimeSpan.Zero, $"UF desconhecida: {uf}."));
     }
@@ -130,12 +135,12 @@ public class BaixadorBaseCar
                 filtro: $"cod_municipio_ibge={codigoIbge}",
                 escopo: $"{uf}/{codigoIbge}",
                 cancellationToken,
-                municipiosDoEscopo: new HashSet<string> { codigoIbge });
+                pertenceAoEscopo: codigo => codigo == codigoIbge);
     }
 
     private async Task<ResultadoDaBaixa> BaixarAsync(
         string uf, string? filtro, string escopo, CancellationToken cancellationToken,
-        IReadOnlySet<string>? municipiosDoEscopo = null)
+        Func<string, bool>? pertenceAoEscopo = null)
     {
         var relogio = Stopwatch.StartNew();
         var pasta = Path.Combine(Path.GetTempPath(), $"car-{escopo.Replace('/', '-')}-{Guid.NewGuid():N}");
@@ -160,7 +165,7 @@ public class BaixadorBaseCar
                 }
 
                 var resultado = await _importador.ImportarAsync(
-                    arquivo, $"SICAR/WFS ({escopo})", uf, municipiosDoEscopo, cancellationToken);
+                    arquivo, $"SICAR/WFS ({escopo})", uf, pertenceAoEscopo, cancellationToken);
 
                 paginas++;
                 lidos += resultado.Lidos;

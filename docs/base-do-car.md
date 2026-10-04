@@ -44,8 +44,19 @@ O sistema já registrava a demanda: quando uma consulta não encontra o imóvel,
 ele anota o município como **lacuna**. Agora a lacuna é o pedido de carga.
 
 ```bash
-dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- cobertura
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- cobertura            # resumo por UF
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- cobertura --uf GO    # município a município
 ```
+
+O `--uf` é como se confere se um estado está coberto de verdade: município com
+meia dúzia de imóveis costuma ser carona na camada do vizinho, não carga.
+
+Referência das cargas feitas:
+
+| Estado | Municípios | Imóveis | Tempo |
+|---|---|---|---|
+| Goiás | 246 | 243.921 | 526s |
+| Tocantins | 139 | 112.081 | 157s |
 
 ## Paginação: o teto de dez mil
 
@@ -72,10 +83,25 @@ registraria lacuna e ninguém descobriria que falta carregar. Cobertura afirma
 "este município foi carregado por inteiro", e essa afirmação precisa ser
 verdadeira.
 
+O mesmo vale por estado: uma carga de Goiás trouxe dois imóveis com código do
+Distrito Federal e um com código de Minas. Gravados, não cobertos — dois imóveis
+registrando o Distrito Federal como coberto seria a forma mais barata de
+esconder um estado inteiro.
+
 Se uma carga antiga registrou cobertura que não cobriu:
 
 ```bash
 dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- cobertura --remover 1720259
+```
+
+**A contagem por município sai do banco, não do arquivo.** Uma carga por páginas
+chama o registro de cobertura uma vez por página, e município grande aparece em
+várias: contar o que veio na página fazia a última sobrescrever as anteriores.
+Rio Verde aparecia com 5.766 imóveis quando tinha 6.295. Para corrigir cargas
+feitas antes disso:
+
+```bash
+dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- cobertura --recontar
 ```
 
 **Cadastro cancelado entra na base.** Cerca de **6%** dos registros são
