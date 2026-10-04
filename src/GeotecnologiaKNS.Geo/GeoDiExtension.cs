@@ -41,6 +41,7 @@ public static class GeoDiExtension
         services.AddScoped<RecarregadorDeCamadas>();
         services.AddScoped<IPerimetroProprioService, PerimetroProprioService>();
         services.AddScoped<PerimetroProprioService>();
+        services.AddScoped<BaixadorBaseCar>();
 
         return services;
     }

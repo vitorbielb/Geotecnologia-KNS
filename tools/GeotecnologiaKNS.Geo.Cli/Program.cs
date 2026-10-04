@@ -35,6 +35,14 @@ CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("pt-BR");
 
 var comando = args.FirstOrDefault()?.ToLowerInvariant();
 
+// O provedor de linha de comando do .NET só reconhece "--chave valor" e
+// descarta em silêncio uma opção solta como --todas ou --lacunas. Descobri isso
+// com a recarga respondendo "nenhuma camada vencida" a um comando que pedia
+// todas, e de novo com a baixa do CAR ignorando --lacunas. Fica uma função para
+// todas, em vez de cada comando lembrar de ler args por conta própria.
+bool Marcado(string opcao) =>
+    args.Any(x => string.Equals(x, $"--{opcao}", StringComparison.OrdinalIgnoreCase));
+
 // Inspecionar lê só o arquivo; não faz sentido exigir banco para isso.
 if (comando == "inspecionar")
 {
@@ -100,7 +108,7 @@ try
             return await ListarCamadasAsync(scope.ServiceProvider);
 
         case "recarregar":
-            return await RecarregarAsync(scope.ServiceProvider, configuration, args);
+            return await RecarregarAsync(scope.ServiceProvider, configuration, Marcado);
 
         case "cruzar":
             return await CruzarAsync(scope.ServiceProvider, configuration);
@@ -109,10 +117,13 @@ try
             return await SimularCarAsync(scope.ServiceProvider, configuration);
 
         case "cobertura":
-            return await CoberturaAsync(scope.ServiceProvider);
+            return await CoberturaAsync(scope.ServiceProvider, configuration);
 
         case "imoveis":
             return await ListarImoveisAsync(scope.ServiceProvider);
+
+        case "baixar-car":
+            return await BaixarCarAsync(scope.ServiceProvider, configuration, Marcado);
 
         case "importar-perimetro":
             return await ImportarPerimetroAsync(scope.ServiceProvider, configuration);
@@ -134,8 +145,9 @@ try
             Console.Error.WriteLine("  recarregar [--chave <chave>] [--todas]");
             Console.Error.WriteLine("  cruzar --car <codigo> [--tenant <id>]");
             Console.Error.WriteLine("  simular-car --car <codigo> [--area-ha 1000]");
-            Console.Error.WriteLine("  cobertura");
+            Console.Error.WriteLine("  cobertura [--remover <codigo IBGE>]");
             Console.Error.WriteLine("  imoveis");
+            Console.Error.WriteLine("  baixar-car --uf <UF> | --municipio <codigo IBGE> | --lacunas");
             Console.Error.WriteLine("  importar-perimetro --arquivo <arq.zip|.geojson> --nome <nome> --tenant <id>");
             Console.Error.WriteLine();
             Console.Error.WriteLine("  Tipos de camada: " + string.Join(", ", Enum.GetNames<TipoCamada>()));
@@ -153,9 +165,36 @@ catch (Exception ex)
 /// existe. A fila de lacunas é o que guia a próxima carga: em vez de tentar
 /// mapear o país, carrega-se o que está sendo usado de verdade.
 /// </summary>
-static async Task<int> CoberturaAsync(IServiceProvider provider)
+static async Task<int> CoberturaAsync(IServiceProvider provider, IConfiguration configuration)
 {
     var contexto = provider.GetRequiredService<GeoDbContext>();
+
+    // Cobertura afirma que um município foi carregado por inteiro. Quando uma
+    // carga mal escopada registra o que não cobriu, a afirmação fica falsa e
+    // pior que ausente: consulta naquele município deixa de virar lacuna, e
+    // ninguém descobre que falta carregar. Remover é a correção.
+    var remover = configuration["remover"];
+
+    if (!string.IsNullOrWhiteSpace(remover))
+    {
+        var alvo = await contexto.Cobertura
+            .FirstOrDefaultAsync(x => x.CodigoIbge == remover);
+
+        if (alvo is null)
+        {
+            Console.Error.WriteLine($"Município {remover} não consta como coberto.");
+            return 1;
+        }
+
+        contexto.Cobertura.Remove(alvo);
+        await contexto.SaveChangesAsync();
+
+        Console.WriteLine(
+            $"Cobertura de {alvo.Municipio ?? remover}/{alvo.Uf} removida. " +
+            "Os imóveis continuam carregados; o município volta a gerar lacuna quando consultado.");
+
+        return 0;
+    }
 
     var cobertos = await contexto.Cobertura
         .OrderBy(x => x.Uf).ThenBy(x => x.Municipio)
@@ -752,7 +791,7 @@ static string Situacao(DateTime? atualizada, int? periodicidade)
 }
 
 static async Task<int> RecarregarAsync(
-    IServiceProvider provider, IConfiguration configuration, string[] argumentos)
+    IServiceProvider provider, IConfiguration configuration, Func<string, bool> marcado)
 {
     var recarregador = provider.GetRequiredService<RecarregadorDeCamadas>();
     await recarregador.SincronizarCatalogoAsync();
@@ -763,7 +802,7 @@ static async Task<int> RecarregarAsync(
     // .NET só reconhece "--chave valor", e descarta em silêncio uma opção
     // solta como --todas. Descobri isso com a recarga respondendo "nenhuma
     // camada vencida" a um comando que pedia todas.
-    var todas = argumentos.Contains("--todas", StringComparer.OrdinalIgnoreCase);
+    var todas = marcado("todas");
 
     IReadOnlyList<FonteDeCamada> fontes;
 
@@ -825,6 +864,90 @@ static async Task<int> RecarregarAsync(
 
     // Saída diferente de zero para o agendador do sistema enxergar a falha; sem
     // isso, uma recarga que não aconteceu passa por recarga bem-sucedida.
+    return falhas == 0 ? 0 : 1;
+}
+
+/// <summary>
+/// Baixa a base do CAR direto do SICAR.
+/// </summary>
+/// <remarks>
+/// Três escopos, do mais barato ao mais caro: --lacunas atende exatamente os
+/// municípios que alguém consultou e não estavam carregados; --municipio traz
+/// um; --uf traz o estado inteiro.
+/// </remarks>
+static async Task<int> BaixarCarAsync(
+    IServiceProvider provider, IConfiguration configuration, Func<string, bool> marcado)
+{
+    var baixador = provider.GetRequiredService<BaixadorBaseCar>();
+    var contexto = provider.GetRequiredService<GeoDbContext>();
+
+    var uf = configuration["uf"];
+    var municipio = configuration["municipio"];
+    var lacunas = marcado("lacunas");
+
+    var escopos = new List<(string Tipo, string Valor)>();
+
+    if (!string.IsNullOrWhiteSpace(uf))
+    {
+        escopos.Add(("uf", uf.ToUpperInvariant()));
+    }
+    else if (!string.IsNullOrWhiteSpace(municipio))
+    {
+        escopos.Add(("municipio", municipio));
+    }
+    else if (lacunas)
+    {
+        // A lacuna é apagada quando a cobertura chega, então toda linha aqui é
+        // pedido em aberto. O município já coberto fica de fora por garantia,
+        // para o caso de uma carga ter entrado por outro caminho.
+        var cobertos = await contexto.Cobertura.AsNoTracking()
+            .Select(x => x.CodigoIbge).ToListAsync();
+
+        var pendentes = await contexto.Lacunas
+            .AsNoTracking()
+            .Where(x => !cobertos.Contains(x.CodigoIbge))
+            .OrderByDescending(x => x.Consultas)
+            .Select(x => x.CodigoIbge)
+            .Distinct()
+            .ToListAsync();
+
+        if (pendentes.Count == 0)
+        {
+            Console.WriteLine("Nenhuma lacuna de cobertura registrada.");
+            return 0;
+        }
+
+        Console.WriteLine($"{pendentes.Count} município(s) pedido(s) e não carregado(s).");
+        escopos.AddRange(pendentes.Select(x => ("municipio", x)));
+    }
+    else
+    {
+        Console.Error.WriteLine("Informe --uf <UF>, --municipio <codigo IBGE> ou --lacunas.");
+        Console.Error.WriteLine("UFs: " + string.Join(", ", BaixadorBaseCar.Ufs));
+        return 1;
+    }
+
+    var falhas = 0;
+
+    foreach (var (tipo, valor) in escopos)
+    {
+        Console.WriteLine($"→ {valor}");
+
+        var resultado = tipo == "uf"
+            ? await baixador.BaixarUfAsync(valor)
+            : await baixador.BaixarMunicipioAsync(valor);
+
+        Console.WriteLine(resultado.Sucesso
+            ? $"  ok em {resultado.Duracao.TotalSeconds:N0}s — {resultado.Gravados:N0} imóveis " +
+              $"em {resultado.Paginas} página(s)."
+            : $"  FALHOU após {resultado.Gravados:N0} imóveis — {resultado.Erro}");
+
+        if (!resultado.Sucesso)
+        {
+            falhas++;
+        }
+    }
+
     return falhas == 0 ? 0 : 1;
 }
 

@@ -53,7 +53,10 @@ public class GeoDbContext : DbContext
             entity.Property(x => x.Municipio).HasColumnName("municipio").HasMaxLength(150);
             entity.Property(x => x.Uf).HasColumnName("uf").HasMaxLength(2);
             entity.Property(x => x.CodigoIbge).HasColumnName("codigo_ibge").HasMaxLength(7);
-            entity.Property(x => x.Situacao).HasColumnName("situacao").HasMaxLength(50);
+            // 120, e não 50: a condição do SICAR vem por extenso — "Analisado,
+            // aguardando regularização ambiental (Lei nº 12.651/2012)" tem 68
+            // caracteres. Cortar no meio estragaria a frase que vai ao laudo.
+            entity.Property(x => x.Situacao).HasColumnName("situacao").HasMaxLength(120);
             entity.Property(x => x.Tipo).HasColumnName("tipo").HasMaxLength(20);
             entity.Property(x => x.AtualizadoEmOrigem).HasColumnName("atualizado_em_origem");
             entity.Property(x => x.CargaId).HasColumnName("carga_id");

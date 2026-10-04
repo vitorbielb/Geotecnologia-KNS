@@ -34,8 +34,27 @@ public class SicarShapefileImporter
     private static readonly string[] CamposArea = { "NUM_AREA", "AREA_HA", "AREA", "AREA_IMOVE" };
     private static readonly string[] CamposMunicipio = { "MUNICIPIO", "NOM_MUNICI", "NM_MUNICIP", "NOME_MUNIC" };
     private static readonly string[] CamposUf = { "COD_ESTADO", "UF", "SIGLA_UF", "ESTADO" };
-    private static readonly string[] CamposSituacao = { "IND_STATUS", "SITUACAO", "STATUS", "DES_CONDIC" };
-    private static readonly string[] CamposTipo = { "IND_TIPO", "TIPO_IMOVE", "TIPO" };
+    /// <summary>
+    /// Situação do cadastro, na ordem de preferência.
+    /// </summary>
+    /// <remarks>
+    /// "condicao" vem primeiro porque é a que diz algo: "Analisado, em
+    /// conformidade", "Aguardando análise", "Cancelado por decisão
+    /// administrativa". O status_imovel do SICAR é a sigla equivalente (AT, CA,
+    /// PE, SU) e serve de reserva quando a origem não traz a condição por
+    /// extenso.
+    ///
+    /// Importa que o cancelado entre: ele é cerca de 6% da base, e descartá-lo
+    /// faria a análise responder "imóvel não está na base do CAR" para um
+    /// imóvel que está lá e teve o cadastro anulado — duas situações
+    /// diferentes que o laudo não pode confundir.
+    /// </remarks>
+    private static readonly string[] CamposSituacao =
+    {
+        "CONDICAO", "DES_CONDIC", "IND_STATUS", "SITUACAO", "STATUS", "STATUS_IMO", "STATUS_IMOVEL"
+    };
+
+    private static readonly string[] CamposTipo = { "IND_TIPO", "TIPO_IMOVE", "TIPO_IMOVEL", "TIPO" };
 
     /// <summary>
     /// Destino lógico → nomes de coluna aceitos. A comparação é case-insensitive,
@@ -62,10 +81,15 @@ public class SicarShapefileImporter
         _logger = logger;
     }
 
+    /// <param name="municipiosDoEscopo">
+    /// Municípios que esta carga se propõe a cobrir por inteiro. Nulo quando a
+    /// carga é de um arquivo completo, e aí tudo o que aparecer conta.
+    /// </param>
     public async Task<ResultadoImportacao> ImportarAsync(
         string caminhoShapefile,
         string origem,
         string? uf = null,
+        IReadOnlySet<string>? municipiosDoEscopo = null,
         CancellationToken cancellationToken = default)
     {
         if (!File.Exists(caminhoShapefile))
@@ -128,7 +152,8 @@ public class SicarShapefileImporter
                 carga.RegistrosGravados += await GravarLoteAsync(lote, cancellationToken);
             }
 
-            await RegistrarCoberturaAsync(municipiosVistos, carga.Id, cancellationToken);
+            await RegistrarCoberturaAsync(
+                municipiosVistos, municipiosDoEscopo, carga.Id, cancellationToken);
 
             carga.Status = StatusCarga.Concluida;
             carga.ConcluidaEm = DateTime.UtcNow;
@@ -203,8 +228,11 @@ public class SicarShapefileImporter
             Municipio = Texto(atributos, CamposMunicipio),
             Uf = CodigoCar.ExtrairUf(codigo) ?? Texto(atributos, CamposUf),
             CodigoIbge = CodigoCar.ExtrairCodigoIbge(codigo),
-            Situacao = Texto(atributos, CamposSituacao),
-            Tipo = Texto(atributos, CamposTipo),
+            // Cortado no tamanho da coluna porque vem de fora: uma origem
+            // estadual com texto mais longo derrubaria a carga inteira, e
+            // perder o fim de uma frase é melhor que perder o município.
+            Situacao = Limitar(Texto(atributos, CamposSituacao), 120),
+            Tipo = Limitar(Texto(atributos, CamposTipo), 20),
             CargaId = cargaId
         };
     }
@@ -233,9 +261,24 @@ public class SicarShapefileImporter
     /// </summary>
     private async Task RegistrarCoberturaAsync(
         Dictionary<string, (string Uf, string? Nome, int Imoveis)> municipios,
+        IReadOnlySet<string>? municipiosDoEscopo,
         long cargaId,
         CancellationToken cancellationToken)
     {
+        // Aparecer no arquivo não é o mesmo que estar coberto. Uma carga
+        // filtrada por município traz, junto, imóveis cujo código do CAR aponta
+        // para um município vizinho — o SICAR tem registros em que o
+        // cod_municipio_ibge e o município embutido no código do CAR discordam.
+        // Esses imóveis são gravados, porque são dados reais, mas o município
+        // deles não pode ser dado por coberto: uma consulta futura lá não
+        // registraria lacuna, e ninguém saberia que falta carregar.
+        if (municipiosDoEscopo is not null)
+        {
+            municipios = municipios
+                .Where(x => municipiosDoEscopo.Contains(x.Key))
+                .ToDictionary(x => x.Key, x => x.Value);
+        }
+
         if (municipios.Count == 0)
         {
             return;
@@ -345,6 +388,9 @@ public class SicarShapefileImporter
 
         return null;
     }
+
+    private static string? Limitar(string? texto, int tamanho) =>
+        texto is not null && texto.Length > tamanho ? texto[..tamanho] : texto;
 
     /// <summary>Valor cru do primeiro campo encontrado, sem conversão para texto.</summary>
     private static object? Bruto(NetTopologySuite.Features.IAttributesTable atributos, string[] candidatos)
