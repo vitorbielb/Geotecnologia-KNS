@@ -55,9 +55,15 @@ Referência das cargas feitas:
 
 | Estado | Municípios | Imóveis | Tempo |
 |---|---|---|---|
-| Goiás | 246 | 243.921 | 526s |
-| Mato Grosso | 142 | 219.983 | 367s |
-| Tocantins | 139 | 112.081 | 157s |
+| Pará | 144 | 390.587 | 633s |
+| Goiás | 246 | 243.921 | 585s |
+| Mato Grosso | 142 | 219.983 | 391s |
+| Rondônia | 52 | 196.929 | 239s |
+| Tocantins | 139 | 112.081 | 190s |
+| Mato Grosso do Sul | 79 | 90.086 | 157s |
+
+Cerca de 1,25 milhão de imóveis no cinturão da pecuária, pouco mais de 35
+minutos de carga.
 
 Confira a contagem de municípios contra o IBGE **do ano corrente**, não contra o
 que você lembra: Mato Grosso aparece com 142 e não com 141 porque Boa Esperança
@@ -77,6 +83,35 @@ outro, e o buraco não apareceria em lugar nenhum. O fim é detectado por págin
 incompleta.
 
 Referência: uma página cheia (10 mil imóveis, 5,6 MB) leva cerca de 6 segundos.
+
+## A armadilha mais cara: a versão do WFS
+
+**Use `version=1.0.0`.** A partir da 1.1.0 o servidor honra a ordem de eixos
+declarada no EPSG:4674 — latitude antes de longitude — e o SHAPE-ZIP sai com as
+duas **trocadas**. O GeoJSON vem certo nas duas versões, o que torna o defeito
+ainda mais fácil de não ver.
+
+Isso já aconteceu aqui, com 1,25 milhão de imóveis. Abaetetuba ficou em
+longitude −1,76, que é no Atlântico perto da África. E **nada falhou**: o
+cruzamento simplesmente não encontrava nada, e toda análise devolvia "nenhuma
+sobreposição". Laudo limpo para todo fornecedor é o pior resultado possível, e é
+o que mais se parece com sucesso.
+
+Só apareceu porque São Félix do Xingu, epicentro de desmatamento, saiu com zero
+sobreposições em oito imóveis seguidos. Depois da correção, 11 de 15.
+
+Três defesas ficaram no lugar:
+
+- `inspecionar` mostra a extensão da amostra e avisa quando ela cai fora do
+  Brasil. **Rode antes de carregar arquivo de origem nova** — é o comando que
+  existe para isso.
+- O importador descarta imóvel fora do Brasil e **recusa o arquivo inteiro**
+  quando mais de 10% dele cai fora. Imóvel solto é dado ruim na origem; arquivo
+  inteiro é o arquivo errado.
+- A caixa de plausibilidade não é o contorno do país, e não precisa ser: eixo
+  trocado erra por dezenas de graus, não por meio. Buenos Aires cai dentro dela
+  de propósito — apertar até excluir o vizinho recusaria imóvel legítimo de
+  fronteira.
 
 ## Armadilhas que custaram tempo
 
