@@ -327,6 +327,16 @@ dotnet run --project tools/GeotecnologiaKNS.Geo.Cli -- importar-camada \
   --origem "INCRA — Acervo Fundiário (Assentamento Brasil)"
 ```
 
+- **É a única origem que não declara a codificação.** O zip do INCRA vem sem
+  `.cpg` nem `.cst`, e a biblioteca assume UTF-8 quando não há declaração —
+  mas o arquivo é Latin1. O resultado ia para o laudo: "PA PROVÍNCIA" saía com
+  um caractere de substituição no meio do nome.
+
+  A leitura passa a olhar o cabeçalho do DBF (byte 29, o *language driver id*;
+  o INCRA declara 0x57, que é ANSI) e, na falta de tudo, assume Latin1. Todas as
+  demais origens vêm de GeoServer, que sempre escreve `.cst` com ISO-8859-1 —
+  essas continuam pelo caminho de antes.
+
 Última carga de referência: 8.215 projetos, 1 descartado por geometria inválida.
 
 ---

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO.Esri;
+using NetTopologySuite.IO.Esri.Shapefiles.Readers;
 
 namespace GeotecnologiaKNS.Geo.Ingestao;
 
@@ -106,7 +107,11 @@ public class CamadaShapefileImporter
 
         // Leitura em fluxo: ReadAllFeatures materializaria o shapefile inteiro,
         // e camadas como o PRODES Cerrado passam de dois milhões de polígonos.
-        using var leitor = Shapefile.OpenRead(caminhoShapefile);
+        // A codificação entra aqui porque a biblioteca assume UTF-8 quando o
+        // shapefile não traz .cpg/.cst, e órgão brasileiro publica em Latin1.
+        using var leitor = Shapefile.OpenRead(
+            caminhoShapefile,
+            new ShapefileReaderOptions { Encoding = CodificacaoDeShapefile.Detectar(caminhoShapefile) });
 
         foreach (var feature in Legiveis(leitor, ilegiveis, cancellationToken))
         {

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO.Esri;
+using NetTopologySuite.IO.Esri.Shapefiles.Readers;
 
 namespace GeotecnologiaKNS.Geo.Ingestao;
 
@@ -136,7 +137,9 @@ public class SicarShapefileImporter
             // o arquivo inteiro. Medido em 224 MB para 48 mil feições — a base
             // nacional do CAR, com milhões de imóveis, não caberia na memória.
             // Em fluxo o mesmo arquivo custa 5 MB.
-            using var leitor = Shapefile.OpenRead(caminhoShapefile);
+            using var leitor = Shapefile.OpenRead(
+                caminhoShapefile,
+                new ShapefileReaderOptions { Encoding = CodificacaoDeShapefile.Detectar(caminhoShapefile) });
 
             foreach (var feature in leitor)
             {

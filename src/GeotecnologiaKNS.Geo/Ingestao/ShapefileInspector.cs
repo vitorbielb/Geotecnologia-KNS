@@ -1,5 +1,6 @@
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO.Esri;
+using NetTopologySuite.IO.Esri.Shapefiles.Readers;
 
 namespace GeotecnologiaKNS.Geo.Ingestao;
 
@@ -47,7 +48,9 @@ public static class ShapefileInspector
         // Crítico ser em fluxo: ReadAllFeatures leria o arquivo todo antes de o
         // laço poder parar na amostra. Inspecionar a base nacional do CAR, que é
         // justamente o primeiro passo, estouraria a memória.
-        using var leitor = Shapefile.OpenRead(caminhoShapefile);
+        using var leitor = Shapefile.OpenRead(
+            caminhoShapefile,
+            new ShapefileReaderOptions { Encoding = CodificacaoDeShapefile.Detectar(caminhoShapefile) });
 
         foreach (var feature in leitor)
         {
