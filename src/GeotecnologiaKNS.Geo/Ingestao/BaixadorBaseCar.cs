@@ -217,7 +217,18 @@ public class BaixadorBaseCar
         var endereco = new List<string>
         {
             "service=WFS",
-            "version=1.1.0",
+
+            // 1.0.0, e não 1.1.0, por um motivo que custou caro: a partir da
+            // 1.1.0 o WFS honra a ordem de eixos declarada no EPSG:4674, que é
+            // latitude antes de longitude, e o SHAPE-ZIP sai com as duas
+            // trocadas. O GeoJSON vem certo nas duas versões, o que torna o
+            // defeito ainda mais fácil de não ver.
+            //
+            // Nada falha quando isso acontece: os imóveis vão parar no meio do
+            // Atlântico, o cruzamento não encontra nada e toda análise devolve
+            // "nenhuma sobreposição". Laudo limpo para todo fornecedor é o pior
+            // resultado possível, e é o que mais se parece com sucesso.
+            "version=1.0.0",
             "request=GetFeature",
             $"typeName=sicar:sicar_imoveis_{uf.ToLowerInvariant()}",
             "outputFormat=SHAPE-ZIP",

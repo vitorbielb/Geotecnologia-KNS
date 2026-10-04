@@ -660,6 +660,16 @@ static int Inspecionar(IConfiguration configuration)
     Console.WriteLine($"Arquivo:   {inspecao.Arquivo}");
     Console.WriteLine($"Geometria: {inspecao.TipoGeometria ?? "(nenhuma)"}");
     Console.WriteLine($"Amostra:   {inspecao.RegistrosAmostrados} feição(ões)");
+
+    if (inspecao.Extensao is { } caixa)
+    {
+        // Imprimir antes dos campos de propósito: coordenada trocada é o erro
+        // mais caro que um shapefile pode trazer, porque não falha — só faz o
+        // cruzamento não encontrar nada.
+        Console.WriteLine(
+            $"Extensão:  longitude {caixa.MinX:F4} a {caixa.MaxX:F4}, " +
+            $"latitude {caixa.MinY:F4} a {caixa.MaxY:F4}");
+    }
     Console.WriteLine();
     Console.WriteLine($"{"COLUNA",-16} {"RECONHECIDA COMO",-16} EXEMPLO");
 

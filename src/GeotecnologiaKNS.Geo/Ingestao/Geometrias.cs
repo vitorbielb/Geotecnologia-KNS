@@ -14,6 +14,34 @@ namespace GeotecnologiaKNS.Geo.Ingestao;
 public static class Geometrias
 {
     /// <summary>
+    /// Retângulo que contém o Brasil inteiro, com folga.
+    /// </summary>
+    /// <remarks>
+    /// Do Monte Caburaí (+5,3) ao Arroio Chuí (−33,8); da Ponta do Seixas
+    /// (−34,8) à nascente do Moa (−73,99). A folga de um grau existe para não
+    /// recusar imóvel legítimo na fronteira.
+    /// </remarks>
+    private static readonly Envelope Brasil = new(-75, -33, -35, 7);
+
+    /// <summary>
+    /// Verifica se uma extensão cai dentro do Brasil.
+    /// </summary>
+    /// <remarks>
+    /// Existe por causa de um defeito que passou silencioso: a base do CAR
+    /// baixada em SHAPE-ZIP veio com latitude e longitude trocadas, e os imóveis
+    /// foram parar no meio do Atlântico. Nada falhou — o cruzamento
+    /// simplesmente não encontrava nada, e toda análise saía "nenhuma
+    /// sobreposição". Um laudo limpo para todo fornecedor é o pior resultado
+    /// possível, e é o que mais se parece com sucesso.
+    /// </remarks>
+    public static bool DentroDoBrasil(Envelope? extensao) =>
+        extensao is { IsNull: false } && Brasil.Contains(extensao);
+
+    /// <summary>Verifica se uma geometria cai dentro do Brasil.</summary>
+    public static bool DentroDoBrasil(Geometry? geometria) =>
+        geometria is { IsEmpty: false } && DentroDoBrasil(geometria.EnvelopeInternal);
+
+    /// <summary>
     /// Devolve a geometria pronta para gravar, ou null quando não há o que
     /// aproveitar.
     /// </summary>

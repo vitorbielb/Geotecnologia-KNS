@@ -1,3 +1,4 @@
+using NetTopologySuite.Geometries;
 using NetTopologySuite.IO.Esri;
 
 namespace GeotecnologiaKNS.Geo.Ingestao;
@@ -9,7 +10,8 @@ public record InspecaoShapefile(
     int RegistrosAmostrados,
     string? TipoGeometria,
     IReadOnlyList<CampoShapefile> Campos,
-    IReadOnlyList<string> Problemas);
+    IReadOnlyList<string> Problemas,
+    Envelope? Extensao = null);
 
 /// <summary>
 /// Lê apenas o cabeçalho e as primeiras feições de um shapefile para mostrar
@@ -34,6 +36,14 @@ public static class ShapefileInspector
         string? tipoGeometria = null;
         var lidos = 0;
 
+        // A extensão da amostra é o que denuncia coordenada trocada antes de a
+        // carga acontecer. Custou caro aprender: a base do CAR baixada em
+        // SHAPE-ZIP veio com latitude e longitude invertidas, e como ninguém
+        // olhava o retângulo, 1,25 milhão de imóveis foram parar no meio do
+        // Atlântico. Toda análise devolvia "nenhuma sobreposição" — laudo limpo
+        // para todo fornecedor, sem erro nenhum aparecer.
+        var extensao = new Envelope();
+
         // Crítico ser em fluxo: ReadAllFeatures leria o arquivo todo antes de o
         // laço poder parar na amostra. Inspecionar a base nacional do CAR, que é
         // justamente o primeiro passo, estouraria a memória.
@@ -42,6 +52,11 @@ public static class ShapefileInspector
         foreach (var feature in leitor)
         {
             tipoGeometria ??= feature.Geometry?.GeometryType;
+
+            if (feature.Geometry is { IsEmpty: false } geometria)
+            {
+                extensao.ExpandToInclude(geometria.EnvelopeInternal);
+            }
 
             foreach (var nome in feature.Attributes.GetNames())
             {
@@ -62,6 +77,14 @@ public static class ShapefileInspector
         if (lidos == 0)
         {
             problemas.Add("O shapefile não tem nenhuma feição.");
+        }
+        else if (!extensao.IsNull && !Geometrias.DentroDoBrasil(extensao))
+        {
+            problemas.Add(
+                $"A amostra está fora do Brasil: longitude de {extensao.MinX:F4} a {extensao.MaxX:F4}, " +
+                $"latitude de {extensao.MinY:F4} a {extensao.MaxY:F4}. " +
+                "Suspeite de latitude e longitude trocadas, ou de sistema de coordenadas diferente " +
+                "do esperado.");
         }
 
         var mapeamento = SicarShapefileImporter.MapeamentoDeCampos;
@@ -88,6 +111,7 @@ public static class ShapefileInspector
         }
 
         return new InspecaoShapefile(
-            Path.GetFileName(caminhoShapefile), lidos, tipoGeometria, resultado, problemas);
+            Path.GetFileName(caminhoShapefile), lidos, tipoGeometria, resultado, problemas,
+            extensao.IsNull ? null : extensao);
     }
 }

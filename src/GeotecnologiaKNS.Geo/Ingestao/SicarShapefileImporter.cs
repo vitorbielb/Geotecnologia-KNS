@@ -30,6 +30,18 @@ public class SicarShapefileImporter
 
     private static readonly CultureInfo CulturaPtBr = CultureInfo.GetCultureInfo("pt-BR");
 
+    /// <summary>
+    /// Fração de geometrias fora do Brasil a partir da qual a carga é recusada.
+    /// </summary>
+    /// <remarks>
+    /// Imóvel solto fora da caixa é dado ruim na origem e vira descarte. Mas
+    /// um arquivo inteiro fora dela não é dado ruim: é o arquivo errado, ou com
+    /// latitude e longitude trocadas. Gravar isso não falha em lugar nenhum —
+    /// só faz o cruzamento parar de encontrar coisa alguma, e todo laudo sair
+    /// limpo.
+    /// </remarks>
+    private const double FracaoForaDoBrasilAceita = 0.10;
+
     private static readonly string[] CamposCodigo = { "COD_IMOVEL", "CAR", "COD_CAR", "CODIGO_CAR", "CAR_ID" };
     private static readonly string[] CamposArea = { "NUM_AREA", "AREA_HA", "AREA", "AREA_IMOVE" };
     private static readonly string[] CamposMunicipio = { "MUNICIPIO", "NOM_MUNICI", "NM_MUNICIP", "NOME_MUNIC" };
@@ -116,6 +128,7 @@ public class SicarShapefileImporter
         // deduzi-la da existência de imóveis confundiria município sem cadastro
         // com município nunca carregado.
         var municipiosVistos = new Dictionary<string, (string Uf, string? Nome, int Imoveis)>();
+        var foraDoBrasil = new Contador();
 
         try
         {
@@ -130,7 +143,7 @@ public class SicarShapefileImporter
                 cancellationToken.ThrowIfCancellationRequested();
                 carga.RegistrosLidos++;
 
-                var imovel = Mapear(feature.Geometry, feature.Attributes, carga.Id, avisos);
+                var imovel = Mapear(feature.Geometry, feature.Attributes, carga.Id, avisos, foraDoBrasil);
 
                 if (imovel is null)
                 {
@@ -152,6 +165,11 @@ public class SicarShapefileImporter
             {
                 carga.RegistrosGravados += await GravarLoteAsync(lote, cancellationToken);
             }
+
+            // Antes de registrar cobertura: cobertura é a afirmação de que o
+            // município foi carregado, e não se pode afirmar isso sobre um
+            // arquivo que caiu no oceano.
+            ConferirSeEhDoBrasil(carga.RegistrosLidos, foraDoBrasil.Total);
 
             await RegistrarCoberturaAsync(
                 municipiosVistos, pertenceAoEscopo, carga.Id, cancellationToken);
@@ -186,7 +204,8 @@ public class SicarShapefileImporter
         Geometry? geometria,
         NetTopologySuite.Features.IAttributesTable atributos,
         long cargaId,
-        List<string> avisos)
+        List<string> avisos,
+        Contador foraDoBrasil)
     {
         var codigo = CodigoCar.Normalizar(Texto(atributos, CamposCodigo));
 
@@ -214,6 +233,17 @@ public class SicarShapefileImporter
             }
 
             avisos.Add($"{codigo}: geometria corrigida por buffer(0).");
+        }
+
+        // Fora do Brasil é descarte, e o motivo mais provável não é dado ruim:
+        // é latitude e longitude trocadas na origem. Um imóvel no meio do
+        // Atlântico não cruza com nada, e sem este descarte a análise diria
+        // "nenhuma sobreposição" com toda a confiança.
+        if (!Geometrias.DentroDoBrasil(geometria))
+        {
+            foraDoBrasil.Total++;
+            avisos.Add($"{codigo}: geometria fora do Brasil.");
+            return null;
         }
 
         geometria.SRID = GeoDbContext.Srid;
@@ -403,6 +433,35 @@ public class SicarShapefileImporter
         }
 
         return null;
+    }
+
+    /// <summary>Contagem compartilhada entre o laço e o mapeamento.</summary>
+    private sealed class Contador
+    {
+        public int Total { get; set; }
+    }
+
+    /// <summary>
+    /// Recusa o arquivo quando quase tudo nele cai fora do Brasil.
+    /// </summary>
+    /// <remarks>
+    /// Um imóvel fora da caixa é dado ruim na origem. O arquivo inteiro fora
+    /// dela é outra coisa: é o arquivo errado, ou com latitude e longitude
+    /// trocadas — foi o que aconteceu com o SHAPE-ZIP do SICAR em WFS 1.1.0.
+    /// Gravar isso não falha em lugar nenhum, só faz o cruzamento parar de
+    /// encontrar qualquer coisa. Melhor a carga morrer alto.
+    /// </remarks>
+    private static void ConferirSeEhDoBrasil(int lidos, int foraDoBrasil)
+    {
+        if (lidos == 0 || foraDoBrasil < lidos * FracaoForaDoBrasilAceita)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"{foraDoBrasil:N0} de {lidos:N0} geometrias caem fora do Brasil. " +
+            "Suspeite de latitude e longitude trocadas na origem, ou de sistema de " +
+            "coordenadas diferente do esperado. Nenhum imóvel foi publicado.");
     }
 
     private static string? Limitar(string? texto, int tamanho) =>
