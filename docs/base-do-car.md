@@ -56,7 +56,14 @@ Referência das cargas feitas:
 | Estado | Municípios | Imóveis | Tempo |
 |---|---|---|---|
 | Goiás | 246 | 243.921 | 526s |
+| Mato Grosso | 142 | 219.983 | 367s |
 | Tocantins | 139 | 112.081 | 157s |
+
+Confira a contagem de municípios contra o IBGE **do ano corrente**, não contra o
+que você lembra: Mato Grosso aparece com 142 e não com 141 porque Boa Esperança
+do Norte foi desmembrada de Nova Mutum. Município novo entra na base com poucos
+imóveis — os cadastros antigos continuam sob o código do município de origem até
+serem retificados.
 
 ## Paginação: o teto de dez mil
 
