@@ -33,6 +33,58 @@ else
             var titulo = @Json.Serialize(Model.Titulo ?? string.Empty);
             var temCoordenadas = @(temCoordenadas ? "true" : "false");
 
+            // A base guarda o perímetro como geometria crua — {"type":"Polygon",...}
+            // —, e o addGeoJson do Google só aceita Feature ou FeatureCollection:
+            // geometria solta ele recusa e não desenha nada. O polígono do imóvel
+            // nunca apareceu por causa disso. Embrulhar aqui conserta também o que
+            // já está gravado, sem mexer no banco.
+            function comoFeature(objeto) {
+                if (objeto && (objeto.type === 'Feature' || objeto.type === 'FeatureCollection')) {
+                    return objeto;
+                }
+
+                return { type: 'Feature', geometry: objeto, properties: {} };
+            }
+
+            function desenharPerimetro(map, texto) {
+                var feicoes;
+
+                try {
+                    feicoes = map.data.addGeoJson(comoFeature(JSON.parse(texto)));
+                } catch (erro) {
+                    // Sem isto o mapa fica em branco e parece que o imóvel não tem
+                    // perímetro, quando o que houve foi perímetro ilegível.
+                    console.error('Perímetro não pôde ser desenhado:', erro);
+                    return false;
+                }
+
+                map.data.setStyle({
+                    strokeColor: '#2FA7F5',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#2FA7F5',
+                    fillOpacity: 0.35
+                });
+
+                // Enquadra o imóvel inteiro: zoom fixo corta fazenda grande, e o
+                // que fica de fora é justamente a parte que pode ter a restrição.
+                var limites = new google.maps.LatLngBounds();
+                var pontos = 0;
+
+                feicoes.forEach(function (feicao) {
+                    feicao.getGeometry().forEachLatLng(function (ponto) {
+                        limites.extend(ponto);
+                        pontos++;
+                    });
+                });
+
+                if (pontos > 0) {
+                    map.fitBounds(limites);
+                }
+
+                return pontos > 0;
+            }
+
             window.@(callback) = function () {
                 var map = new google.maps.Map(document.getElementById('@Model.ElementoId'), {
                     zoom: geoJson || temCoordenadas ? 13 : 4,
@@ -44,15 +96,11 @@ else
                 if (window.knsTemaComponentes) { window.knsTemaComponentes.registrarMapa(map); }
 
                 if (geoJson) {
-                    map.data.addGeoJson(JSON.parse(geoJson));
-                    map.data.setStyle({
-                        strokeColor: '#2FA7F5',
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2,
-                        fillColor: '#2FA7F5',
-                        fillOpacity: 0.35
-                    });
-                    return;
+                    var desenhado = desenharPerimetro(map, geoJson);
+
+                    if (desenhado) {
+                        return;
+                    }
                 }
 
                 if (temCoordenadas) {
