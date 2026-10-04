@@ -59,13 +59,36 @@
 
         @* Cobertura parcial vem antes de tudo: um laudo sem ocorrências se lê
            como aprovação, e é exatamente aí que a omissão engana. *@
+        @{
+            // O veredito distingue os dois casos: o motor só devolve LIBERADO
+            // quando nenhuma regra capaz de decidir ficou sem avaliar. Então
+            // resultado liberado com cobertura parcial significa que as lacunas
+            // são todas informativas — e aí a tela não pode dizer "não é uma
+            // liberação" logo abaixo de um selo verde escrito Liberado.
+            var lacunasDecidem = Model.Resultado != Status.Liberado;
+        }
+
         @if (Model.Situacao == SituacaoAnalise.Concluida && !Model.CoberturaCompleta)
         {
-            <div class="alert alert-warning">
-                <strong>Verificação incompleta.</strong>
-                As regras abaixo não puderam ser aplicadas porque nenhuma camada do
-                tipo que elas examinam estava carregada. O que não aparece nesta
-                análise não foi verificado — não é ausência de restrição.
+            <div class="alert @(lacunasDecidem ? "alert-warning" : "alert-secondary")">
+                @if (lacunasDecidem)
+                {
+                    <strong>Verificação incompleta.</strong>
+                    <text>
+                        As regras abaixo não puderam ser aplicadas, e por isso o resultado
+                        não é uma liberação. O que não aparece nesta análise não foi
+                        verificado — não é ausência de restrição.
+                    </text>
+                }
+                else
+                {
+                    <strong>Verificação parcial.</strong>
+                    <text>
+                        As regras abaixo não puderam ser aplicadas. Elas são informativas
+                        na política desta indústria, então não alteram o resultado — mas o
+                        que elas examinam não foi verificado.
+                    </text>
+                }
                 @if (!string.IsNullOrWhiteSpace(Model.RegrasNaoAvaliadas))
                 {
                     <ul class="mb-0 mt-2">
@@ -95,11 +118,17 @@
                 Nenhuma sobreposição restritiva encontrada nas camadas verificadas.
             </div>
         }
-        else if (Model.Ocorrencias.Count == 0)
+        else if (Model.Ocorrencias.Count == 0 && lacunasDecidem)
         {
             <div class="alert alert-info mb-0">
                 Nenhuma sobreposição nas camadas disponíveis. O resultado não é uma
                 liberação — veja acima o que ficou sem verificação.
+            </div>
+        }
+        else if (Model.Ocorrencias.Count == 0)
+        {
+            <div class="alert alert-success mb-0">
+                Nenhuma sobreposição restritiva encontrada nas camadas verificadas.
             </div>
         }
         else

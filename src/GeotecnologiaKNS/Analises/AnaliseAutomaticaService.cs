@@ -146,10 +146,14 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             analise.CamadasVerificadas = await DescreverCamadasAsync(
                 solicitacao.TenantId, cancellationToken);
             analise.CoberturaCompleta = avaliacao.CoberturaCompleta;
+            // O motivo vai junto porque "camada não carregada" manda carregar
+            // um arquivo, e essa é a instrução errada para a regra da cadeia
+            // indireta, que se resolve declarando fornecedor. Quem lê precisa
+            // saber onde agir.
             analise.RegrasNaoAvaliadas = avaliacao.NaoAvaliadas.Count == 0
                 ? null
                 : string.Join(Environment.NewLine, avaliacao.NaoAvaliadas.Select(
-                    r => $"{r.CodigoRegra} — {r.Descricao}"));
+                    r => $"{r.CodigoRegra} — {r.Descricao} ({r.Explicacao})"));
             analise.Situacao = SituacaoAnalise.Concluida;
             analise.ConcluidaEm = DateTime.Now;
 

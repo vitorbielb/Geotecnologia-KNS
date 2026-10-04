@@ -49,11 +49,54 @@ public record Achado(
 /// verificado contra uma única camada saía com o mesmo "LIBERADO" de um imóvel
 /// verificado contra todas — e o laudo não dava como distinguir os dois.
 /// </remarks>
+/// <summary>
+/// Por que uma regra ficou sem ser aplicada.
+/// </summary>
+/// <remarks>
+/// Importa dizer qual é: "camada não carregada" manda carregar um arquivo, e
+/// é a instrução errada para a IND-001, que fica sem avaliar porque ninguém
+/// declarou a cadeia de fornecedores. Quem lê o laudo precisa saber o que fazer
+/// para resolver, e as duas coisas se resolvem em lugares diferentes.
+/// </remarks>
+public enum MotivoNaoAvaliada
+{
+    CamadaAusente = 0,
+    ListaRestritivaAusente = 1,
+    ProdutorSemDocumento = 2,
+    CadeiaNaoInformada = 3
+}
+
 public record RegraNaoAvaliada(
     string CodigoRegra,
     string Descricao,
     TipoCamada Tipo,
-    Severidade SeveridadePrevista);
+    Severidade SeveridadePrevista,
+    MotivoNaoAvaliada Motivo = MotivoNaoAvaliada.CamadaAusente)
+{
+    /// <summary>O que resolve a falta, em uma frase.</summary>
+    public string Explicacao => Motivo switch
+    {
+        MotivoNaoAvaliada.CadeiaNaoInformada =>
+            "nenhum fornecedor indireto declarado para o imóvel",
+
+        MotivoNaoAvaliada.ProdutorSemDocumento =>
+            "o produtor está cadastrado sem CPF ou CNPJ",
+
+        MotivoNaoAvaliada.ListaRestritivaAusente =>
+            "a lista restritiva correspondente não está carregada",
+
+        _ => "nenhuma camada do tipo examinado está carregada"
+    };
+
+    /// <summary>
+    /// Indica se a falta desta regra muda o veredito.
+    /// </summary>
+    /// <remarks>
+    /// Regra informativa, se não avaliada, continua só informando: não pode
+    /// decidir mais calada do que decidiria falando.
+    /// </remarks>
+    public bool AlteraOVeredito => SeveridadePrevista != Severidade.Informativo;
+}
 
 public record ResultadoAvaliacao(
     Status Status,
@@ -340,11 +383,20 @@ public class MotorDeRegras : IMotorDeRegras
                 : r.EhPorDocumento
                     ? !temDocumento || !listas.Contains(r.Restricao!.Value)
                     : !verificados.Contains(r.Tipo))
-            .Select(r => new RegraNaoAvaliada(r.Codigo, r.Descricao, r.Tipo, r.Severidade))
+            .Select(r => new RegraNaoAvaliada(
+                r.Codigo, r.Descricao, r.Tipo, r.Severidade, MotivoDe(r, temDocumento)))
             .OrderByDescending(r => r.SeveridadePrevista)
             .ThenBy(r => r.CodigoRegra, StringComparer.Ordinal)
             .ToList();
     }
+
+    private static MotivoNaoAvaliada MotivoDe(RegraAnalise regra, bool temDocumento) => regra switch
+    {
+        { CadeiaIndireta: true } => MotivoNaoAvaliada.CadeiaNaoInformada,
+        { EhPorDocumento: true } when !temDocumento => MotivoNaoAvaliada.ProdutorSemDocumento,
+        { EhPorDocumento: true } => MotivoNaoAvaliada.ListaRestritivaAusente,
+        _ => MotivoNaoAvaliada.CamadaAusente
+    };
 
     /// <summary>
     /// Resumo curto do veredito, para o campo Parecer da solicitação.
@@ -652,12 +704,9 @@ public class MotorDeRegras : IMotorDeRegras
             texto.AppendLine();
             texto.AppendLine($"[NÃO AVALIADA] {regra.CodigoRegra} — {regra.Descricao}");
 
-            // IND-001 não depende de camada: ela fica sem avaliar quando
-            // ninguém declarou a cadeia. Dizer "camada ausente" mandaria quem
-            // lê procurar um arquivo que não resolveria nada.
-            texto.AppendLine(regra.CodigoRegra == "IND-001"
-                ? "  Motivo: nenhum fornecedor indireto declarado para o imóvel."
-                : $"  Tipo de camada ausente: {DescreverTipo(regra.Tipo)}");
+            texto.AppendLine(regra.Motivo == MotivoNaoAvaliada.CamadaAusente
+                ? $"  Motivo: {regra.Explicacao} ({DescreverTipo(regra.Tipo)})."
+                : $"  Motivo: {regra.Explicacao}.");
             texto.AppendLine(
                 $"  Severidade que teria sido aplicada: {regra.SeveridadePrevista.ToString().ToUpperInvariant()}");
         }
