@@ -103,15 +103,21 @@ function desenharPerimetro(imovel) {
         camadasCar.forEach(function (camada) { camada.setMap(null); });
         camadasCar = [];
 
+        // O desenho é o mesmo da tela de detalhe, e mora num arquivo só: eram
+        // duas cópias, e o defeito de geometria crua estava nas duas.
+        if (window.knsPerimetro.desenhar(mapaCar, imovel.perimetro)) {
+            return;
+        }
+
+        // Sem perímetro desenhável, ao menos marca onde o imóvel fica — o
+        // mapa vazio e centrado em lugar nenhum não diz nada a quem cadastra.
         mapaCar.data.forEach(function (feature) { mapaCar.data.remove(feature); });
-        mapaCar.data.addGeoJson(JSON.parse(imovel.perimetro));
-        mapaCar.data.setStyle({
-            strokeColor: '#2FA7F5',
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: '#2FA7F5',
-            fillOpacity: 0.35
-        });
+
+        camadasCar.push(new google.maps.Marker({
+            position: centro,
+            map: mapaCar,
+            title: imovel.codigoCar
+        }));
     };
 
     if (window.google && window.google.maps) {
