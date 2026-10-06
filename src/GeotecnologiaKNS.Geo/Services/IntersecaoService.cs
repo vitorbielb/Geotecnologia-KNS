@@ -17,7 +17,18 @@ public record Sobreposicao(
     string? Rotulo,
     string? AtributosJson,
     double AreaSobrepostaHa,
-    double PercentualDoImovel);
+    double PercentualDoImovel,
+
+    /// <summary>
+    /// A área de interseção em GeoJSON, simplificada, para o laudo desenhar.
+    /// </summary>
+    /// <remarks>
+    /// Vem simplificada e só quando pedida. Um imóvel que toca dezenas de
+    /// polígonos do PRODES traria megabytes de geometria para uma imagem de
+    /// 640 pixels, e a tolerância de 0,0005 grau — cerca de 50 metros — é
+    /// invisível nessa escala.
+    /// </remarks>
+    string? RecorteGeoJson = null);
 
 /// <param name="TiposVerificados">
 /// Tipos de camada que existiam e foram de fato cruzados. Ausência de
@@ -43,6 +54,12 @@ public interface IIntersecaoService
     /// esquecimento de quem chama em vazamento silencioso.
     /// </param>
     Task<ResultadoCruzamento> CruzarPorCarAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// As áreas de sobreposição, em GeoJSON simplificado, para desenhar no laudo.
+    /// </summary>
+    Task<IReadOnlyList<Sobreposicao>> ObterRecortesAsync(
         string codigoCar, int? tenantId, CancellationToken cancellationToken = default);
 
     /// <summary>Camadas ativas, para exibir no laudo o que foi de fato verificado.</summary>
@@ -191,6 +208,74 @@ public class IntersecaoService : IIntersecaoService
         }
 
         return sobreposicoes;
+    }
+
+    /// <summary>
+    /// Repete o cruzamento trazendo a geometria da interseção.
+    /// </summary>
+    /// <remarks>
+    /// Consulta própria, e não um parâmetro na do laudo, porque a geometria é
+    /// cara: ela só é buscada quando alguém pede o documento, e não em toda
+    /// análise que entra na fila.
+    /// </remarks>
+    public async Task<IReadOnlyList<Sobreposicao>> ObterRecortesAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
+    {
+        var normalizado = CodigoCar.Normalizar(codigoCar)
+            ?? throw new ArgumentException("Código do CAR inválido.", nameof(codigoCar));
+
+        var areaImovel = await ObterAreaImovelHaAsync(normalizado, cancellationToken) ?? 0;
+
+        const string Sql = @"
+            SELECT c.chave,
+                   c.nome,
+                   c.tipo,
+                   c.origem,
+                   c.ano_referencia,
+                   f.rotulo,
+                   ST_Area(ST_Intersection(f.geometria, i.perimetro)::geography) / 10000.0 AS area_ha,
+                   ST_AsGeoJSON(
+                       ST_SimplifyPreserveTopology(
+                           ST_Intersection(f.geometria, i.perimetro), 0.0005), 6) AS recorte
+            FROM geo.imovel_car i
+            JOIN geo.feicao_referencia f
+              ON ST_Intersects(f.geometria, i.perimetro)
+            JOIN geo.camada_referencia c
+              ON c.id = f.camada_id
+             AND f.versao = c.versao_atual
+            WHERE i.codigo_car = @codigo
+              AND c.ativa
+              AND (c.tenant_id IS NULL OR c.tenant_id = @tenant)
+              AND ST_IsValid(f.geometria)
+              AND ST_Area(ST_Intersection(f.geometria, i.perimetro)::geography) > 0
+            ORDER BY area_ha DESC";
+
+        await using var comando = await CriarComandoAsync(Sql, cancellationToken);
+        comando.Parameters.AddWithValue("codigo", normalizado);
+        comando.Parameters.AddWithValue("tenant", (object?)tenantId ?? DBNull.Value);
+
+        var recortes = new List<Sobreposicao>();
+
+        await using var leitor = await comando.ExecuteReaderAsync(cancellationToken);
+
+        while (await leitor.ReadAsync(cancellationToken))
+        {
+            var area = leitor.IsDBNull(6) ? 0 : leitor.GetDouble(6);
+
+            recortes.Add(new Sobreposicao(
+                CamadaChave: leitor.GetString(0),
+                CamadaNome: leitor.GetString(1),
+                Tipo: (TipoCamada)leitor.GetInt32(2),
+                Origem: leitor.GetString(3),
+                AnoReferencia: leitor.IsDBNull(4) ? null : leitor.GetInt32(4),
+                Rotulo: leitor.IsDBNull(5) ? null : leitor.GetString(5),
+                AtributosJson: null,
+                AreaSobrepostaHa: area,
+                PercentualDoImovel: areaImovel > 0 ? area / areaImovel * 100 : 0,
+                RecorteGeoJson: leitor.IsDBNull(7) ? null : leitor.GetString(7)));
+        }
+
+        return recortes;
     }
 
     private async Task<NpgsqlCommand> CriarComandoAsync(string sql, CancellationToken cancellationToken)

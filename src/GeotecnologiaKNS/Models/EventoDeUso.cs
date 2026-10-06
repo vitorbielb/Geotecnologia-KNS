@@ -15,7 +15,16 @@ namespace GeotecnologiaKNS.Models
         SolicitacaoAberta = 2,
 
         /// <summary>Um imóvel entrou na carteira monitorada.</summary>
-        ImovelCadastrado = 3
+        ImovelCadastrado = 3,
+
+        /// <summary>Um laudo em PDF foi emitido.</summary>
+        /// <remarks>
+        /// Medido à parte da análise porque são coisas que se cobram diferente:
+        /// a análise é o processamento, o laudo é o documento que a indústria
+        /// leva para a auditoria. Reemitir o mesmo laudo conta de novo, e é
+        /// isso mesmo — cada emissão é uma entrega.
+        /// </remarks>
+        LaudoEmitido = 4
     }
 
     /// <summary>

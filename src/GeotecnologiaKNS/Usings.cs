@@ -1,4 +1,5 @@
 ﻿global using static GeotecnologiaKNS.Utils.Global;
+global using GeotecnologiaKNS.Laudos;
 global using GeotecnologiaKNS.Infra.Arquivos;
 global using GeotecnologiaKNS.Data;
 global using GeotecnologiaKNS.Repositories.Interfaces;

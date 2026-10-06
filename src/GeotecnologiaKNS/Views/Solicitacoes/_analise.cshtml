@@ -19,9 +19,21 @@
 
 <div class="card">
     <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h4 class="card-title mb-0">Análise automática</h4>
-            @Html.DisplayStatus(Model.Resultado)
+
+            <div class="d-flex align-items-center gap-2">
+                @if (Model.Situacao == SituacaoAnalise.Concluida)
+                {
+                    <a class="btn btn-outline-primary btn-sm"
+                       href="@Url.Action("Laudo", "Solicitacoes", new { id = Model.Id })"
+                       target="_blank" rel="noopener">
+                        <i class="mdi mdi-file-pdf-box"></i>
+                        Baixar laudo
+                    </a>
+                }
+                @Html.DisplayStatus(Model.Resultado)
+            </div>
         </div>
 
         <p class="text-muted mt-2 mb-3">

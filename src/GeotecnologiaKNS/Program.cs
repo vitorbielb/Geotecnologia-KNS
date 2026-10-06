@@ -109,6 +109,14 @@ builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.Configure<OpcoesDeArquivos>(
     builder.Configuration.GetSection(OpcoesDeArquivos.Secao));
 builder.Services.AddSingleton<IArmazenamentoDeArquivos, ArmazenamentoEmDisco>();
+
+// O laudo em PDF. A licença Community do QuestPDF é gratuita para quem fatura
+// menos de um milhão de dólares por ano; acima disso é paga, e trocar de
+// biblioteca significa reescrever só o LaudoPdf.
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
+builder.Services.AddScoped<IMapaDoLaudo, MapaDoLaudo>();
+builder.Services.AddScoped<IEmissorDeLaudo, EmissorDeLaudo>();
 builder.Services.AddHostedService<MigradorDeAnexos>();
 var app = builder.Build();
 

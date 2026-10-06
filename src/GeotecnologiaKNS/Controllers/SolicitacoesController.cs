@@ -14,18 +14,22 @@ namespace GeotecnologiaKNS.Controllers
         private readonly IArmazenamentoDeArquivos _arquivos;
         private readonly IUserContext _userContext;
 
+        private readonly IEmissorDeLaudo _laudos;
+
         public SolicitacoesController(
             ApplicationDbContext context,
             IAnaliseAutomaticaService analise,
             IMedidorDeUso medidor,
             IArmazenamentoDeArquivos arquivos,
-            IUserContext userContext)
+            IUserContext userContext,
+            IEmissorDeLaudo laudos)
         {
             _context = context;
             _analise = analise;
             _medidor = medidor;
             _arquivos = arquivos;
             _userContext = userContext;
+            _laudos = laudos;
         }
 
         // GET: Solicitacoes
@@ -268,6 +272,33 @@ namespace GeotecnologiaKNS.Controllers
             await AnexoDeDocumento.DescartarAsync(arquivo, _arquivos);
 
             return View("_file-list-Analise", solicitacao);
+        }
+
+        /// <summary>
+        /// Emite o laudo da análise em PDF.
+        /// </summary>
+        /// <remarks>
+        /// O filtro global por indústria é o que impede alguém de baixar o
+        /// laudo de uma concorrente trocando o número na URL — o mesmo cuidado
+        /// dos endpoints de documento, pelo mesmo motivo.
+        /// </remarks>
+        [HttpGet("Solicitacoes/Laudo/{id}")]
+        public async Task<ActionResult> LaudoAsync(int id, CancellationToken cancellationToken)
+        {
+            var laudo = await _laudos.EmitirAsync(id, cancellationToken);
+
+            if (laudo is null)
+            {
+                // NotFound e não erro: análise inexistente, de outra indústria
+                // ou ainda sem resultado são todos casos legítimos.
+                return NotFound();
+            }
+
+            await _medidor.RegistrarAsync(
+                _userContext.TenantId ?? 0, TipoDeUso.LaudoEmitido, id,
+                laudo.NomeDoArquivo, cancellationToken);
+
+            return File(laudo.Pdf, "application/pdf", laudo.NomeDoArquivo);
         }
 
         [HttpGet("Solicitacoes/ViewFile/{id}")]
