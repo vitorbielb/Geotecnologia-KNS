@@ -31,6 +31,7 @@ else
             var geoJson = @Json.Serialize(Model.GeoJson);
             var centro = { lat: @centroLat.ToString(inv), lng: @centroLng.ToString(inv) };
             var titulo = @Json.Serialize(Model.Titulo ?? string.Empty);
+            var situacao = @Json.Serialize(Model.Situacao ?? string.Empty);
             var temCoordenadas = @(temCoordenadas ? "true" : "false");
 
             window.@(callback) = function () {
@@ -43,12 +44,17 @@ else
 
                 if (window.knsTemaComponentes) { window.knsTemaComponentes.registrarMapa(map); }
 
-                if (geoJson && window.knsPerimetro.desenhar(map, geoJson)) {
+                if (geoJson && window.knsPerimetro.desenhar(map, geoJson, situacao)) {
                     return;
                 }
 
                 if (temCoordenadas) {
-                    new google.maps.Marker({ position: centro, map: map, title: titulo });
+                    new google.maps.Marker({
+                        position: centro,
+                        map: map,
+                        title: titulo,
+                        icon: window.knsPerimetro.marcador(situacao)
+                    });
                 }
             };
 

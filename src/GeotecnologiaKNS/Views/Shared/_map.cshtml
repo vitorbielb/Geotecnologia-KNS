@@ -9,11 +9,15 @@
         .ObterParaMapa()
         .Select(p => new
         {
-            nome = p.NomePropriedade,
+            nome = p.Nome,
             municipio = p.Municipio,
             lat = p.Latitude,
             lng = p.Longitude,
-            perimetro = p.PerimetroGeoJson
+            perimetro = p.PerimetroGeoJson,
+
+            // Vazio quando o imóvel nunca foi analisado — o mapa pinta de
+            // cinza, que não é a cor de liberado.
+            situacao = p.Situacao?.ToString() ?? string.Empty
         })
         .ToList();
 
@@ -24,7 +28,18 @@
 }
 
 <div class="card-body">
-    <h4 class="card-title">Propriedades monitoradas</h4>
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-2">
+        <h4 class="card-title mb-0">Propriedades monitoradas</h4>
+
+        @* Cor sem legenda é adivinhação, e aqui a cor carrega o veredito. *@
+        <div class="kns-legenda-mapa">
+            <span><i style="background: var(--kns-liberado)"></i>Liberado</span>
+            <span><i style="background: var(--kns-alerta)"></i>Alerta</span>
+            <span><i style="background: var(--kns-bloqueado)"></i>Bloqueado</span>
+            <span><i style="background: var(--kns-azul)"></i>Em análise</span>
+            <span><i style="background: var(--kns-neutro)"></i>Sem análise</span>
+        </div>
+    </div>
 
     @if (string.IsNullOrWhiteSpace(maps.ApiKey))
     {
@@ -67,7 +82,7 @@
                     // O acrescentar não lança: perímetro ilegível em uma
                     // propriedade derrubava o laço e o painel ficava vazio.
                     if (propriedade.perimetro) {
-                        window.knsPerimetro.acrescentar(map, propriedade.perimetro);
+                        window.knsPerimetro.acrescentar(map, propriedade.perimetro, propriedade.situacao);
                     }
 
                     if (propriedade.lat === 0 && propriedade.lng === 0) {
@@ -81,10 +96,13 @@
                         position: centro,
                         map: map,
                         title: propriedade.nome,
+                        icon: window.knsPerimetro.marcador(propriedade.situacao),
                     });
 
                     marcador.addListener("click", function () {
-                        infoWindow.setContent(propriedade.nome + " - " + propriedade.municipio);
+                        infoWindow.setContent(
+                            propriedade.nome + " - " + propriedade.municipio +
+                            "<br><strong>" + (propriedade.situacao || "Sem análise") + "</strong>");
                         infoWindow.open(map, marcador);
                     });
                 });

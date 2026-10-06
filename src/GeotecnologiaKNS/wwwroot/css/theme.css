@@ -1252,3 +1252,27 @@ textarea.form-control {
 
 :root[data-tema="escuro"] .kns-tema .kns-tema__escuro { display: none; }
 :root[data-tema="escuro"] .kns-tema .kns-tema__claro { display: inline-block; }
+
+/* Legenda do mapa do painel: a cor do polígono é o veredito da análise, e sem
+   a legenda ela é adivinhação. */
+.kns-legenda-mapa {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: .78rem;
+    color: var(--kns-neutro);
+}
+
+.kns-legenda-mapa span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.kns-legenda-mapa i {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    display: inline-block;
+}

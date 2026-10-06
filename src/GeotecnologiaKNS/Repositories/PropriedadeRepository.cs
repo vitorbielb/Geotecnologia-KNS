@@ -21,10 +21,26 @@ namespace GeotecnologiaKNS.Repositories
                 .ToList();
         }
 
-        public IEnumerable<Propriedade> ObterParaMapa()
+        public IEnumerable<PropriedadeNoMapa> ObterParaMapa()
         {
+            // A situação do imóvel é o veredito da análise mais recente dele.
+            // Imóvel sem solicitação alguma fica com situação nula, que o mapa
+            // pinta de cinza: nunca analisado não é o mesmo que liberado, e a
+            // cor é o que mais rápido comunica isso.
             return _context.Propriedades
                 .AsNoTracking()
+                .Select(p => new PropriedadeNoMapa(
+                    p.NomePropriedade,
+                    p.Municipio,
+                    p.Latitude,
+                    p.Longitude,
+                    p.PerimetroGeoJson,
+                    _context.Solicitacao
+                        .Where(s => s.PropriedadeId == p.Id)
+                        .OrderByDescending(s => s.DataAnalise ?? s.DataSolicitacao)
+                        .ThenByDescending(s => s.Id)
+                        .Select(s => (Status?)s.Status)
+                        .FirstOrDefault()))
                 .ToList();
         }
 

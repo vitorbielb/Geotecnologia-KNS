@@ -10,7 +10,7 @@ namespace GeotecnologiaKNS.Repositories.Interfaces
         /// <summary>
         /// Propriedades do tenant atual com o polígono carregado, para plotagem em mapa.
         /// </summary>
-        IEnumerable<Models.Propriedade> ObterParaMapa();
+        IEnumerable<Models.PropriedadeNoMapa> ObterParaMapa();
 
         Models.Propriedade ObterPropriedadePorId(int id);
         void CadastrarPropriedade(Models.Propriedade propriedade);

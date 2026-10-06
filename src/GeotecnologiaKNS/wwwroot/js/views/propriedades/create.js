@@ -113,10 +113,13 @@ function desenharPerimetro(imovel) {
         // mapa vazio e centrado em lugar nenhum não diz nada a quem cadastra.
         mapaCar.data.forEach(function (feature) { mapaCar.data.remove(feature); });
 
+        // Cinza: o imóvel está sendo cadastrado, ainda não foi analisado. É a
+        // mesma cor que ele terá no painel até a primeira análise sair.
         camadasCar.push(new google.maps.Marker({
             position: centro,
             map: mapaCar,
-            title: imovel.codigoCar
+            title: imovel.codigoCar,
+            icon: window.knsPerimetro.marcador('')
         }));
     };
 
