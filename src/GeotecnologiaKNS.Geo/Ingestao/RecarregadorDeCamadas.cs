@@ -434,7 +434,84 @@ public class RecarregadorDeCamadas
         return (int)Math.Max(0, (new FileInfo(shx).Length - 100) / 8);
     }
 
+    /// <summary>
+    /// Quantas vezes insistir numa requisição que falhou por motivo passageiro.
+    /// </summary>
+    /// <remarks>
+    /// O PRODES do Cerrado são trinta e duas páginas, e a décima nona voltou
+    /// 504 do GeoServer do INPE. Sem insistir, as dezoito páginas já baixadas
+    /// iam fora e a camada continuava sem carregar — meia hora de trabalho
+    /// perdida por um engasgo de um servidor que responde bem no minuto
+    /// seguinte.
+    ///
+    /// Quanto maior a camada, mais requisições, e mais provável que uma delas
+    /// pegue o servidor num mau momento. Justamente as camadas que mais
+    /// precisam ser carregadas são as que mais sofrem com isso.
+    /// </remarks>
+    private const int TentativasPorRequisicao = 4;
+
+    /// <summary>
+    /// Baixa uma requisição, insistindo quando a falha é passageira.
+    /// </summary>
+    /// <remarks>
+    /// Insiste em 5xx, em excesso de requisições e em falha de rede — coisas do
+    /// servidor ou do caminho, que costumam passar. Não insiste em 4xx: pedido
+    /// errado continua errado na terceira vez, e repetir só adia a mensagem que
+    /// explica o que está errado.
+    ///
+    /// A espera cresce entre as tentativas porque 504 costuma ser servidor
+    /// sobrecarregado: voltar no mesmo instante é empurrar quem já está
+    /// afogado.
+    /// </remarks>
     private async Task<string> BaixarAsync(
+        FonteDeCamada fonte, string pasta, CancellationToken cancellationToken, int? inicio = null)
+    {
+        for (var tentativa = 1; ; tentativa++)
+        {
+            try
+            {
+                return await TentarBaixarAsync(fonte, pasta, cancellationToken, inicio);
+            }
+            catch (Exception ex) when (
+                tentativa < TentativasPorRequisicao &&
+                ex is not OperationCanceledException &&
+                EhPassageira(ex))
+            {
+                var espera = TimeSpan.FromSeconds(15 * Math.Pow(3, tentativa - 1));
+
+                _logger.LogWarning(
+                    "{Chave}: tentativa {Tentativa} de {Total} falhou ({Motivo}). " +
+                    "Nova tentativa em {Espera:N0}s.",
+                    fonte.Chave, tentativa, TentativasPorRequisicao, ex.Message, espera.TotalSeconds);
+
+                // A pasta da tentativa que falhou é limpa antes da próxima: um
+                // download pela metade não pode ser tomado por bom.
+                Apagar(pasta);
+                Directory.CreateDirectory(pasta);
+
+                await Task.Delay(espera, cancellationToken);
+            }
+        }
+    }
+
+    /// <summary>Falha que costuma passar sozinha.</summary>
+    internal static bool EhPassageira(Exception ex) => ex switch
+    {
+        HttpRequestException => true,
+        TaskCanceledException => true,
+        TimeoutException => true,
+        IOException => true,
+
+        // A resposta de erro do servidor chega como InvalidOperationException
+        // com o código dentro; só os 5xx e o 429 merecem insistência.
+        InvalidOperationException io =>
+            io.Message.Contains("respondeu 5", StringComparison.Ordinal) ||
+            io.Message.Contains("respondeu 429", StringComparison.Ordinal),
+
+        _ => false
+    };
+
+    private async Task<string> TentarBaixarAsync(
         FonteDeCamada fonte, string pasta, CancellationToken cancellationToken, int? inicio = null)
     {
         var endereco = fonte.UrlResolvida();

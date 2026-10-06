@@ -343,11 +343,25 @@ lê a contagem: nunca casava, devolvia nulo, e a carga seguia sem conferência.
 Como nada falhava, só apareceu porque alguém estava lendo o registro na hora.
 Uma conferência que se desliga sozinha sem avisar não é conferência.
 
-**Download paginado.** As camadas que passam do teto do servidor são baixadas
-em páginas de 50.000, com `sortBy` num campo estável (`fid`, no PRODES) e
-`startIndex`. As páginas entram todas na mesma versão e a publicação acontece
-uma vez, no fim — publicar página a página deixaria a análise rodando contra
-uma fração da camada entre uma e outra.
+**Download paginado, com repetição por página.** As camadas que passam do teto
+do servidor são baixadas em páginas de 50.000, com `sortBy` num campo estável
+(`fid`, no PRODES) e `startIndex`. Cada página é importada e apagada em
+seguida, então o disco nunca guarda mais que uma — medido na Mata Atlântica,
+145 MB em vez de três gigabytes. A publicação acontece uma vez, no fim:
+publicar página a página deixaria a análise rodando contra uma fração da camada
+entre uma e outra.
+
+A requisição que falha por motivo passageiro é repetida, com espera de 15s, 45s
+e dois minutos. Insiste em 5xx, em 429 e em falha de rede; não insiste em 4xx,
+porque pedido errado continua errado na terceira vez e repetir só adia a
+mensagem que explica o erro.
+
+Isso não é zelo preventivo. O PRODES do Cerrado são trinta e duas páginas: na
+primeira tentativa a décima nona voltou 504 e levou junto as dezoito já
+baixadas. Na segunda, o mesmo servidor devolveu 502 e 504 em cinco momentos
+diferentes e a carga fechou inteira. Quanto maior a camada, mais requisições e
+maior a chance de uma pegar o servidor num mau momento — e as camadas que mais
+importam são justamente as maiores.
 
 **Troca versionada.** A carga nova é gravada ao lado da que está no ar, com o
 número de versão seguinte, e a análise continua enxergando a antiga. Só no fim,
