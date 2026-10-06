@@ -52,27 +52,33 @@
                 if (window.knsTemaComponentes) { window.knsTemaComponentes.registrarMapa(map); }
 
                 const infoWindow = new google.maps.InfoWindow();
+                const avulsos = [];
 
-                map.data.setStyle({
-                    strokeColor: "#2FA7F5",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#2FA7F5",
-                    fillOpacity: 0.35,
-                });
+                window.knsPerimetro.estilizar(map);
 
                 propriedadesMonitoradas.forEach(function (propriedade) {
+                    // O perímetro entra sempre que existir, mas sozinho não
+                    // resolve neste mapa: com propriedades em estados
+                    // diferentes o enquadramento desce a zoom 5, e nesse zoom
+                    // uma fazenda inteira tem menos de um pixel. Quem olha o
+                    // painel quer saber onde elas estão — por isso o marcador
+                    // vem junto, e o polígono aparece quando se aproxima.
+                    //
+                    // O acrescentar não lança: perímetro ilegível em uma
+                    // propriedade derrubava o laço e o painel ficava vazio.
                     if (propriedade.perimetro) {
-                        map.data.addGeoJson(JSON.parse(propriedade.perimetro));
-                        return;
+                        window.knsPerimetro.acrescentar(map, propriedade.perimetro);
                     }
 
                     if (propriedade.lat === 0 && propriedade.lng === 0) {
                         return;
                     }
 
+                    const centro = { lat: propriedade.lat, lng: propriedade.lng };
+                    avulsos.push(centro);
+
                     const marcador = new google.maps.Marker({
-                        position: { lat: propriedade.lat, lng: propriedade.lng },
+                        position: centro,
                         map: map,
                         title: propriedade.nome,
                     });
@@ -82,6 +88,11 @@
                         infoWindow.open(map, marcador);
                     });
                 });
+
+                // Enquadra em tudo que entrou. O centro médio com zoom fixo
+                // deixava de fora as propriedades mais distantes — e indústria
+                // que compra em dois estados tem exatamente esse caso.
+                window.knsPerimetro.enquadrarTudo(map, avulsos);
             }
 
             window.initMap = initMap;

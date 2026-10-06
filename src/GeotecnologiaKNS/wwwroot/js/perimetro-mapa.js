@@ -1,9 +1,10 @@
-// Desenho do perímetro do imóvel sobre o Google Maps.
+// Desenho de perímetros de imóvel sobre o Google Maps.
 //
-// Mora num arquivo só porque já tinha duas cópias: a tela de detalhe e a de
-// cadastro desenhavam o mesmo polígono com código parecido, e o defeito abaixo
-// existia nas duas. Corrigir uma e esquecer a outra é o tipo de coisa que passa
-// despercebida justamente porque "já foi corrigido".
+// Mora num arquivo só porque já teve três cópias — detalhe do imóvel, cadastro
+// e painel — e o mesmo defeito estava nas três: mandavam geometria crua para o
+// addGeoJson, que só aceita Feature ou FeatureCollection. Corrigir uma e
+// esquecer as outras é o que vinha acontecendo, e o pior é que o que ficou
+// errado passa a parecer revisado.
 window.knsPerimetro = (function () {
     'use strict';
 
@@ -16,9 +17,9 @@ window.knsPerimetro = (function () {
     };
 
     // A base guarda o perímetro como geometria crua — {"type":"Polygon",...} —
-    // e o addGeoJson do Google só aceita Feature ou FeatureCollection. Geometria
-    // solta ele recusa, e a recusa não aparece: o mapa carrega, centraliza no
-    // imóvel certo e fica sem desenho, o que se lê como "imóvel sem perímetro".
+    // e o addGeoJson recusa isso. A recusa não aparece: o mapa carrega,
+    // centraliza no lugar certo e fica sem desenho, o que se lê como "imóvel
+    // sem perímetro".
     function comoFeature(objeto) {
         if (objeto && (objeto.type === 'Feature' || objeto.type === 'FeatureCollection')) {
             return objeto;
@@ -31,10 +32,11 @@ window.knsPerimetro = (function () {
         map.data.forEach(function (feicao) { map.data.remove(feicao); });
     }
 
-    // Enquadra o imóvel inteiro. Zoom fixo corta fazenda grande, e o pedaço que
-    // fica de fora é tão capaz de ter restrição quanto o que fica dentro.
-    function enquadrar(map, feicoes) {
-        var limites = new google.maps.LatLngBounds();
+    function estilizar(map) {
+        map.data.setStyle(ESTILO);
+    }
+
+    function contornar(feicoes, limites) {
         var pontos = 0;
 
         feicoes.forEach(function (feicao) {
@@ -44,17 +46,36 @@ window.knsPerimetro = (function () {
             });
         });
 
-        if (pontos > 0) {
-            map.fitBounds(limites);
-        }
-
         return pontos;
     }
 
+    /**
+     * Acrescenta um perímetro ao mapa, sem apagar o que já está lá.
+     * Devolve as feições criadas, ou lista vazia quando não deu para desenhar.
+     */
+    function acrescentar(map, geoJsonTexto) {
+        if (!map || !geoJsonTexto) {
+            return [];
+        }
+
+        try {
+            return map.data.addGeoJson(comoFeature(JSON.parse(geoJsonTexto)));
+        } catch (erro) {
+            // Devolver vazio em vez de propagar é o que permite ao painel
+            // continuar desenhando as outras propriedades: um perímetro
+            // ilegível derrubava o laço inteiro e o mapa ficava vazio.
+            console.error('Perímetro não pôde ser desenhado:', erro);
+            return [];
+        }
+    }
+
     return {
+        acrescentar: acrescentar,
+        estilizar: estilizar,
+
         /**
-         * Desenha o perímetro e enquadra o mapa nele.
-         * Devolve true quando algo foi de fato desenhado.
+         * Desenha um perímetro só, substituindo o que estiver no mapa, e
+         * enquadra nele. Para as telas de um imóvel.
          */
         desenhar: function (map, geoJsonTexto) {
             if (!map || !geoJsonTexto) {
@@ -63,21 +84,48 @@ window.knsPerimetro = (function () {
 
             limpar(map);
 
-            var feicoes;
+            var feicoes = acrescentar(map, geoJsonTexto);
 
-            try {
-                feicoes = map.data.addGeoJson(comoFeature(JSON.parse(geoJsonTexto)));
-            } catch (erro) {
-                // Sem isto o mapa fica em branco e parece imóvel sem perímetro,
-                // quando o que houve foi perímetro ilegível. Eram justamente os
-                // dois casos que precisavam ser distinguidos.
-                console.error('Perímetro não pôde ser desenhado:', erro);
+            if (feicoes.length === 0) {
                 return false;
             }
 
-            map.data.setStyle(ESTILO);
+            estilizar(map);
 
-            return enquadrar(map, feicoes) > 0;
+            // Enquadra o imóvel inteiro. Zoom fixo corta fazenda grande, e o
+            // pedaço que fica de fora é tão capaz de ter restrição quanto o que
+            // fica dentro.
+            var limites = new google.maps.LatLngBounds();
+
+            if (contornar(feicoes, limites) > 0) {
+                map.fitBounds(limites);
+            }
+
+            return true;
+        },
+
+        /**
+         * Enquadra o mapa em tudo que já foi acrescentado, mais os pontos
+         * avulsos informados. Para o painel, que mostra várias propriedades.
+         */
+        enquadrarTudo: function (map, pontosAvulsos) {
+            var limites = new google.maps.LatLngBounds();
+            var pontos = 0;
+
+            map.data.forEach(function (feicao) {
+                pontos += contornar([feicao], limites);
+            });
+
+            (pontosAvulsos || []).forEach(function (ponto) {
+                limites.extend(ponto);
+                pontos++;
+            });
+
+            if (pontos > 0) {
+                map.fitBounds(limites);
+            }
+
+            return pontos > 0;
         }
     };
 })();
