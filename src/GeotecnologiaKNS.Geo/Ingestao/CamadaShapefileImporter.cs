@@ -102,8 +102,14 @@ public class CamadaShapefileImporter
         int? esperadoNaOrigem = null,
         CancellationToken cancellationToken = default) =>
         ImportarAsync(
-            new[] { caminhoShapefile }, chave, nome, tipo, origem,
+            Apenas(caminhoShapefile), chave, nome, tipo, origem,
             anoReferencia, tenantId, biomas, esperadoNaOrigem, cancellationToken);
+
+    private static async IAsyncEnumerable<string> Apenas(string caminho)
+    {
+        await Task.CompletedTask;
+        yield return caminho;
+    }
 
     /// <summary>
     /// Carrega uma camada a partir de um ou mais shapefiles, numa única versão.
@@ -114,9 +120,14 @@ public class CamadaShapefileImporter
     /// todas na mesma versão e a publicação acontece uma vez, no fim. Publicar
     /// página a página deixaria a análise rodando contra uma fração da camada
     /// entre uma e outra.
+    ///
+    /// Elas chegam uma a uma, e não numa lista pronta, para que quem as produz
+    /// possa apagar cada página assim que esta leitura terminar com ela. Com a
+    /// lista, o PRODES do Cerrado deixaria sete gigabytes descompactados
+    /// parados em disco antes de a primeira linha entrar no banco.
     /// </remarks>
     public async Task<ResultadoImportacaoCamada> ImportarAsync(
-        IReadOnlyList<string> caminhos,
+        IAsyncEnumerable<string> caminhos,
         string chave,
         string nome,
         TipoCamada tipo,
@@ -128,14 +139,6 @@ public class CamadaShapefileImporter
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(caminhos);
-
-        foreach (var caminho in caminhos)
-        {
-            if (!File.Exists(caminho))
-            {
-                throw new FileNotFoundException("Shapefile não encontrado.", caminho);
-            }
-        }
 
         var camada = await _context.Camadas.FirstOrDefaultAsync(x => x.Chave == chave, cancellationToken);
 
@@ -165,8 +168,13 @@ public class CamadaShapefileImporter
         var menorAno = int.MaxValue;
         var lote = new List<FeicaoReferencia>(TamanhoLote);
 
-        foreach (var caminho in caminhos)
+        await foreach (var caminho in caminhos.WithCancellation(cancellationToken))
         {
+            if (!File.Exists(caminho))
+            {
+                throw new FileNotFoundException("Shapefile não encontrado.", caminho);
+            }
+
             // Leitura em fluxo: ReadAllFeatures materializaria o shapefile
             // inteiro, e o PRODES do Cerrado passa de um milhão e meio de
             // polígonos. A codificação entra aqui porque a biblioteca assume

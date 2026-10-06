@@ -8,6 +8,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<!--
+			A transformação da URL de download na consulta de contagem é lógica
+			pura e foi onde um erro de uma letra desligou a conferência inteira
+			sem que nada falhasse. Ela precisa de teste, e não precisa ser
+			pública para isso.
+		-->
+		<InternalsVisibleTo Include="GeotecnologiaKNS.UnitTests" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
 			<PrivateAssets>all</PrivateAssets>

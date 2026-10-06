@@ -226,34 +226,42 @@ public class RecarregadorDeCamadas
         // PRODES que entrou no ar com 50.000 de 802.277 polígonos.
         var esperado = await ContarNaOrigemAsync(fonte, cancellationToken);
 
-        var arquivos = await BaixarTudoAsync(fonte, daTentativa, cancellationToken);
-
-        return await ImportarAsync(fonte, arquivos, esperado, cancellationToken);
+        return await ImportarAsync(
+            fonte, PaginasAsync(fonte, daTentativa, cancellationToken), esperado, cancellationToken);
     }
 
     /// <summary>
-    /// Baixa a camada inteira: uma requisição, ou tantas quantas forem precisas.
+    /// Entrega a camada em pedaços: uma requisição, ou tantas quantas precisar.
     /// </summary>
     /// <remarks>
+    /// Devolve as páginas uma a uma, e não todas de uma vez, porque entre
+    /// baixar tudo e importar depois o disco guardaria a camada inteira
+    /// descompactada: o PRODES do Cerrado são trinta e duas páginas de cerca de
+    /// 220 MB — sete gigabytes parados antes de a primeira linha entrar no
+    /// banco. Aqui cada página é apagada assim que o importador termina com
+    /// ela, e o espaço ocupado fica do tamanho de uma.
+    ///
     /// A paginação para quando uma página vem com menos feições do que o
     /// tamanho pedido, que é o sinal de que acabou. Contar pelo .shx é exato e
     /// custa um <c>stat</c>: o índice do shapefile tem cabeçalho de 100 bytes e
     /// oito bytes por registro.
     /// </remarks>
-    private async Task<IReadOnlyList<string>> BaixarTudoAsync(
-        FonteDeCamada fonte, string pasta, CancellationToken cancellationToken)
+    private async IAsyncEnumerable<string> PaginasAsync(
+        FonteDeCamada fonte,
+        string pasta,
+        [System.Runtime.CompilerServices.EnumeratorCancellation]
+        CancellationToken cancellationToken)
     {
         if (!fonte.EhPaginada)
         {
             var unico = await BaixarAsync(fonte, pasta, cancellationToken);
-            return new[] { await PrepararArquivoAsync(fonte, unico, pasta, cancellationToken) };
+            yield return await PrepararArquivoAsync(fonte, unico, pasta, cancellationToken);
+            yield break;
         }
 
         // Teto de páginas: uma origem que ignorasse o startIndex devolveria
         // sempre a primeira página cheia, e o laço não terminaria nunca.
         const int MaximoDePaginas = 200;
-
-        var arquivos = new List<string>();
 
         for (var pagina = 0; pagina < MaximoDePaginas; pagina++)
         {
@@ -266,22 +274,24 @@ public class RecarregadorDeCamadas
 
             var naPagina = FeicoesNoShapefile(arquivo);
 
-            if (naPagina > 0)
-            {
-                arquivos.Add(arquivo);
-            }
-
             _logger.LogInformation(
                 "{Chave}: página {Pagina} trouxe {Feicoes:N0} feições (a partir de {Inicio:N0}).",
                 fonte.Chave, pagina + 1, naPagina, inicio);
+
+            if (naPagina > 0)
+            {
+                yield return arquivo;
+            }
+
+            // A execução só volta aqui depois que o importador terminou de ler
+            // esta página, então apagá-la agora é seguro.
+            Apagar(daPagina);
 
             if (naPagina < CatalogoDeFontes.PorPagina)
             {
                 break;
             }
         }
-
-        return arquivos;
     }
 
     /// <summary>
@@ -377,7 +387,7 @@ public class RecarregadorDeCamadas
     /// 1.0.0 — e aqui a troca é segura, já que nenhuma geometria vem na
     /// resposta e a inversão de eixos da 1.1.0 em diante não tem o que inverter.
     /// </remarks>
-    private static string? ConsultaDeContagem(string url)
+    internal static string? ConsultaDeContagem(string url)
     {
         var separador = url.IndexOf('?');
 
@@ -527,43 +537,44 @@ public class RecarregadorDeCamadas
 
     private async Task<string> ImportarAsync(
         FonteDeCamada fonte,
-        IReadOnlyList<string> arquivos,
+        IAsyncEnumerable<string> paginas,
         int? esperado,
         CancellationToken cancellationToken)
     {
-        if (arquivos.Count == 0)
+        // Os formatos de arquivo único consomem só a primeira página: eles não
+        // são paginados, e a enumeração devolve exatamente uma.
+        if (fonte.Formato != FormatoDaFonte.ShapefileEmZip)
         {
-            throw new InvalidOperationException("A origem não devolveu feição alguma.");
+            var arquivo = await PrimeiraAsync(paginas, cancellationToken)
+                ?? throw new InvalidOperationException("A origem não devolveu arquivo algum.");
+
+            if (fonte.Formato == FormatoDaFonte.CsvEmbargo)
+            {
+                var embargo = await _embargo.ImportarAsync(arquivo, cancellationToken);
+
+                return $"{Formatos.Quantidade(embargo.Gravados)} polígonos e " +
+                       $"{Formatos.Quantidade(embargo.Documentos)} registros por documento.";
+            }
+
+            return Descrever(await _geoJson.ImportarAsync(
+                arquivo, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
+                fonte.AnoReferencia, tenantId: null, fonte.Biomas, esperado, cancellationToken));
         }
 
-        switch (fonte.Formato)
+        return Descrever(await _shapefile.ImportarAsync(
+            paginas, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
+            fonte.AnoReferencia, tenantId: null, fonte.Biomas, esperado, cancellationToken));
+    }
+
+    private static async Task<string?> PrimeiraAsync(
+        IAsyncEnumerable<string> paginas, CancellationToken cancellationToken)
+    {
+        await foreach (var arquivo in paginas.WithCancellation(cancellationToken))
         {
-            case FormatoDaFonte.CsvEmbargo:
-            {
-                var resultado = await _embargo.ImportarAsync(arquivos[0], cancellationToken);
-
-                return $"{Formatos.Quantidade(resultado.Gravados)} polígonos e " +
-                       $"{Formatos.Quantidade(resultado.Documentos)} registros por documento.";
-            }
-
-            case FormatoDaFonte.GeoJsonEmZip:
-            {
-                var resultado = await _geoJson.ImportarAsync(
-                    arquivos[0], fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
-                    fonte.AnoReferencia, tenantId: null, fonte.Biomas, esperado, cancellationToken);
-
-                return Descrever(resultado);
-            }
-
-            default:
-            {
-                var resultado = await _shapefile.ImportarAsync(
-                    arquivos, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
-                    fonte.AnoReferencia, tenantId: null, fonte.Biomas, esperado, cancellationToken);
-
-                return Descrever(resultado);
-            }
+            return arquivo;
         }
+
+        return null;
     }
 
     private static string Descrever(ResultadoImportacaoCamada resultado) =>
