@@ -61,9 +61,9 @@ internal sealed class IntersecaoIndisponivel : IIntersecaoService
         string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
         => throw new InvalidOperationException(Mensagem);
 
-    public Task<IReadOnlyList<CamadaReferencia>> ObterCamadasAtivasAsync(
-        int? tenantId, CancellationToken cancellationToken = default)
-        => Task.FromResult<IReadOnlyList<CamadaReferencia>>(Array.Empty<CamadaReferencia>());
+    public Task<IReadOnlyList<CamadaConsultada>> ObterCamadasAtivasAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<CamadaConsultada>>(Array.Empty<CamadaConsultada>());
 
     public Task<IReadOnlyList<Sobreposicao>> ObterRecortesAsync(
         string codigoCar, int? tenantId, CancellationToken cancellationToken = default)

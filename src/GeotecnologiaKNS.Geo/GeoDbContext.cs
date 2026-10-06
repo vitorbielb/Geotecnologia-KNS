@@ -166,6 +166,8 @@ public class GeoDbContext : DbContext
             entity.Property(x => x.VersaoAtual).HasColumnName("versao_atual");
             entity.Property(x => x.TenantId).HasColumnName("tenant_id");
             entity.Property(x => x.PeriodicidadeDias).HasColumnName("periodicidade_dias");
+            entity.Property(x => x.Abrangencia).HasColumnName("abrangencia").HasColumnType($"geometry(Geometry,{Srid})");
+            entity.Property(x => x.CobreDesdeAno).HasColumnName("cobre_desde_ano");
 
             entity.HasIndex(x => x.Chave).IsUnique();
             entity.HasIndex(x => x.Tipo);
@@ -182,6 +184,7 @@ public class GeoDbContext : DbContext
             entity.Property(x => x.AtributosJson).HasColumnName("atributos").HasColumnType("jsonb");
             entity.Property(x => x.Rotulo).HasColumnName("rotulo").HasMaxLength(300);
             entity.Property(x => x.Versao).HasColumnName("versao");
+            entity.Property(x => x.Ano).HasColumnName("ano");
 
             // A consulta de sobreposição filtra pela versão publicada; sem o
             // índice combinado, a carga seguinte deixaria o cruzamento lento

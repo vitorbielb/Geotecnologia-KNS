@@ -789,13 +789,41 @@ static async Task<int> ListarCamadasAsync(IServiceProvider provider)
         return 0;
     }
 
-    Console.WriteLine($"{"CHAVE",-26} {"TIPO",-24} {"FEIÇÕES",9}  {"ATUALIZADA",-14} SITUAÇÃO");
+    // A abrangência fica na tabela, e não num detalhe à parte, porque é ela
+    // que diz se a camada responde pelo imóvel que alguém vai analisar.
+    // Enquanto não aparecia, uma camada da Amazônia parecia cobrir o país.
+    Console.WriteLine(
+        $"{"CHAVE",-26} {"TIPO",-24} {"FEIÇÕES",9}  {"ABRANGÊNCIA",-18} " +
+        $"{"DESDE",5}  {"ATUALIZADA",-14} SITUAÇÃO");
 
     foreach (var camada in camadas.Where(x => x.TenantId is null))
     {
         Console.WriteLine(
             $"{Encurtar(camada.Chave, 26),-26} {camada.Tipo,-24} {camada.TotalFeicoes,9:N0}  " +
-            $"{Quando(camada.AtualizadaEm),-14} {Situacao(camada.AtualizadaEm, camada.PeriodicidadeDias)}");
+            $"{Abrangencia(camada),-18} {camada.CobreDesdeAno?.ToString() ?? "—",5}  " +
+            $"{Quando(camada.AtualizadaEm),-14} " +
+            $"{(camada.Ativa ? Situacao(camada.AtualizadaEm, camada.PeriodicidadeDias) : "DESLIGADA")}");
+    }
+
+    // As que o catálogo conhece e ninguém carregou. Sem esta lista, a única
+    // pista de que falta o PRODES do Cerrado seria a ausência de uma linha —
+    // e ausência de linha não chama atenção de ninguém.
+    var faltando = CatalogoDeFontes.Todas
+        .Where(f => camadas.TrueForAll(c => !string.Equals(
+            c.Chave, f.Chave, StringComparison.OrdinalIgnoreCase)))
+        .ToList();
+
+    if (faltando.Count > 0)
+    {
+        Console.WriteLine();
+        Console.WriteLine("NUNCA CARREGADAS — as regras que dependem delas saem como não avaliadas:");
+
+        foreach (var fonte in faltando)
+        {
+            Console.WriteLine(
+                $"{Encurtar(fonte.Chave, 26),-26} {fonte.Tipo,-24} " +
+                $"{"—",9}  {(fonte.Biomas is null ? "nacional" : string.Join(", ", fonte.Biomas)),-18}");
+        }
     }
 
     // Separadas das públicas de propósito: estas são de uma indústria só, e
@@ -831,6 +859,20 @@ static async Task<int> ListarCamadasAsync(IServiceProvider provider)
     }
 
     return 0;
+}
+
+/// <summary>Em uma palavra, o que a camada cobre.</summary>
+static string Abrangencia(CamadaReferencia camada)
+{
+    if (camada.Abrangencia is null)
+    {
+        return "nacional";
+    }
+
+    // O nome do bioma não é guardado na camada, só o recorte. Dizer
+    // "recortada" é honesto e suficiente: o que importa aqui é que ela NÃO
+    // responde pelo país inteiro, e qual região é a análise que informa.
+    return "regional";
 }
 
 static string Encurtar(string texto, int limite) =>

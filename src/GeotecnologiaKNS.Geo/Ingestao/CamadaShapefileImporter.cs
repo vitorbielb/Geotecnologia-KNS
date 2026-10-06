@@ -37,7 +37,33 @@ public class CamadaShapefileImporter
 
         // MapBiomas Alerta: o alerta não tem nome, e o município é o que
         // permite reconhecê-lo no laudo.
-        "cities", "CITIES"
+        "cities", "CITIES",
+
+        // Por último, porque várias camadas trazem o bioma como atributo e ele
+        // só serve de rótulo quando não há mais nada — na camada de limites de
+        // biomas, onde é o próprio nome da feição e o que permite recortar a
+        // abrangência das camadas regionais.
+        "bioma", "BIOMA"
+    };
+
+    /// <summary>
+    /// Campos de onde sai o ano do fato, na ordem de preferência.
+    /// </summary>
+    /// <remarks>
+    /// O corte temporal de uma regra recai sobre o fato, não sobre a carga.
+    /// Enquanto cada camada guardava um único ano dava para ler o ano da
+    /// camada inteira; com o PRODES trazendo de 2008 em diante, isso passaria a
+    /// responder o mesmo para todo polígono.
+    ///
+    /// Os nomes vêm truncados em dez caracteres porque é o limite de coluna do
+    /// DBF, e todo shapefile sai assim: "detected_at" chega como "detected_a".
+    /// Os dois estão na lista — o GeoJSON das mesmas origens traz o nome
+    /// inteiro.
+    /// </remarks>
+    private static readonly string[] CamposAno =
+    {
+        "year", "YEAR", "ano", "ANO", "year_detec", "year_detected_at",
+        "detected_a", "detected_at", "view_date", "VIEW_DATE", "data_detec", "dt_detec"
     };
 
     /// <summary>
@@ -63,7 +89,8 @@ public class CamadaShapefileImporter
         _logger = logger;
     }
 
-    public async Task<ResultadoImportacaoCamada> ImportarAsync(
+    /// <summary>Carrega um único shapefile.</summary>
+    public Task<ResultadoImportacaoCamada> ImportarAsync(
         string caminhoShapefile,
         string chave,
         string nome,
@@ -71,11 +98,43 @@ public class CamadaShapefileImporter
         string origem,
         int? anoReferencia = null,
         int? tenantId = null,
+        IReadOnlyList<string>? biomas = null,
+        int? esperadoNaOrigem = null,
+        CancellationToken cancellationToken = default) =>
+        ImportarAsync(
+            new[] { caminhoShapefile }, chave, nome, tipo, origem,
+            anoReferencia, tenantId, biomas, esperadoNaOrigem, cancellationToken);
+
+    /// <summary>
+    /// Carrega uma camada a partir de um ou mais shapefiles, numa única versão.
+    /// </summary>
+    /// <remarks>
+    /// Mais de um arquivo quando a origem limita o tamanho da resposta e o
+    /// download sai paginado. As páginas são pedaços de uma carga só: entram
+    /// todas na mesma versão e a publicação acontece uma vez, no fim. Publicar
+    /// página a página deixaria a análise rodando contra uma fração da camada
+    /// entre uma e outra.
+    /// </remarks>
+    public async Task<ResultadoImportacaoCamada> ImportarAsync(
+        IReadOnlyList<string> caminhos,
+        string chave,
+        string nome,
+        TipoCamada tipo,
+        string origem,
+        int? anoReferencia = null,
+        int? tenantId = null,
+        IReadOnlyList<string>? biomas = null,
+        int? esperadoNaOrigem = null,
         CancellationToken cancellationToken = default)
     {
-        if (!File.Exists(caminhoShapefile))
+        ArgumentNullException.ThrowIfNull(caminhos);
+
+        foreach (var caminho in caminhos)
         {
-            throw new FileNotFoundException("Shapefile não encontrado.", caminhoShapefile);
+            if (!File.Exists(caminho))
+            {
+                throw new FileNotFoundException("Shapefile não encontrado.", caminho);
+            }
         }
 
         var camada = await _context.Camadas.FirstOrDefaultAsync(x => x.Chave == chave, cancellationToken);
@@ -103,42 +162,55 @@ public class CamadaShapefileImporter
         var descartados = 0;
         var ilegiveis = new Contador();
         var gravados = 0;
+        var menorAno = int.MaxValue;
         var lote = new List<FeicaoReferencia>(TamanhoLote);
 
-        // Leitura em fluxo: ReadAllFeatures materializaria o shapefile inteiro,
-        // e camadas como o PRODES Cerrado passam de dois milhões de polígonos.
-        // A codificação entra aqui porque a biblioteca assume UTF-8 quando o
-        // shapefile não traz .cpg/.cst, e órgão brasileiro publica em Latin1.
-        using var leitor = Shapefile.OpenRead(
-            caminhoShapefile,
-            new ShapefileReaderOptions { Encoding = CodificacaoDeShapefile.Detectar(caminhoShapefile) });
-
-        foreach (var feature in Legiveis(leitor, ilegiveis, cancellationToken))
+        foreach (var caminho in caminhos)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            lidos++;
+            // Leitura em fluxo: ReadAllFeatures materializaria o shapefile
+            // inteiro, e o PRODES do Cerrado passa de um milhão e meio de
+            // polígonos. A codificação entra aqui porque a biblioteca assume
+            // UTF-8 quando o shapefile não traz .cpg/.cst, e órgão brasileiro
+            // publica em Latin1.
+            using var leitor = Shapefile.OpenRead(
+                caminho,
+                new ShapefileReaderOptions { Encoding = CodificacaoDeShapefile.Detectar(caminho) });
 
-            var geometria = Geometrias.Normalizar(feature.Geometry);
-
-            if (geometria is null)
+            foreach (var feature in Legiveis(leitor, ilegiveis, cancellationToken))
             {
-                descartados++;
-                continue;
-            }
+                cancellationToken.ThrowIfCancellationRequested();
+                lidos++;
 
-            lote.Add(new FeicaoReferencia
-            {
-                CamadaId = camada.Id,
-                Versao = versao,
-                Geometria = geometria,
-                Rotulo = ExtrairRotulo(feature.Attributes),
-                AtributosJson = SerializarAtributos(feature.Attributes)
-            });
+                var geometria = Geometrias.Normalizar(feature.Geometry);
 
-            if (lote.Count >= TamanhoLote)
-            {
-                gravados += await GravarLoteAsync(lote, cancellationToken);
-                lote.Clear();
+                if (geometria is null)
+                {
+                    descartados++;
+                    continue;
+                }
+
+                var ano = ExtrairAnoDe(feature.Attributes);
+
+                if (ano is int a && a < menorAno)
+                {
+                    menorAno = a;
+                }
+
+                lote.Add(new FeicaoReferencia
+                {
+                    CamadaId = camada.Id,
+                    Versao = versao,
+                    Geometria = geometria,
+                    Ano = ano,
+                    Rotulo = ExtrairRotulo(feature.Attributes),
+                    AtributosJson = SerializarAtributos(feature.Attributes)
+                });
+
+                if (lote.Count >= TamanhoLote)
+                {
+                    gravados += await GravarLoteAsync(lote, cancellationToken);
+                    lote.Clear();
+                }
             }
         }
 
@@ -146,6 +218,17 @@ public class CamadaShapefileImporter
         {
             gravados += await GravarLoteAsync(lote, cancellationToken);
         }
+
+        GuardaDeCarga.ConferirContraOrigem(chave, esperadoNaOrigem, lidos);
+
+        // Antes de publicar, a camada precisa declarar o que cobre — no espaço
+        // e no tempo. Uma camada publicada sem isso volta a ser o que era: uma
+        // que responde "estou carregada" para qualquer imóvel do país.
+        await new AbrangenciaDeCamada(_context).DefinirAsync(camada, biomas, cancellationToken);
+
+        // Medido, não declarado: o menor ano presente É o começo da cobertura,
+        // e medir fecha a porta para a declaração divergir do arquivo.
+        camada.CobreDesdeAno = menorAno == int.MaxValue ? null : menorAno;
 
         var publicacao = await troca.PublicarAsync(camada, gravados, cancellationToken);
 
@@ -239,6 +322,67 @@ public class CamadaShapefileImporter
         {
             (enumerador as IDisposable)?.Dispose();
         }
+    }
+
+    /// <summary>
+    /// Ano do fato que a feição registra, quando a origem o informa.
+    /// </summary>
+    /// <remarks>
+    /// Aceita o ano direto e a data por extenso, porque as origens misturam os
+    /// dois: o PRODES traz <c>year</c>, o MapBiomas traz <c>detected_at</c> e o
+    /// DETER traz <c>view_date</c>. De uma data só interessa o ano — é a
+    /// granularidade em que as regras cortam.
+    ///
+    /// Um ano fora de 1980..2100 é descartado em vez de aceito. Campo de ano
+    /// vazio chega como zero em shapefile, e zero passaria em qualquer corte
+    /// "a partir de 2008" pelo lado errado da comparação.
+    /// </remarks>
+    internal static int? ExtrairAnoDe(NetTopologySuite.Features.IAttributesTable? atributos)
+    {
+        if (atributos is null)
+        {
+            return null;
+        }
+
+        foreach (var campo in CamposAno)
+        {
+            if (!atributos.Exists(campo))
+            {
+                continue;
+            }
+
+            var valor = atributos[campo];
+
+            var ano = valor switch
+            {
+                null => (int?)null,
+                DateTime data => data.Year,
+                int inteiro => inteiro,
+                long longo => (int)longo,
+                double real => (int)real,
+                _ => AnoDeTexto(valor.ToString())
+            };
+
+            if (ano is >= 1980 and <= 2100)
+            {
+                return ano;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>Ano de um texto que é o próprio ano ou uma data que começa por ele.</summary>
+    private static int? AnoDeTexto(string? texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+        {
+            return null;
+        }
+
+        var inicio = texto.AsSpan().TrimStart();
+
+        return inicio.Length >= 4 && int.TryParse(inicio[..4], out var ano) ? ano : null;
     }
 
     private static string? ExtrairRotulo(NetTopologySuite.Features.IAttributesTable atributos)

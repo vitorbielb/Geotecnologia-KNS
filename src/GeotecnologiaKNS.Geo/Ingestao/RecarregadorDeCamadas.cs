@@ -102,6 +102,14 @@ public class RecarregadorDeCamadas
             .Where(fonte => !camadas.TryGetValue(fonte.Chave, out var camada)
                             || camada.AtualizadaEm is null
                             || camada.AtualizadaEm.Value.AddDays(fonte.PeriodicidadeDias) < DateTime.UtcNow)
+
+            // Os limites de biomas primeiro: é deles que as camadas regionais
+            // tiram o recorte que declaram cobrir, e uma camada regional que
+            // não consegue declará-lo não é publicada. Deixar essa ordem por
+            // conta da posição no catálogo funcionaria hoje e quebraria na
+            // primeira vez que alguém reordenasse a lista — sem erro de
+            // compilação e sem nada falhar até a próxima recarga.
+            .OrderByDescending(fonte => fonte.Tipo == TipoCamada.Bioma)
             .ToList();
     }
 
@@ -213,17 +221,223 @@ public class RecarregadorDeCamadas
         var daTentativa = Path.Combine(pasta, Guid.NewGuid().ToString("N")[..8]);
         Directory.CreateDirectory(daTentativa);
 
-        var baixado = await BaixarAsync(fonte, daTentativa, cancellationToken);
-        var arquivo = await PrepararArquivoAsync(fonte, baixado, daTentativa, cancellationToken);
+        // Quanto a origem diz ter, antes de baixar. É com este número que a
+        // carga é conferida no fim — e é o que teria denunciado, na hora, o
+        // PRODES que entrou no ar com 50.000 de 802.277 polígonos.
+        var esperado = await ContarNaOrigemAsync(fonte, cancellationToken);
 
-        return await ImportarAsync(fonte, arquivo, cancellationToken);
+        var arquivos = await BaixarTudoAsync(fonte, daTentativa, cancellationToken);
+
+        return await ImportarAsync(fonte, arquivos, esperado, cancellationToken);
+    }
+
+    /// <summary>
+    /// Baixa a camada inteira: uma requisição, ou tantas quantas forem precisas.
+    /// </summary>
+    /// <remarks>
+    /// A paginação para quando uma página vem com menos feições do que o
+    /// tamanho pedido, que é o sinal de que acabou. Contar pelo .shx é exato e
+    /// custa um <c>stat</c>: o índice do shapefile tem cabeçalho de 100 bytes e
+    /// oito bytes por registro.
+    /// </remarks>
+    private async Task<IReadOnlyList<string>> BaixarTudoAsync(
+        FonteDeCamada fonte, string pasta, CancellationToken cancellationToken)
+    {
+        if (!fonte.EhPaginada)
+        {
+            var unico = await BaixarAsync(fonte, pasta, cancellationToken);
+            return new[] { await PrepararArquivoAsync(fonte, unico, pasta, cancellationToken) };
+        }
+
+        // Teto de páginas: uma origem que ignorasse o startIndex devolveria
+        // sempre a primeira página cheia, e o laço não terminaria nunca.
+        const int MaximoDePaginas = 200;
+
+        var arquivos = new List<string>();
+
+        for (var pagina = 0; pagina < MaximoDePaginas; pagina++)
+        {
+            var inicio = pagina * CatalogoDeFontes.PorPagina;
+            var daPagina = Path.Combine(pasta, $"p{pagina:D3}");
+            Directory.CreateDirectory(daPagina);
+
+            var baixado = await BaixarAsync(fonte, daPagina, cancellationToken, inicio);
+            var arquivo = await PrepararArquivoAsync(fonte, baixado, daPagina, cancellationToken);
+
+            var naPagina = FeicoesNoShapefile(arquivo);
+
+            if (naPagina > 0)
+            {
+                arquivos.Add(arquivo);
+            }
+
+            _logger.LogInformation(
+                "{Chave}: página {Pagina} trouxe {Feicoes:N0} feições (a partir de {Inicio:N0}).",
+                fonte.Chave, pagina + 1, naPagina, inicio);
+
+            if (naPagina < CatalogoDeFontes.PorPagina)
+            {
+                break;
+            }
+        }
+
+        return arquivos;
+    }
+
+    /// <summary>
+    /// Quantas feições a origem diz ter, ou nulo quando ela não sabe responder.
+    /// </summary>
+    /// <remarks>
+    /// Esta é a conferência que faltava, e a lição mais cara desta base. O
+    /// GeoServer do INPE limita cada requisição a 50.000 feições e, quando o
+    /// pedido passa disso, devolve as primeiras 50.000 com <b>200 OK</b>. Nada
+    /// falha: o zip é válido, o shapefile abre, o importador grava, a troca
+    /// versionada publica. O PRODES da Amazônia entrou no ar com 50.000
+    /// polígonos de 802.277 — 6% — e nenhum registro em lugar nenhum disse isso.
+    ///
+    /// A paginação resolve o caso conhecido. Esta contagem resolve o
+    /// desconhecido: qualquer origem que passe a entregar menos do que anuncia
+    /// — teto novo, filtro que mudou de significado, resposta cortada — é
+    /// recusada em vez de publicada pela metade.
+    ///
+    /// Falhar aqui não derruba a carga. Nem toda origem é WFS, nem todo WFS
+    /// aceita <c>resultType=hits</c>, e trocar uma recarga boa por nenhuma
+    /// porque a conferência não pôde ser feita seria o remédio pior.
+    /// </remarks>
+    private async Task<int?> ContarNaOrigemAsync(
+        FonteDeCamada fonte, CancellationToken cancellationToken)
+    {
+        var consulta = ConsultaDeContagem(fonte.UrlResolvida());
+
+        if (consulta is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            using var resposta = await Http.GetAsync(consulta, cancellationToken);
+
+            if (!resposta.IsSuccessStatusCode)
+            {
+                return SemConferencia(fonte, $"a origem respondeu {(int)resposta.StatusCode}");
+            }
+
+            var corpo = await resposta.Content.ReadAsStringAsync(cancellationToken);
+
+            // numberMatched no WFS 2.0.0; numberOfFeatures nas versões antigas.
+            var achado = System.Text.RegularExpressions.Regex.Match(
+                corpo, @"number(?:Matched|OfFeatures)=""(\d+)""");
+
+            if (!achado.Success || !int.TryParse(achado.Groups[1].Value, out var total))
+            {
+                return SemConferencia(fonte, "a resposta não traz a contagem");
+            }
+
+            _logger.LogInformation("{Chave}: a origem declara {Total:N0} feições.", fonte.Chave, total);
+
+            return total;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            return SemConferencia(fonte, ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Registra que esta carga entrou sem ser conferida contra a origem.
+    /// </summary>
+    /// <remarks>
+    /// Aviso, e não silêncio. A primeira versão desta sonda tinha um erro de
+    /// uma letra na expressão que lê a contagem: ela nunca casava, devolvia
+    /// nulo, e a carga seguia sem conferência alguma. Como nada falhava, só
+    /// apareceu porque alguém estava lendo o registro na hora.
+    ///
+    /// Uma conferência que pode se desligar sozinha sem avisar não é
+    /// conferência — é a mesma omissão que ela existe para impedir, um nível
+    /// acima.
+    /// </remarks>
+    private int? SemConferencia(FonteDeCamada fonte, string motivo)
+    {
+        _logger.LogWarning(
+            "{Chave}: a carga não pôde ser conferida contra a origem ({Motivo}). Ela entra " +
+            "sem essa rede de proteção — uma resposta truncada passaria despercebida.",
+            fonte.Chave, motivo);
+
+        return null;
+    }
+
+    /// <summary>
+    /// Transforma a URL de download na mesma consulta pedindo só a contagem.
+    /// </summary>
+    /// <remarks>
+    /// Mesmos <c>typeName</c> e <c>CQL_FILTER</c>, de propósito: o número só
+    /// serve para conferir se for exatamente o recorte que está sendo baixado.
+    /// A versão sobe para 2.0.0 porque <c>resultType=hits</c> não existe na
+    /// 1.0.0 — e aqui a troca é segura, já que nenhuma geometria vem na
+    /// resposta e a inversão de eixos da 1.1.0 em diante não tem o que inverter.
+    /// </remarks>
+    private static string? ConsultaDeContagem(string url)
+    {
+        var separador = url.IndexOf('?');
+
+        if (separador < 0 || !url.Contains("service=WFS", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var partes = new List<string>();
+
+        foreach (var par in url[(separador + 1)..].Split('&', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var nome = par.Split('=', 2)[0];
+
+            if (nome.Equals("outputFormat", StringComparison.OrdinalIgnoreCase) ||
+                nome.Equals("maxFeatures", StringComparison.OrdinalIgnoreCase) ||
+                nome.Equals("startIndex", StringComparison.OrdinalIgnoreCase) ||
+                nome.Equals("sortBy", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            partes.Add(nome.Equals("version", StringComparison.OrdinalIgnoreCase) ? "version=2.0.0"
+                     : nome.Equals("typeName", StringComparison.OrdinalIgnoreCase)
+                         ? "typeNames=" + par.Split('=', 2)[1]
+                         : par);
+        }
+
+        partes.Add("resultType=hits");
+
+        return url[..separador] + "?" + string.Join("&", partes);
+    }
+
+    /// <summary>Feições de um shapefile, lidas do índice sem abrir a geometria.</summary>
+    private static int FeicoesNoShapefile(string caminhoShp)
+    {
+        var shx = Path.ChangeExtension(caminhoShp, ".shx");
+
+        if (!File.Exists(shx))
+        {
+            return 0;
+        }
+
+        return (int)Math.Max(0, (new FileInfo(shx).Length - 100) / 8);
     }
 
     private async Task<string> BaixarAsync(
-        FonteDeCamada fonte, string pasta, CancellationToken cancellationToken)
+        FonteDeCamada fonte, string pasta, CancellationToken cancellationToken, int? inicio = null)
     {
+        var endereco = fonte.UrlResolvida();
+
+        if (inicio is int desde)
+        {
+            endereco +=
+                $"&sortBy={Uri.EscapeDataString(fonte.ChaveDeOrdenacao!)}" +
+                $"&startIndex={desde}&maxFeatures={CatalogoDeFontes.PorPagina}";
+        }
+
         using var requisicao = new HttpRequestMessage(
-            fonte.EhPost ? HttpMethod.Post : HttpMethod.Get, fonte.UrlResolvida());
+            fonte.EhPost ? HttpMethod.Post : HttpMethod.Get, endereco);
 
         if (fonte.EhPost)
         {
@@ -312,13 +526,21 @@ public class RecarregadorDeCamadas
     }
 
     private async Task<string> ImportarAsync(
-        FonteDeCamada fonte, string arquivo, CancellationToken cancellationToken)
+        FonteDeCamada fonte,
+        IReadOnlyList<string> arquivos,
+        int? esperado,
+        CancellationToken cancellationToken)
     {
+        if (arquivos.Count == 0)
+        {
+            throw new InvalidOperationException("A origem não devolveu feição alguma.");
+        }
+
         switch (fonte.Formato)
         {
             case FormatoDaFonte.CsvEmbargo:
             {
-                var resultado = await _embargo.ImportarAsync(arquivo, cancellationToken);
+                var resultado = await _embargo.ImportarAsync(arquivos[0], cancellationToken);
 
                 return $"{Formatos.Quantidade(resultado.Gravados)} polígonos e " +
                        $"{Formatos.Quantidade(resultado.Documentos)} registros por documento.";
@@ -327,24 +549,26 @@ public class RecarregadorDeCamadas
             case FormatoDaFonte.GeoJsonEmZip:
             {
                 var resultado = await _geoJson.ImportarAsync(
-                    arquivo, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
-                    fonte.AnoReferencia, tenantId: null, cancellationToken);
+                    arquivos[0], fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
+                    fonte.AnoReferencia, tenantId: null, fonte.Biomas, esperado, cancellationToken);
 
-                return $"{Formatos.Quantidade(resultado.Gravados)} feições " +
-                       $"({Formatos.Quantidade(resultado.Descartados)} descartadas).";
+                return Descrever(resultado);
             }
 
             default:
             {
                 var resultado = await _shapefile.ImportarAsync(
-                    arquivo, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
-                    fonte.AnoReferencia, tenantId: null, cancellationToken);
+                    arquivos, fonte.Chave, fonte.Nome, fonte.Tipo, fonte.Origem,
+                    fonte.AnoReferencia, tenantId: null, fonte.Biomas, esperado, cancellationToken);
 
-                return $"{Formatos.Quantidade(resultado.Gravados)} feições " +
-                       $"({Formatos.Quantidade(resultado.Descartados)} descartadas).";
+                return Descrever(resultado);
             }
         }
     }
+
+    private static string Descrever(ResultadoImportacaoCamada resultado) =>
+        $"{Formatos.Quantidade(resultado.Gravados)} feições " +
+        $"({Formatos.Quantidade(resultado.Descartados)} descartadas).";
 
     private async Task<bool> TentarTravarAsync(string chave, CancellationToken cancellationToken)
     {

@@ -52,6 +52,8 @@ public class CamadaGeoJsonImporter
         string origem,
         int? anoReferencia = null,
         int? tenantId = null,
+        IReadOnlyList<string>? biomas = null,
+        int? esperadoNaOrigem = null,
         CancellationToken cancellationToken = default)
     {
         if (!File.Exists(caminhoGeoJson))
@@ -71,6 +73,7 @@ public class CamadaGeoJsonImporter
         var lidos = 0;
         var descartados = 0;
         var gravados = 0;
+        var menorAno = int.MaxValue;
         var lote = new List<FeicaoReferencia>(TamanhoLote);
 
         using var leitor = new LeitorGeoJson(new StreamReader(caminhoGeoJson, Encoding.UTF8));
@@ -106,7 +109,8 @@ public class CamadaGeoJsonImporter
                 CamadaId = camada.Id,
                 Versao = versao,
                 Geometria = geometria,
-                Rotulo = ExtrairRotulo(feicao!.Attributes),
+                Ano = AnoDaFeicao(feicao!.Attributes, ref menorAno),
+                Rotulo = ExtrairRotulo(feicao.Attributes),
                 AtributosJson = SerializarAtributos(feicao.Attributes)
             });
 
@@ -121,6 +125,12 @@ public class CamadaGeoJsonImporter
         {
             gravados += await GravarLoteAsync(lote, cancellationToken);
         }
+
+        GuardaDeCarga.ConferirContraOrigem(chave, esperadoNaOrigem, lidos);
+
+        await new AbrangenciaDeCamada(_context).DefinirAsync(camada, biomas, cancellationToken);
+
+        camada.CobreDesdeAno = menorAno == int.MaxValue ? null : menorAno;
 
         var publicacao = await troca.PublicarAsync(camada, gravados, cancellationToken);
 
@@ -158,6 +168,19 @@ public class CamadaGeoJsonImporter
 
         await _context.SaveChangesAsync(cancellationToken);
         return camada;
+    }
+
+    /// <summary>Ano da feição, já acompanhando o começo da cobertura da camada.</summary>
+    private static int? AnoDaFeicao(IAttributesTable? atributos, ref int menorAno)
+    {
+        var ano = CamadaShapefileImporter.ExtrairAnoDe(atributos);
+
+        if (ano is int a && a < menorAno)
+        {
+            menorAno = a;
+        }
+
+        return ano;
     }
 
     private static string? ExtrairRotulo(IAttributesTable? atributos)

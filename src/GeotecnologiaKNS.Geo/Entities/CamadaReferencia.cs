@@ -85,6 +85,50 @@ public class CamadaReferencia
 
     public int TotalFeicoes { get; set; }
 
+    /// <summary>
+    /// Região que a camada de fato cobre. Nulo significa cobertura nacional.
+    /// </summary>
+    /// <remarks>
+    /// Existe porque a guarda de cobertura estava um nível acima do necessário
+    /// e deixava passar justamente o erro que ela foi feita para impedir. Ela
+    /// perguntava "existe camada deste tipo?" — e o PRODES da Amazônia responde
+    /// que sim para um imóvel de Goiás, onde não tem um polígono sequer. A
+    /// regra se dizia avaliada, o laudo listava a camada entre as verificadas,
+    /// e o imóvel saía liberado por omissão. Dos 1,25 milhão de imóveis da
+    /// base, 334 mil estão em Goiás e Mato Grosso do Sul, fora de qualquer
+    /// camada de desmatamento que havia carregada.
+    ///
+    /// A abrangência é <b>declarada</b> no catálogo, não deduzida das feições.
+    /// Deduzir seria circular: camada de desmatamento só tem polígono onde
+    /// houve desmatamento, e a ausência deles tanto pode significar "floresta
+    /// intacta" quanto "o satélite nunca olhou para cá". Só a origem sabe qual
+    /// das duas, e é ela quem declara.
+    /// </remarks>
+    public Geometry? Abrangencia { get; set; }
+
+    /// <summary>
+    /// Primeiro ano que a camada alcança. Nulo quando ela não é datada.
+    /// </summary>
+    /// <remarks>
+    /// O equivalente temporal da abrangência, e tão necessário quanto: o PRODES
+    /// carregado tinha só o ano de 2024, enquanto a regra DES-001 se chama
+    /// "desmatamento consolidado a partir de 2008". Dezesseis anos que a regra
+    /// dizia examinar e não tinha como encontrar.
+    ///
+    /// Vem medido das feições gravadas, e não declarado, porque aqui o dado
+    /// sabe a resposta: o menor ano presente é o começo da cobertura. Declarar
+    /// abriria espaço para a declaração divergir do arquivo, que é o defeito
+    /// que este campo existe para fechar.
+    ///
+    /// É um inteiro, e não uma data, porque ano é o que as regras cortam — e
+    /// porque guardar instante aqui já deu errado uma vez: como
+    /// <c>timestamptz</c>, 1º de janeiro de 2025 em UTC volta como 2024 numa
+    /// sessão em Brasília, e a camada se declarava um ano mais antiga do que é.
+    /// Errar para mais velho é errar para o lado perigoso: faz a regra se dizer
+    /// avaliada sobre um período que a camada não cobre.
+    /// </remarks>
+    public int? CobreDesdeAno { get; set; }
+
     /// <summary>Versão das feições que a análise enxerga.</summary>
     /// <remarks>
     /// A recarga grava a versão seguinte ao lado da atual e só troca este
@@ -141,4 +185,16 @@ public class FeicaoReferencia
 
     /// <summary>Versão da carga a que esta feição pertence.</summary>
     public int Versao { get; set; }
+
+    /// <summary>
+    /// Ano do fato que a feição registra, quando a origem o informa.
+    /// </summary>
+    /// <remarks>
+    /// O corte temporal de uma regra ("a partir de 2008") precisa recair sobre
+    /// o fato, não sobre a carga. Antes isso era lido do ano da camada inteira,
+    /// o que só funcionava enquanto cada camada guardasse um único ano — e
+    /// deixava de funcionar no instante em que o PRODES passasse a trazer de
+    /// 2008 em diante, porque aí todo polígono responderia pelo mesmo ano.
+    /// </remarks>
+    public int? Ano { get; set; }
 }

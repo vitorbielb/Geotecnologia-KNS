@@ -100,10 +100,12 @@ public class PerimetroProprioService : IPerimetroProprioService
             var resultado = ehShapefile
                 ? await _shapefile.ImportarAsync(
                     arquivo, chave, nome, TipoCamada.OutroPerimetro, OrigemDeclarada,
-                    anoReferencia: null, tenantId: tenantId, cancellationToken)
+                    anoReferencia: null, tenantId: tenantId,
+                    biomas: null, cancellationToken: cancellationToken)
                 : await _geoJson.ImportarAsync(
                     arquivo, chave, nome, TipoCamada.OutroPerimetro, OrigemDeclarada,
-                    anoReferencia: null, tenantId: tenantId, cancellationToken);
+                    anoReferencia: null, tenantId: tenantId,
+                    biomas: null, cancellationToken: cancellationToken);
 
             _logger.LogInformation(
                 "Perímetro {Nome} da indústria {TenantId}: {Gravados} feições.",

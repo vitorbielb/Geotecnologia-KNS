@@ -3,6 +3,7 @@ using System;
 using GeotecnologiaKNS.Geo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GeotecnologiaKNS.Geo.Migrations
 {
     [DbContext(typeof(GeoDbContext))]
-    partial class GeoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261006033349_AbrangenciaDeCamada")]
+    partial class AbrangenciaDeCamada
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

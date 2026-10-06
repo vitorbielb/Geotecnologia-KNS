@@ -144,7 +144,7 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             analise.Resultado = avaliacao.Status;
             analise.Parecer = avaliacao.Parecer;
             analise.CamadasVerificadas = await DescreverCamadasAsync(
-                solicitacao.TenantId, cancellationToken);
+                cruzamento.CodigoCar, solicitacao.TenantId, cancellationToken);
             analise.CoberturaCompleta = avaliacao.CoberturaCompleta;
             // O motivo vai junto porque "camada não carregada" manda carregar
             // um arquivo, e essa é a instrução errada para a regra da cadeia
@@ -415,21 +415,59 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
     private static string Formatar(double valor) =>
         valor.ToString("N2", System.Globalization.CultureInfo.GetCultureInfo("pt-BR"));
 
-    private async Task<string> DescreverCamadasAsync(int tenantId, CancellationToken cancellationToken)
+    /// <summary>
+    /// A lista de bases que o laudo cita, separando o que respondeu do que não
+    /// alcança este imóvel.
+    /// </summary>
+    /// <remarks>
+    /// A separação é o ponto. Antes a lista era a mesma para o país inteiro, e
+    /// o laudo de uma fazenda de Goiás trazia "PRODES — 48.750 feições" entre
+    /// as bases consultadas — uma camada da Amazônia, sem um polígono sequer no
+    /// estado, citada como se tivesse respondido.
+    ///
+    /// As que não alcançam continuam na lista, e dizendo que não alcançam.
+    /// Sumir com elas trocaria uma informação errada por uma lacuna, e quem lê
+    /// o laudo não teria como saber que a camada existe.
+    /// </remarks>
+    private async Task<string> DescreverCamadasAsync(
+        string codigoCar, int tenantId, CancellationToken cancellationToken)
     {
-        var camadas = await _intersecao.ObterCamadasAtivasAsync(tenantId, cancellationToken);
+        var camadas = await _intersecao.ObterCamadasAtivasAsync(
+            codigoCar, tenantId, cancellationToken);
+
+        if (camadas.Count == 0)
+        {
+            return "Nenhuma camada ativa.";
+        }
+
         var texto = new StringBuilder();
 
-        foreach (var camada in camadas)
+        foreach (var consultada in camadas.Where(x => x.CobreOImovel))
         {
+            var camada = consultada.Camada;
+
             texto.AppendLine(
                 $"{camada.Nome} ({camada.Origem})" +
                 (camada.AnoReferencia.HasValue ? $" — ano {camada.AnoReferencia}" : string.Empty) +
+                (camada.CobreDesdeAno.HasValue ? $" — desde {camada.CobreDesdeAno}" : string.Empty) +
                 $" — {camada.TotalFeicoes} feições, atualizada em " +
                 (camada.AtualizadaEm?.ToString("dd/MM/yyyy") ?? "data não registrada"));
         }
 
-        return texto.Length == 0 ? "Nenhuma camada ativa." : texto.ToString();
+        var foraDoAlcance = camadas.Where(x => !x.CobreOImovel).ToList();
+
+        if (foraDoAlcance.Count > 0)
+        {
+            texto.AppendLine();
+            texto.AppendLine("Não alcançam este imóvel (região fora da cobertura da camada):");
+
+            foreach (var consultada in foraDoAlcance)
+            {
+                texto.AppendLine($"{consultada.Camada.Nome} ({consultada.Camada.Origem})");
+            }
+        }
+
+        return texto.ToString();
     }
 }
 

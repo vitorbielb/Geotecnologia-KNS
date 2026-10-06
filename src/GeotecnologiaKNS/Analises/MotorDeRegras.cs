@@ -63,7 +63,25 @@ public enum MotivoNaoAvaliada
     CamadaAusente = 0,
     ListaRestritivaAusente = 1,
     ProdutorSemDocumento = 2,
-    CadeiaNaoInformada = 3
+    CadeiaNaoInformada = 3,
+
+    /// <summary>Há camada do tipo, mas nenhuma alcança a região do imóvel.</summary>
+    /// <remarks>
+    /// Separado de <see cref="CamadaAusente"/> porque a providência é outra: ali
+    /// falta carregar a camada, aqui falta carregar a camada <i>do bioma
+    /// certo</i>. Era o caso de 334 mil imóveis em Goiás e Mato Grosso do Sul,
+    /// cruzados contra um PRODES que só cobre a Amazônia — e, até esta
+    /// distinção existir, saindo liberados por isso.
+    /// </remarks>
+    ForaDaAbrangencia = 4,
+
+    /// <summary>A camada não alcança o período que a regra examina.</summary>
+    /// <remarks>
+    /// Uma regra que diz "a partir de 2008" avaliada contra uma camada que
+    /// começa em 2024 não está avaliada: está respondendo sobre dezesseis anos
+    /// que nunca consultou.
+    /// </remarks>
+    PeriodoNaoCoberto = 5
 }
 
 public record RegraNaoAvaliada(
@@ -71,7 +89,9 @@ public record RegraNaoAvaliada(
     string Descricao,
     TipoCamada Tipo,
     Severidade SeveridadePrevista,
-    MotivoNaoAvaliada Motivo = MotivoNaoAvaliada.CamadaAusente)
+    MotivoNaoAvaliada Motivo = MotivoNaoAvaliada.CamadaAusente,
+    int? CobreDesdeAno = null,
+    int? AnoMinimo = null)
 {
     /// <summary>O que resolve a falta, em uma frase.</summary>
     public string Explicacao => Motivo switch
@@ -84,6 +104,12 @@ public record RegraNaoAvaliada(
 
         MotivoNaoAvaliada.ListaRestritivaAusente =>
             "a lista restritiva correspondente não está carregada",
+
+        MotivoNaoAvaliada.ForaDaAbrangencia =>
+            "nenhuma camada do tipo examinado cobre a região deste imóvel",
+
+        MotivoNaoAvaliada.PeriodoNaoCoberto =>
+            $"a regra examina desde {AnoMinimo} e a camada disponível começa em {CobreDesdeAno}",
 
         _ => "nenhuma camada do tipo examinado está carregada"
     };
@@ -367,7 +393,13 @@ public class MotorDeRegras : IMotorDeRegras
         ConsultaPorDocumento? documento,
         CadeiaIndireta? cadeia)
     {
+        // Verificados são os tipos cuja camada alcança ESTE imóvel; existentes,
+        // os que estão carregados em algum lugar do país. A diferença entre os
+        // dois conjuntos é exatamente o buraco que deixava Goiás passar.
         var verificados = cruzamento.TiposVerificados.ToHashSet();
+        var existentes = (cruzamento.TiposExistentes ?? cruzamento.TiposVerificados).ToHashSet();
+        var desde = cruzamento.CobreDesdeAno;
+
         var listas = documento?.TiposDisponiveis.ToHashSet() ?? new HashSet<TipoRestricao>();
         var temDocumento = !string.IsNullOrWhiteSpace(documento?.Documento);
 
@@ -382,21 +414,64 @@ public class MotorDeRegras : IMotorDeRegras
                 ? !cadeiaInformada
                 : r.EhPorDocumento
                     ? !temDocumento || !listas.Contains(r.Restricao!.Value)
-                    : !verificados.Contains(r.Tipo))
-            .Select(r => new RegraNaoAvaliada(
-                r.Codigo, r.Descricao, r.Tipo, r.Severidade, MotivoDe(r, temDocumento)))
+                    : !verificados.Contains(r.Tipo) || FaltaPeriodo(r, desde) is not null)
+            .Select(r => Descrever(r, temDocumento, verificados, existentes, desde))
             .OrderByDescending(r => r.SeveridadePrevista)
             .ThenBy(r => r.CodigoRegra, StringComparer.Ordinal)
             .ToList();
     }
 
-    private static MotivoNaoAvaliada MotivoDe(RegraAnalise regra, bool temDocumento) => regra switch
+    /// <summary>
+    /// Primeiro ano coberto, quando ele é posterior ao corte que a regra exige.
+    /// </summary>
+    /// <remarks>
+    /// Devolve o ano em vez de um booleano porque o laudo precisa dizer qual é:
+    /// "a regra examina desde 2008 e a camada começa em 2024" manda carregar os
+    /// anos que faltam, enquanto "período não coberto" não manda fazer nada.
+    /// </remarks>
+    private static int? FaltaPeriodo(
+        RegraAnalise regra, IReadOnlyDictionary<TipoCamada, int?>? desde)
     {
-        { CadeiaIndireta: true } => MotivoNaoAvaliada.CadeiaNaoInformada,
-        { EhPorDocumento: true } when !temDocumento => MotivoNaoAvaliada.ProdutorSemDocumento,
-        { EhPorDocumento: true } => MotivoNaoAvaliada.ListaRestritivaAusente,
-        _ => MotivoNaoAvaliada.CamadaAusente
-    };
+        if (regra.AnoMinimo is not int minimo || desde is null)
+        {
+            return null;
+        }
+
+        return desde.TryGetValue(regra.Tipo, out var inicio) && inicio is int ano && ano > minimo
+            ? ano
+            : null;
+    }
+
+    private static RegraNaoAvaliada Descrever(
+        RegraAnalise regra,
+        bool temDocumento,
+        IReadOnlySet<TipoCamada> verificados,
+        IReadOnlySet<TipoCamada> existentes,
+        IReadOnlyDictionary<TipoCamada, int?>? desde)
+    {
+        var faltaPeriodo = FaltaPeriodo(regra, desde);
+
+        var motivo = regra switch
+        {
+            { CadeiaIndireta: true } => MotivoNaoAvaliada.CadeiaNaoInformada,
+            { EhPorDocumento: true } when !temDocumento => MotivoNaoAvaliada.ProdutorSemDocumento,
+            { EhPorDocumento: true } => MotivoNaoAvaliada.ListaRestritivaAusente,
+
+            // A ordem importa: fora da abrangência vem antes do período, porque
+            // onde a camada não chega o período dela não diz nada.
+            _ when !verificados.Contains(regra.Tipo) && existentes.Contains(regra.Tipo)
+                => MotivoNaoAvaliada.ForaDaAbrangencia,
+
+            _ when !verificados.Contains(regra.Tipo) => MotivoNaoAvaliada.CamadaAusente,
+
+            _ => MotivoNaoAvaliada.PeriodoNaoCoberto
+        };
+
+        return new RegraNaoAvaliada(
+            regra.Codigo, regra.Descricao, regra.Tipo, regra.Severidade, motivo,
+            CobreDesdeAno: faltaPeriodo,
+            AnoMinimo: regra.AnoMinimo);
+    }
 
     /// <summary>
     /// Resumo curto do veredito, para o campo Parecer da solicitação.
@@ -704,7 +779,8 @@ public class MotorDeRegras : IMotorDeRegras
             texto.AppendLine();
             texto.AppendLine($"[NÃO AVALIADA] {regra.CodigoRegra} — {regra.Descricao}");
 
-            texto.AppendLine(regra.Motivo == MotivoNaoAvaliada.CamadaAusente
+            texto.AppendLine(regra.Motivo is MotivoNaoAvaliada.CamadaAusente
+                                          or MotivoNaoAvaliada.ForaDaAbrangencia
                 ? $"  Motivo: {regra.Explicacao} ({DescreverTipo(regra.Tipo)})."
                 : $"  Motivo: {regra.Explicacao}.");
             texto.AppendLine(
