@@ -34,6 +34,14 @@ namespace GeotecnologiaKNS.UnitTests.Analises
                 .Distinct()
                 .ToList();
 
+        /// <summary>
+        /// Cadastro vigente: o caso comum, e o que mantém estes testes medindo
+        /// o que se propuseram a medir. Sem ele a CAR-001 sai como não
+        /// avaliada e derruba o veredito de todos eles de uma vez.
+        /// </summary>
+        private static readonly CadastroDoImovel CadastroVigente =
+            new("Analisado sem pendências");
+
         private static ResultadoAvaliacao Avaliar(
             ConsultaPorDocumento? documento,
             CadeiaIndireta? cadeia,
@@ -43,7 +51,8 @@ namespace GeotecnologiaKNS.UnitTests.Analises
                     Car, 1000, Array.Empty<Sobreposicao>(), DateTime.UtcNow, tipos ?? TodosOsTipos),
                 PoliticaAnalise.Padrao(),
                 documento,
-                cadeia);
+                cadeia,
+                CadastroVigente);
 
         private static ConsultaPorDocumento ProdutorLimpo =>
             new("00000836230", Array.Empty<AchadoPorDocumento>(),

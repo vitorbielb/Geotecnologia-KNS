@@ -34,13 +34,22 @@ namespace GeotecnologiaKNS.UnitTests.Analises
             new("00000836230", Array.Empty<AchadoPorDocumento>(),
                 new[] { TipoRestricao.EmbargoAmbiental, TipoRestricao.TrabalhoEscravo });
 
+        /// <summary>
+        /// Cadastro vigente: o caso comum, e o que mantém estes testes medindo
+        /// o que se propuseram a medir. Sem ele a CAR-001 sai como não
+        /// avaliada e derruba o veredito de todos eles de uma vez.
+        /// </summary>
+        private static readonly CadastroDoImovel CadastroVigente =
+            new("Analisado sem pendências");
+
         private static ResultadoAvaliacao Avaliar(
             CadeiaIndireta? cadeia, PoliticaAnalise? politica = null) =>
             new MotorDeRegras().Avaliar(
                 new ResultadoCruzamento(Car, 1000, Array.Empty<Sobreposicao>(), DateTime.UtcNow, TodosOsTipos),
                 politica ?? PoliticaAnalise.Padrao(),
                 ProdutorLimpo,
-                cadeia);
+                cadeia,
+                CadastroVigente);
 
         /// <summary>
         /// Política de uma indústria que leva a cadeia indireta a sério.

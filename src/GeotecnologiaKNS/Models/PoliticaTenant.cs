@@ -76,6 +76,17 @@ namespace GeotecnologiaKNS.Models
         [Display(Name = "Cadeia indireta")]
         public bool CadeiaIndireta { get; set; }
 
+        /// <summary>
+        /// Quando verdadeira, a regra examina a validade do cadastro do imóvel.
+        /// </summary>
+        /// <remarks>
+        /// Separado da regra de embargo de propósito: embargo é sanção sobre a
+        /// área, cancelamento de CAR é anulação do registro. Escrever "área
+        /// embargada" sobre um imóvel sem infração destruiria a credibilidade
+        /// do laudo pelo lado oposto ao de liberar o que não foi verificado.
+        /// </remarks>
+        public bool SituacaoDoCar { get; set; }
+
         /// <summary>0 informativo, 1 alerta, 2 bloqueio.</summary>
         [Display(Name = "Severidade")]
         public int Severidade { get; set; }

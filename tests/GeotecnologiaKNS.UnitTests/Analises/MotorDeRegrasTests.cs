@@ -78,9 +78,18 @@ namespace GeotecnologiaKNS.UnitTests.Analises
                     Verificado: true, Array.Empty<string>(), null)
             });
 
+        /// <summary>
+        /// Cadastro vigente: o caso comum, e o que mantém estes testes medindo
+        /// o que se propuseram a medir. Sem ele a CAR-001 sai como não
+        /// avaliada e derruba o veredito de todos eles de uma vez.
+        /// </summary>
+        private static readonly CadastroDoImovel CadastroVigente =
+            new("Analisado sem pendências");
+
         private static ResultadoAvaliacao Avaliar(params Sobreposicao[] sobreposicoes) =>
             new MotorDeRegras().Avaliar(
-                Cruzamento(sobreposicoes), PoliticaAnalise.Padrao(), ProdutorLimpo, CadeiaLimpa);
+                Cruzamento(sobreposicoes), PoliticaAnalise.Padrao(),
+                ProdutorLimpo, CadeiaLimpa, CadastroVigente);
 
         [Fact]
         public void Avaliar_SemSobreposicao_DeveLiberar()
@@ -290,7 +299,7 @@ namespace GeotecnologiaKNS.UnitTests.Analises
             params Sobreposicao[] sobreposicoes) =>
             new MotorDeRegras().Avaliar(
                 new ResultadoCruzamento(Car, 1000, sobreposicoes, DateTime.UtcNow, new[] { tipoDisponivel }),
-                PoliticaAnalise.Padrao());
+                PoliticaAnalise.Padrao(), cadastro: CadastroVigente);
 
         [Fact]
         public void Avaliar_SemCamadaParaUmaRegra_NaoDeveLiberar()

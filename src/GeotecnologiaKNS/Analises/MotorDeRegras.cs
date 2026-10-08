@@ -22,7 +22,47 @@ public enum EscopoDoAchado
     Documento = 1,
 
     /// <summary>Restrição em imóvel que forneceu ao fornecedor direto.</summary>
-    CadeiaIndireta = 2
+    CadeiaIndireta = 2,
+
+    /// <summary>Problema na validade do cadastro, não na área.</summary>
+    Cadastro = 3
+}
+
+/// <summary>
+/// A situação do cadastro do imóvel, como o SICAR a publica.
+/// </summary>
+/// <remarks>
+/// Cancelamento de CAR não é embargo, e tratá-los igual quebraria o laudo pelo
+/// lado oposto ao que ele já esteve quebrado. Embargo é sanção: vem de auto de
+/// infração, recai sobre área determinada e proíbe atividade econômica ali.
+/// Cancelamento é anulação de registro — diz que o cadastro não vale, não que a
+/// área está sob sanção, e pode não haver infração nenhuma.
+/// </remarks>
+public record CadastroDoImovel(string? Situacao)
+{
+    /// <summary>A situação é conhecida; sem ela não há o que avaliar.</summary>
+    public bool Informada => !string.IsNullOrWhiteSpace(Situacao);
+
+    /// <summary>
+    /// O cadastro foi anulado por decisão com conteúdo — administrativa ou
+    /// judicial.
+    /// </summary>
+    /// <remarks>
+    /// Só essas duas, e a distinção é a parte que importa. O SICAR cancela
+    /// cadastro por cinco motivos, e três deles são rotina de cartório: a
+    /// divisa do município mudou, o cadastro estava duplicado, o proprietário
+    /// pediu para cancelar e recadastrar. Na base carregada são 551 imóveis
+    /// nessas três situações contra 80.900 nas outras duas.
+    ///
+    /// Uma regra única sobre "Cancelado" colocaria redesenho de divisa
+    /// municipal no mesmo balde que anulação judicial — e afirmar restrição
+    /// onde não há é o mesmo erro que liberar onde há, invertido.
+    /// </remarks>
+    public bool SemValidade =>
+        Informada &&
+        Situacao!.Contains("cancelad", StringComparison.OrdinalIgnoreCase) &&
+        (Situacao.Contains("administrativ", StringComparison.OrdinalIgnoreCase) ||
+         Situacao.Contains("judicial", StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>
@@ -81,7 +121,10 @@ public enum MotivoNaoAvaliada
     /// começa em 2024 não está avaliada: está respondendo sobre dezesseis anos
     /// que nunca consultou.
     /// </remarks>
-    PeriodoNaoCoberto = 5
+    PeriodoNaoCoberto = 5,
+
+    /// <summary>A situação do cadastro do imóvel não é conhecida.</summary>
+    SituacaoDoCarDesconhecida = 6
 }
 
 public record RegraNaoAvaliada(
@@ -110,6 +153,9 @@ public record RegraNaoAvaliada(
 
         MotivoNaoAvaliada.PeriodoNaoCoberto =>
             $"a regra examina desde {AnoMinimo} e a camada disponível começa em {CobreDesdeAno}",
+
+        MotivoNaoAvaliada.SituacaoDoCarDesconhecida =>
+            "a situação do cadastro do imóvel não foi informada",
 
         _ => "nenhuma camada do tipo examinado está carregada"
     };
@@ -192,7 +238,8 @@ public interface IMotorDeRegras
         ResultadoCruzamento cruzamento,
         PoliticaAnalise politica,
         ConsultaPorDocumento? documento = null,
-        CadeiaIndireta? cadeia = null);
+        CadeiaIndireta? cadeia = null,
+        CadastroDoImovel? cadastro = null);
 }
 
 public class MotorDeRegras : IMotorDeRegras
@@ -201,7 +248,8 @@ public class MotorDeRegras : IMotorDeRegras
         ResultadoCruzamento cruzamento,
         PoliticaAnalise politica,
         ConsultaPorDocumento? documento = null,
-        CadeiaIndireta? cadeia = null)
+        CadeiaIndireta? cadeia = null,
+        CadastroDoImovel? cadastro = null)
     {
         ArgumentNullException.ThrowIfNull(cruzamento);
         ArgumentNullException.ThrowIfNull(politica);
@@ -227,6 +275,7 @@ public class MotorDeRegras : IMotorDeRegras
 
         achados.AddRange(AvaliarPorDocumento(politica, documento));
         achados.AddRange(AvaliarCadeiaIndireta(politica, cadeia));
+        achados.AddRange(AvaliarCadastro(politica, cadastro));
 
         // Ordena por gravidade e, dentro dela, pela área — o laudo precisa abrir
         // com o achado que decide o veredito.
@@ -235,7 +284,7 @@ public class MotorDeRegras : IMotorDeRegras
             .ThenByDescending(a => a.AreaSobrepostaHa)
             .ToList();
 
-        var naoAvaliadas = LevantarNaoAvaliadas(cruzamento, politica, documento, cadeia);
+        var naoAvaliadas = LevantarNaoAvaliadas(cruzamento, politica, documento, cadeia, cadastro);
         var status = DeterminarStatus(achados, naoAvaliadas);
 
         return new ResultadoAvaliacao(
@@ -324,6 +373,40 @@ public class MotorDeRegras : IMotorDeRegras
     }
 
     /// <summary>
+    /// Produz um achado quando o cadastro do imóvel perdeu a validade.
+    /// </summary>
+    /// <remarks>
+    /// Área e percentual ficam em zero, como nas regras por documento: o
+    /// problema não é um pedaço do imóvel, é o registro inteiro. Escrever
+    /// "0,00 ha" sem essa distinção faria a ocorrência parecer irrelevante,
+    /// quando ela é o contrário — ela põe em dúvida o perímetro contra o qual
+    /// todo o resto da análise foi calculado.
+    /// </remarks>
+    private static IEnumerable<Achado> AvaliarCadastro(
+        PoliticaAnalise politica, CadastroDoImovel? cadastro)
+    {
+        if (cadastro is null || !cadastro.SemValidade)
+        {
+            yield break;
+        }
+
+        foreach (var regra in politica.Regras.Where(r => r.SituacaoDoCar))
+        {
+            yield return new Achado(
+                regra.Codigo,
+                regra.Descricao,
+                regra.Severidade,
+                "Cadastro Ambiental Rural",
+                "SICAR — situação do cadastro",
+                cadastro.Situacao,
+                AreaSobrepostaHa: 0,
+                PercentualDoImovel: 0,
+                regra.Fundamento,
+                EscopoDoAchado.Cadastro);
+        }
+    }
+
+    /// <summary>
     /// Identifica o fornecedor na ocorrência, sem repetir o que a seção da
     /// cadeia já detalha.
     /// </summary>
@@ -391,7 +474,8 @@ public class MotorDeRegras : IMotorDeRegras
         ResultadoCruzamento cruzamento,
         PoliticaAnalise politica,
         ConsultaPorDocumento? documento,
-        CadeiaIndireta? cadeia)
+        CadeiaIndireta? cadeia,
+        CadastroDoImovel? cadastro)
     {
         // Verificados são os tipos cuja camada alcança ESTE imóvel; existentes,
         // os que estão carregados em algum lugar do país. A diferença entre os
@@ -409,12 +493,17 @@ public class MotorDeRegras : IMotorDeRegras
         // quem é afirmar o que não se apurou.
         var cadeiaInformada = cadeia?.Informada == true;
 
+        // Situação não informada é regra não avaliada, e não regra cumprida —
+        // o mesmo cuidado da cadeia indireta. Um imóvel cujo cadastro ninguém
+        // conferiu não é um imóvel com cadastro válido.
         return politica.Regras
             .Where(r => r.CadeiaIndireta
                 ? !cadeiaInformada
-                : r.EhPorDocumento
-                    ? !temDocumento || !listas.Contains(r.Restricao!.Value)
-                    : !verificados.Contains(r.Tipo) || FaltaPeriodo(r, desde) is not null)
+                : r.SituacaoDoCar
+                    ? cadastro?.Informada != true
+                    : r.EhPorDocumento
+                        ? !temDocumento || !listas.Contains(r.Restricao!.Value)
+                        : !verificados.Contains(r.Tipo) || FaltaPeriodo(r, desde) is not null)
             .Select(r => Descrever(r, temDocumento, verificados, existentes, desde))
             .OrderByDescending(r => r.SeveridadePrevista)
             .ThenBy(r => r.CodigoRegra, StringComparer.Ordinal)
@@ -454,6 +543,7 @@ public class MotorDeRegras : IMotorDeRegras
         var motivo = regra switch
         {
             { CadeiaIndireta: true } => MotivoNaoAvaliada.CadeiaNaoInformada,
+            { SituacaoDoCar: true } => MotivoNaoAvaliada.SituacaoDoCarDesconhecida,
             { EhPorDocumento: true } when !temDocumento => MotivoNaoAvaliada.ProdutorSemDocumento,
             { EhPorDocumento: true } => MotivoNaoAvaliada.ListaRestritivaAusente,
 
@@ -658,6 +748,14 @@ public class MotorDeRegras : IMotorDeRegras
                     $"  Registros em nome do produtor: {grupo.Quantidade}. " +
                     "Independe da localização do imóvel.");
             }
+            else if (grupo.Escopo == EscopoDoAchado.Cadastro)
+            {
+                texto.AppendLine($"  Fonte: {grupo.Origem}");
+                texto.AppendLine(
+                    "  O achado é sobre a validade do registro, não sobre a área. Como todo " +
+                    "o cruzamento geográfico é feito contra o perímetro do CAR, um cadastro " +
+                    "anulado tira o lastro oficial do perímetro usado nesta análise.");
+            }
             else
             {
                 texto.AppendLine($"  Camada: {grupo.CamadaNome} ({grupo.Origem})");
@@ -673,6 +771,7 @@ public class MotorDeRegras : IMotorDeRegras
                 {
                     EscopoDoAchado.CadeiaIndireta => "Imóveis",
                     EscopoDoAchado.Documento => "Atos",
+                    EscopoDoAchado.Cadastro => "Situação",
                     _ => "Feições"
                 };
                 texto.AppendLine($"  {titulo}: {string.Join(", ", grupo.Rotulos)}{reticencias}");

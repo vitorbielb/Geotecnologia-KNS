@@ -44,13 +44,22 @@ namespace GeotecnologiaKNS.UnitTests.Analises
                     "MT-1", "Fornecedor limpo", Verificado: true, Array.Empty<string>(), null)
             });
 
+        /// <summary>
+        /// Cadastro vigente: o caso comum, e o que mantém estes testes medindo
+        /// o que se propuseram a medir. Sem ele a CAR-001 sai como não
+        /// avaliada e derruba o veredito de todos eles de uma vez.
+        /// </summary>
+        private static readonly CadastroDoImovel CadastroVigente =
+            new("Analisado sem pendências");
+
         private static ResultadoAvaliacao Avaliar(
             IReadOnlyList<TipoCamada> verificados, params Sobreposicao[] sobreposicoes) =>
             new MotorDeRegras().Avaliar(
                 new ResultadoCruzamento(Car, 1000, sobreposicoes, DateTime.UtcNow, verificados),
                 PoliticaAnalise.Padrao(),
                 ProdutorLimpo,
-                CadeiaLimpa);
+                CadeiaLimpa,
+                CadastroVigente);
 
         [Fact]
         public void SemPerimetroCarregado_OUT001_DeveSairComoNaoAvaliada()

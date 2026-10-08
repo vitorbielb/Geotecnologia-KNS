@@ -185,3 +185,63 @@ acrescenta o que é novo, sem apagar nada. Recarregar um estado é rotina segura
 A base do CAR muda todo dia, mas devagar e por acréscimo. Não há recarga
 automática periódica como nas camadas de referência — se ela passar a fazer
 falta, o comando por UF já existe e pode ser agendado.
+
+## A situação do cadastro, e por que ela não é embargo
+
+A regra **CAR-001** examina a validade do cadastro. Ela é separada da regra de
+embargo de propósito, e a distinção decide o que o laudo pode afirmar.
+
+**Embargo é sanção.** Vem de auto de infração, recai sobre área determinada e
+proíbe atividade econômica ali. Comprar de área embargada gera responsabilidade
+direta — por isso ele bloqueia.
+
+**Cancelamento de CAR é anulação de registro.** Diz que aquele cadastro não
+vale, não que a área está sob sanção. Pode não haver infração nenhuma.
+
+O que o cancelamento é, de fato, incomoda de outro jeito: todas as regras
+geográficas são calculadas contra o perímetro do CAR. Com o cadastro anulado, o
+cruzamento rodou sobre um polígono que o Estado não reconhece mais como a
+declaração daquele imóvel. A geometria não está errada — perdeu o lastro.
+
+### Nem todo cancelamento significa a mesma coisa
+
+O SICAR cancela cadastro por cinco motivos, e três deles são rotina de
+cartório. Na base carregada:
+
+| Motivo | Imóveis | Dispara |
+|---|---|---|
+| por decisão administrativa | 77.935 | sim |
+| por decisão judicial | 2.965 | sim |
+| por solicitação do proprietário | 530 | não |
+| por alteração na base de municípios | 21 | não |
+| por duplicidade | 1 | não |
+
+A divisa do município mudou, o cadastro estava duplicado, o dono pediu para
+recadastrar: nenhum desses é restrição ambiental. Uma regra única sobre
+"Cancelado" colocaria redesenho de divisa municipal no mesmo balde que anulação
+judicial — e **afirmar restrição onde não há é o mesmo erro que liberar onde há,
+invertido**.
+
+### Severidade
+
+Alerta no protocolo padrão, não bloqueio: o critério é que bloqueio fica para
+área sob sanção. Se a indústria exigir CAR ativo por obrigação contratual — os
+acordos de carne costumam exigir —, o corte é dela e a regra aceita bloqueio;
+muda a severidade e o fundamento citado no laudo, que passa a ser contratual em
+vez de ambiental.
+
+Situação **não informada** sai como regra não avaliada, nunca como cadastro em
+ordem. É o mesmo cuidado da cadeia indireta: um imóvel que ninguém conferiu não
+é um imóvel conferido.
+
+### O que ainda não é olhado
+
+Dois conjuntos grandes que o sistema hoje ignora, e que talvez pesem mais que um
+cancelamento por duplicidade:
+
+- **399.041 imóveis (31,8%)** em "Analisado, aguardando atendimento a
+  notificação" — o órgão examinou e notificou.
+- **50.585 (4,0%)** em "Analisado, aguardando regularização ambiental".
+
+Nenhum dos dois é sanção, mas ambos são sinal de que o órgão achou pendência.
+Fica anotado.

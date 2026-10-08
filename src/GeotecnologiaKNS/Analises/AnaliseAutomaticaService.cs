@@ -138,7 +138,13 @@ public class AnaliseAutomaticaService : IAnaliseAutomaticaService
             var cadeia = await VerificarCadeiaIndiretaAsync(
                 propriedade.Id, solicitacao.TenantId, cancellationToken);
 
-            var avaliacao = _motor.Avaliar(cruzamento, politica, documento, cadeia);
+            // A situação vai como o SICAR a publica, sem interpretação aqui: é
+            // a regra que decide o que cada uma significa. O importador que
+            // classificasse por conta própria esconderia a decisão num lugar
+            // onde ninguém a procuraria depois.
+            var cadastro = new CadastroDoImovel(propriedade.SituacaoCar);
+
+            var avaliacao = _motor.Avaliar(cruzamento, politica, documento, cadeia, cadastro);
 
             analise.AreaImovelHa = cruzamento.AreaImovelHa;
             analise.Resultado = avaliacao.Status;

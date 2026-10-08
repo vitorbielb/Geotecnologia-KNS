@@ -63,8 +63,30 @@ public class RegraAnalise
     /// </remarks>
     public bool CadeiaIndireta { get; set; }
 
+    /// <summary>
+    /// Quando verdadeira, a regra examina a validade do cadastro do imóvel.
+    /// </summary>
+    /// <remarks>
+    /// Quarto eixo, e o mais difícil de classificar. Cancelamento de CAR não é
+    /// embargo: embargo é sanção, vem de auto de infração, recai sobre área
+    /// determinada e proíbe atividade econômica ali. Cancelamento é anulação de
+    /// um registro — diz que o cadastro não vale, não que a área está sob
+    /// sanção, e pode não haver infração nenhuma.
+    ///
+    /// O que ele é, de fato, incomoda de outro jeito: todas as regras
+    /// geográficas são calculadas contra o perímetro do CAR. Com o cadastro
+    /// anulado, o cruzamento rodou sobre um polígono que o Estado não reconhece
+    /// mais como a declaração daquele imóvel. A geometria não está errada;
+    /// perdeu o lastro.
+    ///
+    /// Por isso é regra própria, e não uma extensão da regra de embargo:
+    /// escrever "área embargada" sobre um imóvel sem infração destruiria a
+    /// credibilidade do laudo pelo lado oposto ao que a destruía antes.
+    /// </remarks>
+    public bool SituacaoDoCar { get; set; }
+
     /// <summary>Indica se a regra examina o imóvel em si, por sobreposição.</summary>
-    public bool EhGeografica => !EhPorDocumento && !CadeiaIndireta;
+    public bool EhGeografica => !EhPorDocumento && !CadeiaIndireta && !SituacaoDoCar;
 
     public Severidade Severidade { get; set; }
 
@@ -208,6 +230,17 @@ public class PoliticaAnalise
                 Tipo = TipoCamada.AlertaDesmatamento,
                 Severidade = Severidade.Alerta,
                 Fundamento = "Alerta ainda não consolidado; exige verificação."
+            },
+            new()
+            {
+                Codigo = "CAR-001",
+                Descricao = "Cadastro Ambiental Rural sem validade",
+                SituacaoDoCar = true,
+                Severidade = Severidade.Alerta,
+                Fundamento =
+                    "Cadastro anulado pelo órgão ambiental ou por decisão judicial. Não é " +
+                    "sanção sobre a área: é a perda do registro em que esta análise se apoia, " +
+                    "já que todo o cruzamento geográfico é feito contra o perímetro do CAR."
             },
             new()
             {
