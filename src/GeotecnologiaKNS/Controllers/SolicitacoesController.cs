@@ -15,6 +15,7 @@ namespace GeotecnologiaKNS.Controllers
         private readonly IUserContext _userContext;
 
         private readonly IEmissorDeLaudo _laudos;
+        private readonly IIntersecaoService _intersecao;
 
         public SolicitacoesController(
             ApplicationDbContext context,
@@ -22,7 +23,8 @@ namespace GeotecnologiaKNS.Controllers
             IMedidorDeUso medidor,
             IArmazenamentoDeArquivos arquivos,
             IUserContext userContext,
-            IEmissorDeLaudo laudos)
+            IEmissorDeLaudo laudos,
+            IIntersecaoService intersecao)
         {
             _context = context;
             _analise = analise;
@@ -30,6 +32,7 @@ namespace GeotecnologiaKNS.Controllers
             _arquivos = arquivos;
             _userContext = userContext;
             _laudos = laudos;
+            _intersecao = intersecao;
         }
 
         // GET: Solicitacoes
@@ -60,11 +63,22 @@ namespace GeotecnologiaKNS.Controllers
                 return NotFound();
             }
 
-            ViewBag.Analise = await _context.AnalisesAutomaticas
+            var analise = await _context.AnalisesAutomaticas
                 .Include(x => x.Ocorrencias)
                 .Where(x => x.SolicitacaoId == solicitacao.Id)
                 .OrderByDescending(x => x.IniciadaEm)
                 .FirstOrDefaultAsync();
+
+            ViewBag.Analise = analise;
+
+            // Quando a base mudou depois que a análise rodou, quem está olhando
+            // precisa saber antes de agir sobre o resultado — e não depois, ao
+            // cruzar a data de execução com a data de carga de cada camada.
+            if (analise is { Situacao: SituacaoAnalise.Concluida })
+            {
+                ViewBag.BasesAtualizadasEm = await _intersecao.AtualizacaoMaisRecenteAsync(
+                    analise.CodigoCar, solicitacao.TenantId);
+            }
 
             return View(solicitacao);
         }
@@ -299,6 +313,42 @@ namespace GeotecnologiaKNS.Controllers
                 laudo.NomeDoArquivo, cancellationToken);
 
             return File(laudo.Pdf, "application/pdf", laudo.NomeDoArquivo);
+        }
+
+        /// <summary>
+        /// Enfileira uma nova análise para a mesma solicitação.
+        /// </summary>
+        /// <remarks>
+        /// Uma análise nova, e não a correção da antiga. A anterior fica
+        /// gravada com o resultado que teve, porque o laudo emitido a partir
+        /// dela está com alguém — e um documento que muda de conteúdo sem mudar
+        /// de número não defende ninguém numa auditoria.
+        ///
+        /// Existe porque a cobertura das bases mudou debaixo de análises já
+        /// concluídas. Das cinco que diziam LIBERADO, as cinco passaram a
+        /// apontar achados quando as camadas de desmatamento foram corrigidas —
+        /// e, sem um jeito de refazê-las, a única saída seria abrir cada
+        /// solicitação e recadastrar.
+        /// </remarks>
+        [HttpPost("Solicitacoes/Reanalisar/{id}")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "UserCanUpdateSolicitacoes")]
+        public async Task<IActionResult> ReanalisarAsync(int id, CancellationToken cancellationToken)
+        {
+            // O filtro global por indústria é o que impede alguém de disparar a
+            // reanálise de uma concorrente trocando o número na URL. Aqui ele
+            // precisa valer.
+            var solicitacao = await _context.Solicitacao
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (solicitacao is null)
+            {
+                return NotFound();
+            }
+
+            await _analise.EnfileirarAsync(solicitacao.Id, cancellationToken);
+
+            return RedirectToAction(nameof(Details), new { id });
         }
 
         [HttpGet("Solicitacoes/ViewFile/{id}")]

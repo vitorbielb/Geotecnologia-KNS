@@ -65,6 +65,10 @@ internal sealed class IntersecaoIndisponivel : IIntersecaoService
         string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
         => Task.FromResult<IReadOnlyList<CamadaConsultada>>(Array.Empty<CamadaConsultada>());
 
+    public Task<DateTime?> AtualizacaoMaisRecenteAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
+        => Task.FromResult<DateTime?>(null);
+
     public Task<IReadOnlyList<Sobreposicao>> ObterRecortesAsync(
         string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
         => Task.FromResult<IReadOnlyList<Sobreposicao>>(Array.Empty<Sobreposicao>());

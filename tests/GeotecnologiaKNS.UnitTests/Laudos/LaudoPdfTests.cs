@@ -44,7 +44,8 @@ namespace GeotecnologiaKNS.UnitTests.Laudos
             IReadOnlyList<FornecedorDoLaudo>? cadeia = null,
             byte[]? mapa = null,
             string? mapaIndisponivel = "o imóvel não tem perímetro registrado.",
-            string? situacaoCar = "Aguardando análise") =>
+            string? situacaoCar = "Aguardando análise",
+            DateTime? basesAtualizadasEm = null) =>
             new()
             {
                 Analise = new AnaliseAutomatica
@@ -97,7 +98,8 @@ namespace GeotecnologiaKNS.UnitTests.Laudos
                 CadeiaIndireta = cadeia ?? [],
                 Mapa = mapa,
                 MapaIndisponivel = mapaIndisponivel,
-                CodigoDeConferencia = "A1B2-C3D4-E5F6"
+                CodigoDeConferencia = "A1B2-C3D4-E5F6",
+                BasesAtualizadasEm = basesAtualizadasEm
             };
 
         private static byte[] Gerar(DadosDoLaudo dados) => new LaudoPdf(dados).GeneratePdf();
@@ -169,6 +171,18 @@ namespace GeotecnologiaKNS.UnitTests.Laudos
             dados.Analise.PoliticaAplicada = "{isso não é json";
 
             dados.Protocolo.Should().BeEmpty();
+            Gerar(dados).Should().NotBeEmpty();
+        }
+
+        [Fact]
+        public void Laudo_ComBaseAtualizadaDepois_DeveSairComOAviso()
+        {
+            // O aviso é um trecho novo no encerramento, e trecho de PDF só
+            // falha quando é desenhado. Foi assim que a fonte indisponível
+            // apareceu — numa compilação que tinha passado.
+            var dados = Dados(basesAtualizadasEm: new DateTime(2026, 10, 11, 10, 0, 0));
+
+            dados.BasesMudaramDepois.Should().BeTrue();
             Gerar(dados).Should().NotBeEmpty();
         }
 

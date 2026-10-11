@@ -88,6 +88,8 @@ public class EmissorDeLaudo : IEmissorDeLaudo
             CadeiaIndireta = cadeia,
             Mapa = imagem.Png,
             MapaIndisponivel = imagem.Indisponivel,
+            BasesAtualizadasEm = await _intersecao.AtualizacaoMaisRecenteAsync(
+                analise.CodigoCar, analise.TenantId, cancellationToken),
             CodigoDeConferencia = Conferencia(analise)
         };
 

@@ -104,6 +104,21 @@ public interface IIntersecaoService
     /// </remarks>
     Task<IReadOnlyList<CamadaConsultada>> ObterCamadasAtivasAsync(
         string codigoCar, int? tenantId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Quando a base que cobre este imóvel foi atualizada pela última vez.
+    /// </summary>
+    /// <remarks>
+    /// Serve para comparar com a data da análise e dizer se ela ainda reflete o
+    /// que está carregado. Um laudo não fica errado por envelhecer — ele passa
+    /// a descrever um retrato anterior, e quem o lê precisa saber disso sem
+    /// cruzar datas à mão no rodapé.
+    ///
+    /// Só as camadas que alcançam este imóvel contam. Recarregar o PRODES do
+    /// Pantanal não torna velha a análise de uma fazenda do Pará.
+    /// </remarks>
+    Task<DateTime?> AtualizacaoMaisRecenteAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default);
 }
 
 public class IntersecaoService : IIntersecaoService
@@ -259,6 +274,36 @@ public class IntersecaoService : IIntersecaoService
     /// Camada sem feição publicada não conta: uma primeira carga recusada deixa
     /// a camada cadastrada e vazia, e ela se diria verificada do mesmo jeito.
     /// </remarks>
+    public async Task<DateTime?> AtualizacaoMaisRecenteAsync(
+        string codigoCar, int? tenantId, CancellationToken cancellationToken = default)
+    {
+        var normalizado = CodigoCar.Normalizar(codigoCar);
+
+        if (normalizado is null)
+        {
+            return null;
+        }
+
+        const string Sql = @"
+            SELECT MAX(c.atualizada_em)
+            FROM geo.camada_referencia c
+            JOIN geo.imovel_car i ON i.codigo_car = @codigo
+            WHERE c.ativa
+              AND c.total_feicoes > 0
+              AND c.tipo <> @bioma
+              AND (c.tenant_id IS NULL OR c.tenant_id = @tenant)
+              AND (c.abrangencia IS NULL OR ST_Intersects(c.abrangencia, i.perimetro))";
+
+        await using var comando = await CriarComandoAsync(Sql, cancellationToken);
+        comando.Parameters.AddWithValue("codigo", normalizado);
+        comando.Parameters.AddWithValue("tenant", (object?)tenantId ?? DBNull.Value);
+        comando.Parameters.AddWithValue("bioma", TipoBioma);
+
+        var resultado = await comando.ExecuteScalarAsync(cancellationToken);
+
+        return resultado is null or DBNull ? null : (DateTime)resultado;
+    }
+
     private sealed record CamadaNoImovel(TipoCamada Tipo, bool CobreOImovel, int? DesdeAno);
 
     private async Task<List<CamadaNoImovel>> ConsultarCoberturaAsync(

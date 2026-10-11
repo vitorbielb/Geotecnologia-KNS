@@ -53,6 +53,29 @@ public class DadosDoLaudo
     public string? MapaIndisponivel { get; init; }
 
     /// <summary>
+    /// Quando as bases que cobrem este imóvel foram atualizadas pela última vez.
+    /// </summary>
+    public DateTime? BasesAtualizadasEm { get; init; }
+
+    /// <summary>
+    /// A base mudou depois que esta análise rodou.
+    /// </summary>
+    /// <remarks>
+    /// O laudo não fica errado por envelhecer: ele descreve o que havia na data
+    /// em que foi executado, e continua verdadeiro sobre aquela data. O que
+    /// muda é que ele deixa de descrever o presente — e quem recebe o documento
+    /// não tem como saber disso sem cruzar a data da execução com a data de
+    /// carga de cada base no rodapé.
+    ///
+    /// Dizer isso em uma frase é a diferença entre um laudo honesto e um laudo
+    /// que deixa o leitor concluir sozinho, errado, que nada mudou.
+    /// </remarks>
+    public bool BasesMudaramDepois =>
+        BasesAtualizadasEm is DateTime carga &&
+        Analise.ConcluidaEm is DateTime concluida &&
+        carga > concluida;
+
+    /// <summary>
     /// Identificador de conferência, derivado do conteúdo da análise.
     /// </summary>
     /// <remarks>

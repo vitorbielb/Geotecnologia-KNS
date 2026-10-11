@@ -592,6 +592,26 @@ public class LaudoPdf : IDocument
                        "assinatura digital para fins da ICP-Brasil.").SemiBold();
             });
 
+            // Dito aqui, e não escondido nas datas de carga da seção anterior:
+            // quem recebe o documento não vai cruzar data de execução com data
+            // de carga de cada base para descobrir sozinho que o retrato
+            // envelheceu.
+            if (_dados.BasesMudaramDepois)
+            {
+                coluna.Item().PaddingTop(6).Text(t =>
+                {
+                    t.DefaultTextStyle(x => x.FontSize(7.5f).FontColor(Grafite).LineHeight(1.35f));
+
+                    t.Span("Bases atualizadas depois desta execução. ").SemiBold();
+                    t.Span(
+                        $"As bases consultadas receberam carga em " +
+                        $"{_dados.BasesAtualizadasEm!.Value.ToString("dd/MM/yyyy", PtBr)}, " +
+                        "posterior à data desta análise. O que está escrito acima continua " +
+                        "verdadeiro sobre o dia em que foi apurado; uma nova execução " +
+                        "refletiria o que as bases trazem hoje.");
+                });
+            }
+
             coluna.Item().PaddingTop(6).Background("#F4FAFF").Padding(8).Row(linha =>
             {
                 linha.RelativeItem().Text(t =>

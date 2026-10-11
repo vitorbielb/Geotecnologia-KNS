@@ -31,6 +31,17 @@
                         <i class="mdi mdi-file-pdf-box"></i>
                         Baixar laudo
                     </a>
+
+                    <form method="post"
+                          action="@Url.Action("Reanalisar", "Solicitacoes", new { id = Model.SolicitacaoId })"
+                          class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-secondary btn-sm"
+                                title="Executa uma análise nova contra as bases de hoje. A anterior fica gravada.">
+                            <i class="mdi mdi-refresh"></i>
+                            Reexecutar
+                        </button>
+                    </form>
                 }
                 @Html.DisplayStatus(Model.Resultado)
             </div>
@@ -43,6 +54,29 @@
                 <text>· imóvel de @Model.AreaImovelHa.ToString("N2") ha</text>
             }
         </p>
+
+        @{
+            var basesEm = ViewBag.BasesAtualizadasEm as DateTime?;
+            var basesMudaram = basesEm.HasValue
+                               && Model.ConcluidaEm.HasValue
+                               && basesEm.Value > Model.ConcluidaEm.Value;
+        }
+        @if (basesMudaram)
+        {
+            @* Dito aqui, e não deixado para quem cruzar a data da execução com
+               a data de carga de cada base: o resultado continua verdadeiro
+               sobre o dia em que foi apurado, e deixou de descrever hoje. *@
+            <div class="alert alert-info d-flex align-items-start gap-2">
+                <i class="mdi mdi-database-clock mt-1"></i>
+                <div>
+                    <strong>As bases mudaram depois desta análise.</strong>
+                    A carga mais recente das camadas que cobrem este imóvel é de
+                    @basesEm!.Value.ToString("dd/MM/yyyy"), posterior à execução.
+                    O resultado abaixo continua verdadeiro sobre o dia em que foi
+                    apurado — uma nova execução refletiria o que há nas bases hoje.
+                </div>
+            </div>
+        }
 
         @if (Model.Situacao is SituacaoAnalise.Pendente or SituacaoAnalise.Processando)
         {
